@@ -1,0 +1,1 @@
+- [GitHub sync contract](github-sync.md) — site content is mirrored to an external GitHub repo; push after every site change, copy is publisher-locked.

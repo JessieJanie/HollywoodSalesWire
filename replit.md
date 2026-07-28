@@ -1,45 +1,41 @@
-# [Project name]
+# Hollywood Sales Wire
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+Subscription sales site for Hollywood Sales Wire — a long-form sales letter, order page with Stripe Payment Link checkout, thank-you page, and legal pages.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- Site: `artifacts/hollywood-sales-wire` (previewPath `/`), workflow `artifacts/hollywood-sales-wire: web`
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/scripts run sync-github -- "message"` — push site changes to GitHub (JessieJanie/HollywoodSalesWire, main). Run after every change to the site.
 
 ## Stack
 
-- pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Static React (Vite) frontend only — no backend or database in use. Checkout happens on Stripe Payment Links.
+- pnpm workspaces, TypeScript, Tailwind v4, wouter, shadcn-style UI
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- Site source: `artifacts/hollywood-sales-wire/src` (pages: SalesPage `/`, OrderPage `/order`, ThanksPage `/thanks`, legal `/terms` `/privacy` `/refund-policy`)
+- Pricing, deadline, Stripe checkout links: `artifacts/hollywood-sales-wire/src/lib/constants.ts`
+- GitHub sync script: `scripts/src/sync-github.ts`
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Site was imported verbatim from GitHub repo `JessieJanie/HollywoodSalesWire`; only the sync roots (`src/`, `public/`, `index.html`) are pushed back — the repo keeps its own standalone package.json/vite.config.
+- No backend: subscriptions run through Stripe Payment Links (currently TEST-mode links in constants.ts; owner will swap to live links).
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Founding rate: $1,995/yr ($38/wk) → regular $3,995/yr ($77/wk). Team: $4,995 founding / $9,995 regular.
+- 90-Day Money-Back Guarantee (exact phrase). Support: hello@hollywoodsaleswire.com.
+- Launch deadline shown on site: Tuesday, August 4 (constants.ts).
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+- **All copy is locked by the publisher.** Do not rewrite, "improve," or expand any copy, pricing, guarantee wording, or claims. Only make changes the user explicitly asks for.
+- Every change to the site must be pushed to the GitHub repo `JessieJanie/HollywoodSalesWire`.
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- After any site change, run the sync-github script so GitHub stays current.
+- Custom domain: hollywoodsaleswire.com (DNS on Cloudflare; A + TXT records, DNS-only/gray-cloud) — owner attaches after publishing.
