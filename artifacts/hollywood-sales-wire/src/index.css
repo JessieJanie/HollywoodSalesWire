@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap');
+
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@plugin "@tailwindcss/typography";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-card-border: hsl(var(--card-border));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-popover-border: hsl(var(--popover-border));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-border: var(--primary-border);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-secondary-border: var(--secondary-border);
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-muted-border: var(--muted-border);
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-accent-border: var(--accent-border);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-destructive-border: var(--destructive-border);
+
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* LIGHT MODE - Insider Financial Intelligence */
+:root {
+  --button-outline: rgba(0, 0, 0, 0.1);
+  --badge-outline: rgba(0, 0, 0, 0.05);
+  --opaque-button-border-intensity: -8;
+  --elevate-1: rgba(0, 0, 0, 0.03);
+  --elevate-2: rgba(0, 0, 0, 0.08);
+
+  --background: 60 15% 98%;      /* #FCFCFA Creamy off-white paper */
+  --foreground: 0 0% 8%;         /* #141414 Rich black text */
+
+  --border: 60 8% 85%;           /* #DBDBDA Subtle separating lines */
+
+  --card: 0 0% 100%;             /* White cards */
+  --card-foreground: 0 0% 8%;
+  --card-border: 60 8% 88%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 8%;
+  --popover-border: 60 8% 88%;
+
+  --primary: 153 30% 18%;        /* #203B2E Deep hunter / money green */
+  --primary-foreground: 60 15% 98%;
+
+  --secondary: 40 18% 92%;       /* #EBE7DF Warm gray/beige for secondary elements */
+  --secondary-foreground: 0 0% 8%;
+
+  --muted: 40 10% 95%;           /* Very light gray/beige */
+  --muted-foreground: 0 0% 35%;  /* #595959 Readable gray text */
+
+  --accent: 0 75% 42%;           /* #BA1A1A Crimson red for urgency/highlights */
+  --accent-foreground: 60 15% 98%;
+
+  --destructive: 0 75% 42%;
+  --destructive-foreground: 60 15% 98%;
+
+  --input: 60 8% 85%;
+  --ring: 153 30% 18%;
+
+  --app-font-sans: 'DM Sans', sans-serif;
+  --app-font-serif: 'Playfair Display', serif;
+  --app-font-mono: 'Space Mono', monospace;
+  
+  --radius: 0rem; /* Sharp, authoritative edges. No rounded corners for this aesthetic. */
+  
+  --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.03);
+  --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.05);
+  --shadow-sm:
+    0px 2px 0px 0px hsl(0 0% 0% / 0.02),
+    0px 1px 2px -1px hsl(0 0% 0% / 0.04);
+  --shadow:
+    0px 2px 0px 0px hsl(0 0% 0% / 0.02),
+    0px 1px 3px 0px hsl(0 0% 0% / 0.08);
+  --shadow-md:
+    0px 2px 0px 0px hsl(0 0% 0% / 0.02),
+    0px 4px 8px -2px hsl(0 0% 0% / 0.1);
+  --shadow-lg:
+    0px 2px 0px 0px hsl(0 0% 0% / 0.02),
+    0px 8px 16px -4px hsl(0 0% 0% / 0.12);
+  --shadow-xl:
+    0px 2px 0px 0px hsl(0 0% 0% / 0.02),
+    0px 16px 32px -8px hsl(0 0% 0% / 0.14);
+  --shadow-2xl: 0px 2px 0px 0px hsl(0 0% 0% / 0.16);
+
+  --primary-border: hsl(from hsl(var(--primary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --secondary-border: hsl(from hsl(var(--secondary)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --muted-border: hsl(from hsl(var(--muted)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --accent-border: hsl(from hsl(var(--accent)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+  --destructive-border: hsl(from hsl(var(--destructive)) h s calc(l + var(--opaque-button-border-intensity)) / alpha);
+}
+
+.dark {
+  /* We enforce light mode for this cinematic sales letter feel, but we'll provide a slate fallback */
+  --background: 0 0% 8%;
+  --foreground: 60 15% 98%;
+  --border: 0 0% 20%;
+  --card: 0 0% 12%;
+  --card-foreground: 60 15% 98%;
+  --card-border: 0 0% 20%;
+  --popover: 0 0% 12%;
+  --popover-foreground: 60 15% 98%;
+  --popover-border: 0 0% 20%;
+  --primary: 153 30% 40%;
+  --primary-foreground: 60 15% 98%;
+  --secondary: 0 0% 20%;
+  --secondary-foreground: 60 15% 98%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 65%;
+  --accent: 0 75% 50%;
+  --accent-foreground: 60 15% 98%;
+  --destructive: 0 75% 50%;
+  --destructive-foreground: 60 15% 98%;
+  --input: 0 0% 20%;
+  --ring: 153 30% 40%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    /* Add subtle paper noise texture */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.02'/%3E%3C/svg%3E");
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif tracking-tight text-foreground;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .font-mono-data {
+    @apply font-mono tracking-tighter uppercase text-[0.85em];
+  }
+}

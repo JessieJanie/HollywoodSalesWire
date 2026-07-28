@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "Hollywood Sales Wire"
+version = "1.0.0"
+id = "artifacts/hollywood-sales-wire"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25128
+
+[services.development]
+run = "pnpm --filter @workspace/hollywood-sales-wire run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/hollywood-sales-wire", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/hollywood-sales-wire/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25128"
+BASE_PATH = "/"
