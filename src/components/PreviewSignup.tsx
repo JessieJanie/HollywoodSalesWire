@@ -4,6 +4,7 @@ import { Mail, CheckCircle2 } from "lucide-react";
 
 export default function PreviewSignup() {
   const [email, setEmail] = useState("");
+  const [company, setCompany] = useState(""); // honeypot — hidden from real users
   const subscribe = useSubscribe();
 
   const done = subscribe.isSuccess;
@@ -11,7 +12,7 @@ export default function PreviewSignup() {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || subscribe.isPending) return;
-    subscribe.mutate({ data: { email: email.trim() } });
+    subscribe.mutate({ data: { email: email.trim(), ...(company ? { company } : {}) } as never });
   };
 
   return (
@@ -32,6 +33,16 @@ export default function PreviewSignup() {
         </div>
       ) : (
         <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            value={company}
+            onChange={(e) => setCompany(e.target.value)}
+            name="company"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="hidden"
+          />
           <input
             type="email"
             required
