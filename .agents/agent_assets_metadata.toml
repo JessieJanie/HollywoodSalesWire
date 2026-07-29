@@ -6,3 +6,21 @@ id = "lAb7ARhGFVCb3sE2y2Z8I"
 uri = "file://attached_assets/hollywood-sales-wire-icon-512.png"
 type = "image"
 title = "Hollywood Sales Wire icon (512×512 PNG)"
+
+[[outputs]]
+id = "sbHJbtYOq_fjFQ5Mr2Imd"
+uri = "file://attached_assets/logos/logo-mark-wordmark-green.png"
+type = "image"
+title = "Logo A — mark + wordmark, green (for light backgrounds)"
+
+[[outputs]]
+id = "SA0t0LzJ5M4Q1IRxYQVYi"
+uri = "file://attached_assets/logos/logo-mark-wordmark-white.png"
+type = "image"
+title = "Logo B — mark + wordmark, white (for the green checkout header)"
+
+[[outputs]]
+id = "0Urte1wCqeYZsCmYGNJxs"
+uri = "file://attached_assets/logos/logo-masthead-green.png"
+type = "image"
+title = "Logo C — masthead style, green (newspaper look)"
