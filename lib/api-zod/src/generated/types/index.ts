@@ -7,6 +7,8 @@
  */
 
 export * from './apiMessage';
+export * from './foundingOfferParams';
+export * from './foundingOfferStatus';
 export * from './healthStatus';
 export * from './subscribeResult';
 export * from './subscriberInput';

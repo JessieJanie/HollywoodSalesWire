@@ -33,3 +33,17 @@ export const SubscribeResponse = zod.object({
 })
 
 
+/**
+ * @summary Check a subscriber's founding-offer status
+ */
+export const FoundingOfferQueryParams = zod.object({
+  "token": zod.coerce.string()
+})
+
+export const FoundingOfferResponse = zod.object({
+  "active": zod.boolean(),
+  "deadline": zod.string(),
+  "deadlineLabel": zod.string()
+})
+
+

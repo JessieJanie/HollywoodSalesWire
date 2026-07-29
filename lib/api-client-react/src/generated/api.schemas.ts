@@ -5,6 +5,12 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface FoundingOfferStatus {
+  active: boolean;
+  deadline: string;
+  deadlineLabel: string;
+}
+
 export interface SubscriberInput {
   /** @minLength 3 */
   email: string;
@@ -21,4 +27,8 @@ export interface ApiMessage {
 export interface HealthStatus {
   status: string;
 }
+
+export type FoundingOfferParams = {
+token: string;
+};
 

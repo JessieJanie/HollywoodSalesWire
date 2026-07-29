@@ -48,8 +48,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMessage"
+  /founding-offer:
+    get:
+      operationId: foundingOffer
+      tags: [marketing]
+      summary: Check a subscriber's founding-offer status
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Offer status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoundingOfferStatus"
+        "404":
+          description: Unknown token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
 components:
   schemas:
+    FoundingOfferStatus:
+      type: object
+      required: [active, deadline, deadlineLabel]
+      properties:
+        active:
+          type: boolean
+        deadline:
+          type: string
+        deadlineLabel:
+          type: string
     SubscriberInput:
       type: object
       required: [email]

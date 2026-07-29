@@ -1,3 +1,3 @@
 - [GitHub sync contract](github-sync.md) — site content is mirrored to an external GitHub repo; push after every site change, copy is publisher-locked.
 - [Stripe live connection status](stripe-live-connection.md) — live account connected; live payment links created and swapped into CHECKOUT_LINKS July 29, 2026. Use the sk_live connection, not the sandbox one.
-- [Opt-in email sequence](email-sequence.md) — 5-email preview series pre-scheduled via Resend scheduled_at; opt-in only (cold outreach declined); copy is publisher-locked drafts.
+- [Evergreen founding funnel](email-sequence.md) — public site sells regular rate; signup triggers welcome + 5-email founding series (days 7–14) to token-gated offer page; copy publisher-locked.

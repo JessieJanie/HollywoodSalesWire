@@ -4,7 +4,8 @@ import { eq } from "drizzle-orm";
 import { db, emailSubscribersTable, sequenceEmailsTable } from "@workspace/db";
 import { SubscribeBody, SubscribeResponse } from "@workspace/api-zod";
 import { resendRequest } from "../lib/resend";
-import { FROM_ADDRESS, SITE_URL, WELCOME_EMAIL } from "../lib/emailSequence";
+import { FROM_ADDRESS, SEQUENCE, SITE_URL, WELCOME_EMAIL } from "../lib/emailSequence";
+import { deadlineLabel } from "../lib/foundingDeadline";
 
 const router: IRouter = Router();
 
@@ -98,6 +99,41 @@ router.post("/subscribe", async (req, res): Promise<void> => {
       scheduledAt: new Date(),
       status: "failed",
     });
+  }
+
+  // Schedule the Founding-Offer series: starts day 7, deadline day 14.
+  const offerUrl = `${SITE_URL}/founding-offer?token=${token}`;
+  const label = deadlineLabel(subscriber.createdAt);
+  const now = Date.now();
+  for (const step of SEQUENCE) {
+    const scheduledAt = new Date(now + step.dayOffset * 24 * 60 * 60 * 1000);
+    try {
+      const sent = await resendRequest<{ id: string }>("/emails", {
+        method: "POST",
+        body: {
+          from: FROM_ADDRESS,
+          to: [email],
+          subject: step.subject,
+          html: step.body({ unsubscribeUrl, offerUrl, deadlineLabel: label }),
+          scheduled_at: scheduledAt.toISOString(),
+        },
+      });
+      await db.insert(sequenceEmailsTable).values({
+        subscriberId: subscriber.id,
+        step: step.step,
+        resendEmailId: sent.id,
+        scheduledAt,
+        status: "scheduled",
+      });
+    } catch (err) {
+      req.log.error({ err, step: step.step, email }, "Failed to schedule sequence email");
+      await db.insert(sequenceEmailsTable).values({
+        subscriberId: subscriber.id,
+        step: step.step,
+        scheduledAt,
+        status: "failed",
+      });
+    }
   }
 
   res.status(201).json(SubscribeResponse.parse({ status: "subscribed" }));

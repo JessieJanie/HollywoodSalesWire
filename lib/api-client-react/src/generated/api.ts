@@ -21,6 +21,8 @@ import type {
 
 import type {
   ApiMessage,
+  FoundingOfferParams,
+  FoundingOfferStatus,
   HealthStatus,
   SubscribeResult,
   SubscriberInput
@@ -201,4 +203,88 @@ export const useSubscribe = <TError = ErrorType<ApiMessage>,
       > => {
       return useMutation(getSubscribeMutationOptions(options));
     }
+
+export const getFoundingOfferUrl = (params: FoundingOfferParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/founding-offer?${stringifiedParams}` : `/api/founding-offer`
+}
+
+/**
+ * @summary Check a subscriber's founding-offer status
+ */
+export const foundingOffer = async (params: FoundingOfferParams, options?: Parameters<typeof customFetch>[1]): Promise<FoundingOfferStatus> => {
+
+  return customFetch<FoundingOfferStatus>(getFoundingOfferUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getFoundingOfferQueryKey = (params?: FoundingOfferParams,) => {
+    return [
+    `/api/founding-offer`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getFoundingOfferQueryOptions = <TData = Awaited<ReturnType<typeof foundingOffer>>, TError = ErrorType<ApiMessage>>(params: FoundingOfferParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof foundingOffer>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getFoundingOfferQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof foundingOffer>>> = ({ signal }) => foundingOffer(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof foundingOffer>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type FoundingOfferQueryResult = NonNullable<Awaited<ReturnType<typeof foundingOffer>>>
+export type FoundingOfferQueryError = ErrorType<ApiMessage>
+
+
+/**
+ * @summary Check a subscriber's founding-offer status
+ */
+
+export function useFoundingOffer<TData = Awaited<ReturnType<typeof foundingOffer>>, TError = ErrorType<ApiMessage>>(
+ params: FoundingOfferParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof foundingOffer>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getFoundingOfferQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 

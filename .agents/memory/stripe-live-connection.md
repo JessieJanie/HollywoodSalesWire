@@ -1,15 +1,14 @@
 ---
-name: Stripe live connection status
-description: Where the Stripe live-mode setup stands and what remains before real payments work
+name: Stripe live connection & payment links
+description: How to reach the live Stripe account and which payment links exist
 ---
+Live Stripe account `acct_1TyKnC8TDFH4346h` is connected. Multiple Stripe connections exist — pick the one whose `settings.secret` starts with `sk_live`/`rk_live`.
 
-The site's checkout runs on Stripe Payment Links; `CHECKOUT_LINKS` in the web artifact's constants file still holds TEST-mode links.
+**Access pattern:** `getClient()`/`proxyFetch` do NOT work for Stripe here ("Unrecognized request URL" via proxy). Use CodeExecution `"use impure"` + `listConnections("stripe")` + the connection's `settings.secret` + direct fetch to `api.stripe.com`.
 
-**State (as of July 28, 2026):** The Replit Stripe connector is bound only to the user's SANDBOX account (`listConnections("stripe")` returns an `sk_test_` key, "Hollywood Sales Wire Sandbox"). The user submitted live-account activation (bank + identity) but Stripe's review was pending, so installing the Replit app on the live account failed / the live account was unselectable in the install picker.
-
-**Remaining steps:**
-1. User installs the Replit app on the LIVE account (Replit Tools → Integrations → Stripe → step 3). Verify via `listConnections` that the key is `sk_live_`/`rk_live_` and account name has no "Sandbox".
-2. Then create two yearly recurring products + payment links in live mode ($1,995/yr founding individual, $4,995/yr team 5 seats) — agent can do this via the connector once live.
-3. Swap the two URLs into `CHECKOUT_LINKS`, sync to GitHub, user Republishes.
-
-**Why:** Everything the user built earlier kept landing in the sandbox because the live account was never connected; don't create products until the connector shows a live key.
+Payment links (all live, annual recurring):
+- Regular individual $3,995/yr: https://buy.stripe.com/8x200dgk30anePL8nJ1VK02 (public order page)
+- Regular team $9,995/yr: https://buy.stripe.com/9B69AN9VFf5hfTPgUf1VK03 (public order page)
+- Founding individual $1,995/yr: https://buy.stripe.com/7sYeV70l5bT5bDz47t1VK04 (server-side only, behind /api/founding-checkout)
+- Founding team $4,995/yr: https://buy.stripe.com/5kQfZb2td4qD373dI31VK05 (server-side only)
+- OLD founding links (bJebIVgk37CP9vravR1VK00 individual, 8x2dR3c3N0an3737jF1VK01 team) were public on the pre-funnel site. **Deactivate them in Stripe once Karilyn republishes** — not before, or live checkout on the currently-published site breaks.
