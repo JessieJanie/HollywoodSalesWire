@@ -8,6 +8,7 @@ import SalesPage from '@/pages/SalesPage';
 import OrderPage from '@/pages/OrderPage';
 import ThanksPage from '@/pages/ThanksPage';
 import { TermsPage, PrivacyPage, RefundPage } from '@/pages/legal';
+import SupportPage from '@/pages/SupportPage';
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/refund-policy" component={RefundPage} />
+      <Route path="/support" component={SupportPage} />
       <Route component={NotFound} />
     </Switch>
   );

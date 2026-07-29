@@ -48,6 +48,7 @@ export function Footer() {
           <Link href="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
           <Link href="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
           <Link href="/refund-policy" className="hover:text-foreground transition-colors">Refund Policy</Link>
+          <Link href="/support" className="hover:text-foreground transition-colors">Support</Link>
           <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-foreground transition-colors">{SUPPORT_EMAIL}</a>
         </div>
       </div>
