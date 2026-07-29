@@ -13,8 +13,14 @@ export function Header() {
             Hollywood Sales Wire
           </span>
         </Link>
-        <div className="hidden sm:flex items-center gap-6 text-sm font-medium text-muted-foreground">
-          <span className="font-mono-data">CONFIDENTIAL BRIEFING</span>
+        <div className="flex items-center gap-4 sm:gap-6 text-sm font-medium text-muted-foreground">
+          <Link href="/support" className="hover:text-foreground transition-colors">Support</Link>
+          <Link
+            href="/order"
+            className="bg-primary text-primary-foreground px-4 py-2 font-medium hover:opacity-90 transition-opacity"
+          >
+            Become a Member
+          </Link>
         </div>
       </div>
     </header>
