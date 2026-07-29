@@ -1,6 +1,6 @@
+// Founding-rate checkout links are intentionally NOT here — they live
+// server-side only, behind /api/founding-checkout (deadline-verified).
 export const CHECKOUT_LINKS = {
-  INDIVIDUAL_FOUNDING: "https://buy.stripe.com/bJebIVgk37CP9vravR1VK00",
-  TEAM_FOUNDING: "https://buy.stripe.com/8x2dR3c3N0an3737jF1VK01",
   INDIVIDUAL_REGULAR: "https://buy.stripe.com/8x200dgk30anePL8nJ1VK02",
   TEAM_REGULAR: "https://buy.stripe.com/9B69AN9VFf5hfTPgUf1VK03"
 };

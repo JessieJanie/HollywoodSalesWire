@@ -68,7 +68,7 @@ export default function FoundingOfferPage() {
               YOUR FOUNDING OFFER CLOSED AT MIDNIGHT ET, {offer.data?.deadlineLabel?.toUpperCase()} — REGULAR RATES BELOW
             </div>
           )}
-          <PricingContent founding={founding} deadlineLabel={offer.data?.deadlineLabel} />
+          <PricingContent founding={founding} deadlineLabel={offer.data?.deadlineLabel} token={token} />
         </>
       )}
       <Footer />

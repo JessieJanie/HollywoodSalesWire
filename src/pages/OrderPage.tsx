@@ -19,15 +19,21 @@ import { ArrowRight, CheckCircle2, Lock, ShieldCheck, Users, User } from "lucide
 export function PricingContent({
   founding,
   deadlineLabel,
+  token,
 }: {
   founding: boolean;
   deadlineLabel?: string;
+  token?: string;
 }) {
   const indWk = founding ? FOUNDING_RATE_WK : REGULAR_RATE_WK;
   const indYr = founding ? FOUNDING_RATE_YR : REGULAR_RATE_YR;
   const teamYr = founding ? TEAM_FOUNDING_RATE_YR : TEAM_REGULAR_RATE_YR;
-  const indLink = founding ? CHECKOUT_LINKS.INDIVIDUAL_FOUNDING : CHECKOUT_LINKS.INDIVIDUAL_REGULAR;
-  const teamLink = founding ? CHECKOUT_LINKS.TEAM_FOUNDING : CHECKOUT_LINKS.TEAM_REGULAR;
+  // Founding checkout is never linked directly — the server re-verifies the
+  // subscriber's deadline before redirecting to Stripe.
+  const foundingCheckout = (plan: string) =>
+    `${import.meta.env.BASE_URL}api/founding-checkout?token=${encodeURIComponent(token ?? "")}&plan=${plan}`;
+  const indLink = founding ? foundingCheckout("individual") : CHECKOUT_LINKS.INDIVIDUAL_REGULAR;
+  const teamLink = founding ? foundingCheckout("team") : CHECKOUT_LINKS.TEAM_REGULAR;
 
   const individualFeatures = founding
     ? [
