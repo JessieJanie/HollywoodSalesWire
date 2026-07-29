@@ -19,17 +19,17 @@ export default function PreviewSignup() {
     <div className="bg-secondary/30 border border-border p-8 my-16 not-prose">
       <h3 className="text-2xl mt-0 mb-2 flex items-center gap-3 font-serif font-bold">
         <Mail className="w-6 h-6 text-primary" />
-        Get a Free Preview Briefing
+        Get on the Wire List
       </h3>
       <p className="text-base text-muted-foreground mb-6">
-        Not ready to join? Enter your email and I'll send you a preview of the
-        Tuesday wire — plus a short series on how to read the signals yourself.
-        Unsubscribe anytime.
+        Not ready to join? Enter your email and you'll receive intelligence
+        briefings and occasional offers from the Wire. We never rent or share
+        this list. Unsubscribe anytime.
       </p>
       {done ? (
         <div className="flex items-center gap-3 text-primary font-serif text-lg">
           <CheckCircle2 className="w-6 h-6" />
-          You're on the list — the preview is on its way.
+          You're on the list — check your inbox for a welcome note.
         </div>
       ) : (
         <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-3">
@@ -57,7 +57,7 @@ export default function PreviewSignup() {
             disabled={subscribe.isPending}
             className="bg-primary text-primary-foreground px-6 py-3 font-sans text-sm font-semibold tracking-wide hover:opacity-90 disabled:opacity-50 transition-opacity"
           >
-            {subscribe.isPending ? "Sending…" : "Send Me the Preview"}
+            {subscribe.isPending ? "Signing up…" : "Add Me to the List"}
           </button>
         </form>
       )}
