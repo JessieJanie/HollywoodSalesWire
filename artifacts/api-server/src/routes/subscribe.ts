@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { db, emailSubscribersTable, sequenceEmailsTable } from "@workspace/db";
 import { SubscribeBody, SubscribeResponse } from "@workspace/api-zod";
 import { resendRequest } from "../lib/resend";
-import { FROM_ADDRESS, SEQUENCE, SITE_URL } from "../lib/emailSequence";
+import { FROM_ADDRESS, SITE_URL, WELCOME_EMAIL } from "../lib/emailSequence";
 
 const router: IRouter = Router();
 
@@ -69,46 +69,35 @@ router.post("/subscribe", async (req, res): Promise<void> => {
     .values({ email, unsubscribeToken: token })
     .returning();
 
+  // Send a single immediate welcome email; the subscriber is now on the warm
+  // prospect list. Campaigns to this list are sent manually later.
   const unsubscribeUrl = `${SITE_URL}/api/unsubscribe?token=${token}`;
-  const now = Date.now();
-  let scheduledCount = 0;
-
-  for (const step of SEQUENCE) {
-    const scheduledAt = new Date(now + step.dayOffset * 24 * 60 * 60 * 1000);
-    try {
-      const sent = await resendRequest<{ id: string }>("/emails", {
-        method: "POST",
-        body: {
-          from: FROM_ADDRESS,
-          to: [email],
-          subject: step.subject,
-          html: step.body({ unsubscribeUrl }),
-          scheduled_at: scheduledAt.toISOString(),
-        },
-      });
-      await db.insert(sequenceEmailsTable).values({
-        subscriberId: subscriber.id,
-        step: step.step,
-        resendEmailId: sent.id,
-        scheduledAt,
-        status: "scheduled",
-      });
-      scheduledCount++;
-    } catch (err) {
-      req.log.error({ err, step: step.step, email }, "Failed to schedule sequence email");
-      await db.insert(sequenceEmailsTable).values({
-        subscriberId: subscriber.id,
-        step: step.step,
-        scheduledAt,
-        status: "failed",
-      });
-    }
-  }
-
-  if (scheduledCount === 0) {
-    req.log.error({ email }, "All sequence emails failed to schedule");
-    res.status(500).json({ error: "We couldn't schedule your emails — please try again later." });
-    return;
+  try {
+    const sent = await resendRequest<{ id: string }>("/emails", {
+      method: "POST",
+      body: {
+        from: FROM_ADDRESS,
+        to: [email],
+        subject: WELCOME_EMAIL.subject,
+        html: WELCOME_EMAIL.body({ unsubscribeUrl }),
+      },
+    });
+    await db.insert(sequenceEmailsTable).values({
+      subscriberId: subscriber.id,
+      step: 0, // step 0 = welcome email
+      resendEmailId: sent.id,
+      scheduledAt: new Date(),
+      status: "sent",
+    });
+  } catch (err) {
+    // They're still on the list even if the welcome email fails — log and continue.
+    req.log.error({ err, email }, "Failed to send welcome email");
+    await db.insert(sequenceEmailsTable).values({
+      subscriberId: subscriber.id,
+      step: 0,
+      scheduledAt: new Date(),
+      status: "failed",
+    });
   }
 
   res.status(201).json(SubscribeResponse.parse({ status: "subscribed" }));
