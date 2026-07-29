@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Header, Footer } from "@/components/layout/Shell";
-import { DEADLINE_DATE, FOUNDING_RATE_WK, FOUNDING_RATE_YR, REGULAR_RATE_WK, REGULAR_RATE_YR } from "@/lib/constants";
+import { FOUNDING_RATE_WK, FOUNDING_RATE_YR, REGULAR_RATE_WK, REGULAR_RATE_YR } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { ArrowRight, FileText, TrendingUp, ShieldCheck } from "lucide-react";
 import PreviewSignup from "@/components/PreviewSignup";
@@ -127,9 +127,9 @@ export default function SalesPage() {
 
           {/* The Stack */}
           <FadeIn>
-            <h2 className="text-3xl mt-16 mb-8">Everything a Founding Member Gets</h2>
+            <h2 className="text-3xl mt-16 mb-8">Everything a Member Gets</h2>
             <p className="mb-10">
-              Hollywood Sales Wire is a weekly intelligence briefing. Every Tuesday, you get the week's live buying signals. But to hand you the system itself, three Special Reports come <strong>free and immediately</strong> with a Founding Membership.
+              Hollywood Sales Wire is a weekly intelligence briefing. Every Tuesday, you get the week's live buying signals. The system behind it is documented in three Special Reports — <strong>free and immediately</strong> with a Founding Membership, offered exclusively through our email list.
             </p>
 
             <div className="space-y-6 not-prose mb-12">
@@ -169,7 +169,7 @@ export default function SalesPage() {
 
           <FadeIn>
             <p>
-              That's <strong>$1,985 in Special Reports</strong> — a crash course in producing your own hot leads that the $15,000-a-year databases don't teach. They are yours to keep forever.
+              That's <strong>$1,985 in Special Reports</strong> — a crash course in producing your own hot leads that the $15,000-a-year databases don't teach. Free for Founding Members, and yours to keep forever.
             </p>
             <p>
               Plus, once a month, subscribers receive <strong>The Divergence Report</strong> — the strategic layer on top of the weekly wire. It's the deeper monthly read on where the money is moving <em>next quarter</em>, so you're positioned before the crowd shows up. The wire is your calls for the week; the Divergence Report is your plan for the season. Both come with the subscription.
@@ -184,11 +184,11 @@ export default function SalesPage() {
             <div className="bg-primary text-primary-foreground p-8 my-10 shadow-xl relative overflow-hidden">
               <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.05\'/%3E%3C/svg%3E')] opacity-50 mix-blend-overlay"></div>
               <p className="font-serif text-xl sm:text-2xl leading-relaxed m-0 relative z-10 text-balance">
-                Subscribe during this launch offer and you pay the Founding Member rate instead: <strong>${FOUNDING_RATE_WK} a week — ${FOUNDING_RATE_YR.toLocaleString()} a year — locked in for as long as you stay a member.</strong>
+                On our email list, invited readers get the Founding Member rate instead: <strong>${FOUNDING_RATE_WK} a week — ${FOUNDING_RATE_YR.toLocaleString()} a year — locked in for as long as you stay a member.</strong> Join the list below and your invitation follows.
               </p>
             </div>
             <p>
-              Notice the math: the Special Reports alone ($1,985) are worth the Founding Membership fee ($1,995). The fifty-two weekly issues and twelve Divergence Reports are, in effect, thrown in.
+              Notice the math for Founding Members: the Special Reports alone ($1,985) are worth the Founding Membership fee ($1,995). The fifty-two weekly issues and twelve Divergence Reports are, in effect, thrown in.
             </p>
 
             <div className="flex flex-col sm:flex-row items-start gap-6 p-8 border border-border mt-10 bg-card">
@@ -203,12 +203,12 @@ export default function SalesPage() {
           </FadeIn>
 
           <FadeIn>
-            <h2 className="text-3xl mt-16 mb-6">The Deadline is {DEADLINE_DATE}</h2>
+            <h2 className="text-3xl mt-16 mb-6">How the Founding Offer Works</h2>
             <p>
-              This is a limited-time launch offer, and the clock is real: it ends at midnight Eastern on {DEADLINE_DATE}. After that, the Founding Member rate and the free Special Reports are withdrawn, and membership is ${REGULAR_RATE_WK} a week like everyone else.
+              The Founding Member rate isn't on this website's order page — it comes by invitation through our email list, and every invitation has a real deadline: your personal offer closes at midnight Eastern, and the clock is enforced. After your deadline, membership is ${REGULAR_RATE_WK} a week like everyone else.
             </p>
             <p>
-              Subscribe before midnight and everything is immediate: the three Special Reports in your inbox tonight, your first issue of the Wire tomorrow morning.
+              Subscribe before your deadline and everything is immediate: the three Special Reports in your inbox tonight, your first issue of the Wire this Tuesday.
             </p>
           </FadeIn>
 
@@ -217,12 +217,12 @@ export default function SalesPage() {
               <Link href="/order" className="group relative inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-8 sm:px-12 py-5 sm:py-6 text-xl font-serif font-bold hover:bg-primary/90 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 w-full sm:w-auto text-center overflow-hidden">
                 <span className="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-black"></span>
                 <span className="relative flex items-center gap-3">
-                  Become a Founding Member <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  Become a Member <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                 </span>
               </Link>
               <div className="mt-6 flex flex-col items-center text-center">
                 <span className="text-sm font-mono-data text-muted-foreground font-bold tracking-widest uppercase">
-                  ${FOUNDING_RATE_WK} / WEEK
+                  ${REGULAR_RATE_WK} / WEEK
                 </span>
                 <span className="text-xs text-muted-foreground mt-1">
                   Billed annually. Rate lock guaranteed.
