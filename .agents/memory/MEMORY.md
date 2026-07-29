@@ -1,2 +1,2 @@
 - [GitHub sync contract](github-sync.md) — site content is mirrored to an external GitHub repo; push after every site change, copy is publisher-locked.
-- [Stripe live connection status](stripe-live-connection.md) — connector still bound to sandbox; live payment links pending Stripe review, then swap into CHECKOUT_LINKS.
+- [Stripe live connection status](stripe-live-connection.md) — live account connected; live payment links created and swapped into CHECKOUT_LINKS July 29, 2026. Use the sk_live connection, not the sandbox one.

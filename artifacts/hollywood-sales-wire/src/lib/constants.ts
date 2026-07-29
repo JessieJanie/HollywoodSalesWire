@@ -1,6 +1,6 @@
 export const CHECKOUT_LINKS = {
-  INDIVIDUAL_FOUNDING: "https://buy.stripe.com/test_fZucN459P0NJ73U5Fv8k800",
-  TEAM_FOUNDING: "https://buy.stripe.com/test_eVq28q1XDgMHdsi1pf8k802"
+  INDIVIDUAL_FOUNDING: "https://buy.stripe.com/bJebIVgk37CP9vravR1VK00",
+  TEAM_FOUNDING: "https://buy.stripe.com/8x2dR3c3N0an3737jF1VK01"
 };
 
 export const DEADLINE_DATE = "Tuesday, August 4";
