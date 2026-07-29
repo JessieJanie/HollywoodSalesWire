@@ -3,6 +3,7 @@ import { Header, Footer } from "@/components/layout/Shell";
 import { DEADLINE_DATE, FOUNDING_RATE_WK, FOUNDING_RATE_YR, REGULAR_RATE_WK, REGULAR_RATE_YR } from "@/lib/constants";
 import { motion } from "framer-motion";
 import { ArrowRight, FileText, TrendingUp, ShieldCheck } from "lucide-react";
+import PreviewSignup from "@/components/PreviewSignup";
 
 const FadeIn = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => (
   <motion.div
@@ -99,6 +100,10 @@ export default function SalesPage() {
             <p>
               And let me be straight about what it is and isn't. Every subscriber gets the same Tuesday wire. But here's what will never happen: I will never rent this list. Not the leads, and not <em>you</em>. Your prospects aren't being hammered by everyone who paid a list broker, and your inbox isn't being sold to one either. In this business, that alone puts you in rare company.
             </p>
+          </FadeIn>
+
+          <FadeIn>
+            <PreviewSignup />
           </FadeIn>
 
           {/* Method Story */}
@@ -245,6 +250,10 @@ export default function SalesPage() {
             <div className="mt-12 text-sm text-muted-foreground italic border-l-2 border-border pl-4">
               <strong>P.S.</strong> One question worth sitting with: when a state publishes a list of 170 funded productions worth $6.6 billion, who in your company is assigned to call those productions first? If the answer is "nobody," that's fixable — by Tuesday.
             </div>
+          </FadeIn>
+
+          <FadeIn>
+            <PreviewSignup />
           </FadeIn>
 
         </article>
