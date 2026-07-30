@@ -10,7 +10,7 @@ description: How the paid Wire's automated research works — Skim (skim402.com)
 - Pattern: `withPaymentInterceptor(axios.create({ baseURL: "https://skim402.com/api", timeout: 90_000 }), privateKeyToAccount(env key))` then `POST /v1/read { url }` → `data.markdown`. ~$0.005/read, gasless.
 - Errors: upstream 404/403 come back as HTTP 422 `{"error":"Upstream responded 4xx"}`. Failed reads are never charged (confirmed by Skim July 30, 2026).
 - Every read returns `wordCount` + THIN_CONTENT warnings. For JS-tabbed pages, `POST /v1/read/js` ($0.005) forces a browser render — pipeline auto-falls back to it when a plain read is under 60 words.
-- Skim queued two custom Signals (studio AI-job counts, state award rounds) pending Karilyn's green-light on skim402.com.
+- Custom Signals: `GET /v2/signal/film-incentives/latest` (x402-axios works) and `GET /v2/signal/studio-jobs/latest` (needs v2 client: @x402/fetch + @x402/core + @x402/evm — installed). As of July 30, 2026 both paths return plain 404 (not deployed; live signals like ai-news return 402 unauthenticated). Pipeline polls them each run and skips gracefully — they light up automatically when Skim deploys them. Reading rules for job counts: per-term per-studio trends only; never sum terms or compare across studios.
 - Research beat + house rules (receipts, primary sources, no paywalls/personal data) are in `attached_assets/Pasted--Hello-Hollywood-we-re-setting-you-up-with-your-own-res_1785388808709.txt`.
 
 ## Verified working source URLs (July 2026)

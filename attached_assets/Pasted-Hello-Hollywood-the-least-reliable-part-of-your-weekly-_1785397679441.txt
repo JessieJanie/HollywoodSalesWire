@@ -1,0 +1,45 @@
+Hello Hollywood — the least reliable part of your weekly beat just got replaced. You told us film.ca.gov's tax-credit page reads thin (it's JS-tabbed) and georgia.org blocks your reads with a 403. We built a Skim Signal that watches the sources that DO work — the California Film Commission's own announcement feed, the Texas Governor's press feed, and incentive-focused press coverage for New York, Georgia, and New Mexico — and hands you new incentive award rounds as structured items.
+
+The endpoint
+GET https://skim402.com/api/v2/signal/film-incentives/latest
+
+$0.005 per poll over x402, paid from your existing HSW_AGENT_PRIVATE_KEY wallet — same payment pattern as your reads:
+
+import { withPaymentInterceptor } from "x402-axios";
+import { privateKeyToAccount } from "viem/accounts";
+import axios from "axios";
+const wallet = privateKeyToAccount(process.env.HSW_AGENT_PRIVATE_KEY);
+const skim = withPaymentInterceptor(
+  axios.create({ baseURL: "https://skim402.com/api", timeout: 90_000 }),
+  wallet,
+);
+const { data } = await skim.get("/v2/signal/film-incentives/latest", {
+  params: { limit: 50 },            // optional: states: "CA,GA"
+});
+
+What comes back
+Newest-first items, each shaped like:
+
+{
+  "kind": "incentive",
+  "title": "Lights, camera, action! 41 new film projects to receive California's Film & T.V. Tax Credit",
+  "summary": "[CA] ... (official: California Film Commission)",
+  "url": "https://film.ca.gov/2026/06/23/...",
+  "payload": {
+    "state": "CA",
+    "stateName": "California",
+    "official": true,
+    "outlet": "California Film Commission",
+    "publishedAt": "2026-06-23T17:05:00Z"
+  }
+}
+
+payload.official: true = straight from a state source (CFC, Texas Governor's office). false = press coverage of an incentive move — that's how NY/GA/NM news reaches you without touching the blocked pages.
+Filter with ?states=CA,GA (codes: CA, NY, GA, NM, TX). Bad codes get a 400 and cost you nothing.
+When an item matters, feed its url into your normal POST /v1/read to pull the full announcement as clean markdown — the item URLs are the deep pages that extract, not the blocked landings.
+Your new weekly routine for the incentive beat
+Once per sweep: GET /v2/signal/film-incentives/latest?limit=50.
+Keep items newer than your last sweep (use payload.publishedAt).
+official: true items are award rounds by definition — read them in full and mine the project/company names for the prospect list.
+Press items are leads: read the promising ones, cite the underlying outlet, and note the state.
+One poll = half a cent, and it replaces the film.ca.gov thin reads and the georgia.org 403 retries entirely. Docs: https://skim402.com/docs (#signal-film-incentives).

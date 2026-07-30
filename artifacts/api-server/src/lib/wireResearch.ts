@@ -1,6 +1,6 @@
 import { desc, eq, and, ne, sql } from "drizzle-orm";
 import { db, wireRunsTable, researchPagesTable } from "@workspace/db";
-import { skimRead, skimReadJs } from "./skim";
+import { skimRead, skimReadJs, skimFilmIncentives, skimStudioJobs } from "./skim";
 import { draftFreeEdition } from "./freeEdition";
 import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
@@ -205,9 +205,60 @@ export async function runWeeklyResearch(trigger: "schedule" | "manual"): Promise
     try {
       logger.info({ runId: run.id, weekKey, trigger }, "weekly research: starting");
 
-      // 1. Fetch the beat (sequentially — be a polite payer).
+      // 0. Custom Skim Signals (structured feeds). Both skip gracefully if
+      // unavailable — the raw beat below still carries the issue.
       const pages: FetchedPage[] = [];
+      const officialIncentiveUrls: string[] = [];
+      try {
+        const items = await skimFilmIncentives(50);
+        const cutoff = Date.now() - 10 * 24 * 3600 * 1000;
+        const fresh = items.filter((i) => Date.parse(i.payload.publishedAt) > cutoff);
+        if (fresh.length > 0) {
+          const md = fresh
+            .map(
+              (i) =>
+                `- [${i.payload.state}] ${i.payload.official ? "OFFICIAL (" + i.payload.outlet + ")" : "press (" + i.payload.outlet + ")"} ${i.payload.publishedAt.slice(0, 10)}: ${i.title}\n  ${i.url}\n  ${i.summary}`,
+            )
+            .join("\n");
+          pages.push({
+            url: "https://skim402.com/api/v2/signal/film-incentives/latest",
+            label: "Skim Signal — state incentive award rounds (CA/NY/GA/NM/TX)",
+            markdown: md,
+            wordCount: md.split(/\s+/).filter(Boolean).length,
+            status: "ok (structured signal)",
+          });
+          // Official items are award rounds by definition — deep-read them.
+          for (const i of fresh.filter((f) => f.payload.official).slice(0, 5)) {
+            officialIncentiveUrls.push(i.url);
+          }
+        }
+      } catch (err) {
+        logger.warn({ err }, "film-incentives signal unavailable; continuing without it");
+      }
+      try {
+        const { items, crawlStatus } = await skimStudioJobs(100);
+        if (items.length > 0) {
+          const md =
+            `Weekly counts of open AI/content-ops job postings per studio (from each studio's ATS API).\n` +
+            `READING RULES: compare week-over-week PER TERM PER STUDIO — that trend is the signal. Never sum the four terms (postings overlap) and never compare absolute counts across studios (each board matches differently). Crawl status: ${crawlStatus ?? "ok"}.\n\n` +
+            JSON.stringify(items, null, 1).slice(0, 20000);
+          pages.push({
+            url: "https://skim402.com/api/v2/signal/studio-jobs/latest",
+            label: "Skim Signal — studio AI/content-ops job-posting counts (weekly)",
+            markdown: md,
+            wordCount: md.split(/\s+/).filter(Boolean).length,
+            status: "ok (structured signal)",
+          });
+        }
+      } catch (err) {
+        logger.warn({ err }, "studio-jobs signal unavailable; continuing without it");
+      }
+
+      // 1. Fetch the beat (sequentially — be a polite payer).
       for (const s of RESEARCH_BEAT) pages.push(await fetchPage(s.url, s.label));
+      for (const u of officialIncentiveUrls) {
+        if (!pages.some((p) => p.url === u)) pages.push(await fetchPage(u, `Official award announcement: ${u}`));
+      }
 
       // 2. Aggressive exploration: let the model pick follow-up URLs from what it saw.
       let exploreUrls: string[] = [];

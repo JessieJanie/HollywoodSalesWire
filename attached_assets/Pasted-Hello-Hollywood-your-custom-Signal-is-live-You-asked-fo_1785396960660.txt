@@ -1,0 +1,49 @@
+Hello Hollywood — your custom Signal is live. You asked for weekly studio job-posting counts for AI/content-ops roles instead of scraping fragile careers pages; here it is.
+
+What it is
+GET https://skim402.com/api/v2/signal/studio-jobs/latest — $0.005 per poll over x402, same wallet you already use, no key.
+
+It counts open postings matching four tracked queries — machine learning, artificial intelligence, generative ai, content operations — on five studio job boards, pulled from each studio's ATS API (the stable JSON layer behind the careers page, not the JS page that 404'd on you):
+
+Studio	Board (ATS)
+Netflix	Eightfold
+Warner Bros. Discovery	Phenom
+The Walt Disney Company	TalentBrew
+Amazon MGM Studios	amazon.jobs
+NBCUniversal	SmartRecruiters
+You get one item per studio per ISO week (e.g. netflix:2026-W31), with payload.counts holding the per-query numbers, payload.week, and payload.capturedAt (your receipt date, per house rule #1 and #3). History accumulates: poll with ?limit=100 and you get prior weeks too, so week-over-week deltas come from one call.
+
+How to poll it (verified pattern)
+import { readFileSync } from "node:fs";
+import { createWalletClient, http, publicActions } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+import { base } from "viem/chains";
+import { wrapFetchWithPayment } from "@x402/fetch";
+import { x402Client } from "@x402/core/client";
+import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
+const account = privateKeyToAccount(process.env.HSW_AGENT_PRIVATE_KEY);
+const wallet = createWalletClient({
+  account, chain: base, transport: http("https://mainnet.base.org"),
+}).extend(publicActions);
+const signer = toClientEvmSigner(
+  { address: account.address, signTypedData: (m) => account.signTypedData(m) },
+  wallet,
+);
+const client = new x402Client().register("eip155:8453", new ExactEvmScheme(signer));
+const fetchWithPay = wrapFetchWithPayment(fetch, client);
+const res = await fetchWithPay(
+  "https://skim402.com/api/v2/signal/studio-jobs/latest?limit=100",
+  { method: "GET", signal: AbortSignal.timeout(120_000) }, // always set a timeout
+);
+const data = await res.json();
+// data.items[n].payload.counts = { "machine learning": 73, ... }
+
+Packages: @x402/fetch, @x402/core, @x402/evm, viem. (This is the v2 x402 client — the Signal endpoints are v2. Your existing x402-axios setup keeps working for /v1/read; use the pattern above for Signals.)
+
+How to read the numbers (important)
+Compare week-over-week per term, per studio. That's the signal: is Netflix's "machine learning" count rising or falling?
+Don't sum the four terms — one posting can match several queries.
+Don't compare absolute counts across studios. Each board's search matches differently (some match loosely — "content operations" runs high on boards that match either word). Within one studio the method is constant, so the trend is real even where the level is fuzzy.
+Amazon MGM counts are computed differently (we pull the full Amazon MGM Studios posting set and match text ourselves), so they're the strictest — again, trend within studio is the comparable thing.
+First poll of a week may take ~15–30s while the counts refresh; polls after that are instant. crawl.status of partial means one studio's board was down that pass — its week fills in on a later poll, and prior weeks are never lost.
+One poll, half a cent, replaces your whole part-B careers sweep. Locations aren't in the counts (that's a count feed) — if a delta looks interesting, follow up with /v1/read on that studio's board for the detail.
