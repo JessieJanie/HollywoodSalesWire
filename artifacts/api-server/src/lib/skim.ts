@@ -72,29 +72,12 @@ export interface IncentiveItem {
   };
 }
 
-/** State incentive award rounds & incentive press (CA, NY, GA, NM, TX). */
-export async function skimFilmIncentives(limit = 50): Promise<IncentiveItem[]> {
-  const skim = await getClient();
-  const { data } = await skim.get("/v2/signal/film-incentives/latest", { params: { limit } });
-  const items = (data as { items?: IncentiveItem[] })?.items;
-  return Array.isArray(items) ? items : [];
-}
-
-export interface StudioJobsItem {
-  payload: {
-    counts: Record<string, number>;
-    week: string;
-    capturedAt: string;
-  };
-  [key: string]: unknown;
-}
-
 /**
- * Weekly AI/content-ops job-posting counts across five studio job boards.
- * Uses the v2 x402 client (Signal endpoints are v2; the axios interceptor
- * only speaks v1 payments for /v1/read).
+ * v2 fetch-with-payment client for Signal endpoints. The v1 axios
+ * interceptor cannot parse v2 payment challenges (verified: throws on
+ * `accepts.map`), so all /v2/signal/* calls go through this.
  */
-export async function skimStudioJobs(limit = 100): Promise<{ items: StudioJobsItem[]; crawlStatus?: string }> {
+async function v2Fetch(url: string): Promise<unknown> {
   const key = process.env.HSW_AGENT_PRIVATE_KEY;
   if (!key) throw new Error("HSW_AGENT_PRIVATE_KEY is not set");
   const [{ wrapFetchWithPayment }, { x402Client }, { ExactEvmScheme, toClientEvmSigner }, viem, { privateKeyToAccount }, { base }] =
@@ -116,11 +99,35 @@ export async function skimStudioJobs(limit = 100): Promise<{ items: StudioJobsIt
   );
   const client = new x402Client().register("eip155:8453", new ExactEvmScheme(signer));
   const fetchWithPay = wrapFetchWithPayment(fetch, client);
-  const res = await fetchWithPay(
+  const res = await fetchWithPay(url, { method: "GET", signal: AbortSignal.timeout(120_000) });
+  if (!res.ok) throw new Error(`Signal fetch ${url}: HTTP ${res.status}`);
+  return res.json();
+}
+
+/** State incentive award rounds & incentive press (CA, NY, GA, NM, TX). */
+export async function skimFilmIncentives(limit = 50): Promise<IncentiveItem[]> {
+  const data = await v2Fetch(`https://skim402.com/api/v2/signal/film-incentives/latest?limit=${limit}`);
+  const items = (data as { items?: IncentiveItem[] })?.items;
+  return Array.isArray(items) ? items : [];
+}
+
+export interface StudioJobsItem {
+  payload: {
+    counts: Record<string, number>;
+    week: string;
+    capturedAt: string;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * Weekly AI/content-ops job-posting counts across five studio job boards.
+ * Uses the v2 x402 client (Signal endpoints are v2; the axios interceptor
+ * only speaks v1 payments for /v1/read).
+ */
+export async function skimStudioJobs(limit = 100): Promise<{ items: StudioJobsItem[]; crawlStatus?: string }> {
+  const data = (await v2Fetch(
     `https://skim402.com/api/v2/signal/studio-jobs/latest?limit=${limit}`,
-    { method: "GET", signal: AbortSignal.timeout(120_000) },
-  );
-  if (!res.ok) throw new Error(`studio-jobs signal: HTTP ${res.status}`);
-  const data = (await res.json()) as { items?: StudioJobsItem[]; crawl?: { status?: string } };
+  )) as { items?: StudioJobsItem[]; crawl?: { status?: string } };
   return { items: data.items ?? [], crawlStatus: data.crawl?.status };
 }
