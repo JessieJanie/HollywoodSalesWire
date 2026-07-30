@@ -26,12 +26,16 @@ import type {
   HealthStatus,
   PublisherDraftInput,
   PublisherDraftResult,
+  PublisherKeyInput,
   PublisherSendInput,
   PublisherSendResult,
   PublisherStatus,
   PublisherStatusParams,
+  PublisherWireLatestParams,
   SubscribeResult,
-  SubscriberInput
+  SubscriberInput,
+  WireRunStarted,
+  WireRunStatus
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -518,5 +522,160 @@ export const usePublisherSend = <TError = ErrorType<ApiMessage>,
         TContext
       > => {
       return useMutation(getPublisherSendMutationOptions(options));
+    }
+
+export const getPublisherWireLatestUrl = (params: PublisherWireLatestParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/publisher/wire/latest?${stringifiedParams}` : `/api/publisher/wire/latest`
+}
+
+/**
+ * @summary Latest Monday research run (key-protected)
+ */
+export const publisherWireLatest = async (params: PublisherWireLatestParams, options?: Parameters<typeof customFetch>[1]): Promise<WireRunStatus> => {
+
+  return customFetch<WireRunStatus>(getPublisherWireLatestUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPublisherWireLatestQueryKey = (params?: PublisherWireLatestParams,) => {
+    return [
+    `/api/publisher/wire/latest`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getPublisherWireLatestQueryOptions = <TData = Awaited<ReturnType<typeof publisherWireLatest>>, TError = ErrorType<ApiMessage>>(params: PublisherWireLatestParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof publisherWireLatest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPublisherWireLatestQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof publisherWireLatest>>> = ({ signal }) => publisherWireLatest(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof publisherWireLatest>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PublisherWireLatestQueryResult = NonNullable<Awaited<ReturnType<typeof publisherWireLatest>>>
+export type PublisherWireLatestQueryError = ErrorType<ApiMessage>
+
+
+/**
+ * @summary Latest Monday research run (key-protected)
+ */
+
+export function usePublisherWireLatest<TData = Awaited<ReturnType<typeof publisherWireLatest>>, TError = ErrorType<ApiMessage>>(
+ params: PublisherWireLatestParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof publisherWireLatest>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPublisherWireLatestQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPublisherWireRunUrl = () => {
+
+
+
+
+  return `/api/publisher/wire/run`
+}
+
+/**
+ * @summary Start a research run now (key-protected)
+ */
+export const publisherWireRun = async (publisherKeyInput: PublisherKeyInput, options?: Parameters<typeof customFetch>[1]): Promise<WireRunStarted> => {
+
+  return customFetch<WireRunStarted>(getPublisherWireRunUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(publisherKeyInput)
+  }
+);}
+
+
+
+
+
+export const getPublisherWireRunMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherWireRun>>, TError,{data: BodyType<PublisherKeyInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publisherWireRun>>, TError,{data: BodyType<PublisherKeyInput>}, TContext> => {
+
+const mutationKey = ['publisherWireRun'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherWireRun>>, {data: BodyType<PublisherKeyInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  publisherWireRun(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublisherWireRunMutationResult = NonNullable<Awaited<ReturnType<typeof publisherWireRun>>>
+    export type PublisherWireRunMutationBody = BodyType<PublisherKeyInput>
+    export type PublisherWireRunMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Start a research run now (key-protected)
+ */
+export const usePublisherWireRun = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherWireRun>>, TError,{data: BodyType<PublisherKeyInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publisherWireRun>>,
+        TError,
+        {data: BodyType<PublisherKeyInput>},
+        TContext
+      > => {
+      return useMutation(getPublisherWireRunMutationOptions(options));
     }
 

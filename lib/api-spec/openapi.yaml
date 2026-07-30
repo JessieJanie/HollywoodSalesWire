@@ -144,8 +144,110 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMessage"
+  /publisher/wire/latest:
+    get:
+      operationId: publisherWireLatest
+      tags: [publisher]
+      summary: Latest Monday research run (key-protected)
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Latest run (status "none" if never run)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WireRunStatus"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /publisher/wire/run:
+    post:
+      operationId: publisherWireRun
+      tags: [publisher]
+      summary: Start a research run now (key-protected)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublisherKeyInput"
+      responses:
+        "202":
+          description: Run started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WireRunStarted"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "409":
+          description: Already running or already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
 components:
   schemas:
+    PublisherKeyInput:
+      type: object
+      required: [key]
+      properties:
+        key:
+          type: string
+    WireRunStarted:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+    WireSource:
+      type: object
+      required: [url, label, wordCount, status]
+      properties:
+        url:
+          type: string
+        label:
+          type: string
+        wordCount:
+          type: number
+        status:
+          type: string
+    WireRunStatus:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+        weekKey:
+          type: string
+        startedAt:
+          type: string
+        finishedAt:
+          type: string
+        error:
+          type: string
+        wireMarkdown:
+          type: string
+        freeSubject:
+          type: string
+        freeBody:
+          type: string
+        sources:
+          type: array
+          items:
+            $ref: "#/components/schemas/WireSource"
     PublisherStatus:
       type: object
       required: [subscriberCount]

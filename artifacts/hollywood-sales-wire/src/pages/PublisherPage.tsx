@@ -3,8 +3,10 @@ import {
   usePublisherStatus,
   usePublisherDraft,
   usePublisherSend,
+  usePublisherWireLatest,
+  usePublisherWireRun,
 } from "@workspace/api-client-react";
-import { Loader2, Send, Sparkles, CheckCircle2 } from "lucide-react";
+import { Loader2, Send, Sparkles, CheckCircle2, RefreshCw, Copy, ExternalLink } from "lucide-react";
 
 /**
  * Private weekly-preview console. Reached only via the publisher's bookmarked
@@ -23,6 +25,20 @@ export default function PublisherPage() {
   const [subject, setSubject] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [sentCount, setSentCount] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const wire = usePublisherWireLatest(
+    { key },
+    {
+      query: {
+        queryKey: ["publisher-wire", key],
+        enabled: key !== "",
+        retry: false,
+        refetchInterval: (q) => (q.state.data?.status === "running" ? 15000 : false),
+      },
+    },
+  );
+  const runWire = usePublisherWireRun();
 
   if (!key || status.isError) {
     return (
@@ -65,6 +81,108 @@ export default function PublisherPage() {
             ? <>Your free list has <strong>{status.data.subscriberCount}</strong> active subscriber{status.data.subscriberCount === 1 ? "" : "s"}.{status.data.lastSubject && <> Last sent: &ldquo;{status.data.lastSubject}&rdquo;.</>}</>
             : "Loading…"}
         </p>
+
+        {/* Monday auto-draft */}
+        <div className="bg-card border border-border p-6 mb-6 shadow-sm">
+          <div className="flex items-center justify-between gap-4 mb-2">
+            <h2 className="font-serif font-bold text-lg">This week's Tuesday Wire draft</h2>
+            <button
+              onClick={() =>
+                runWire.mutate({ data: { key } }, { onSuccess: () => wire.refetch() })
+              }
+              disabled={runWire.isPending || wire.data?.status === "running"}
+              className="inline-flex items-center gap-2 border border-border px-3 py-2 text-sm font-medium disabled:opacity-40 hover:bg-muted"
+              data-testid="button-run-research"
+            >
+              <RefreshCw className={`w-4 h-4 ${wire.data?.status === "running" ? "animate-spin" : ""}`} />
+              Run research now
+            </button>
+          </div>
+          <p className="text-sm text-muted-foreground mb-4">
+            Researched and drafted automatically every Monday at 5:00 PM Pacific. Every item
+            carries its source link; anything tagged SINGLE SOURCE — VERIFY needs your eye.
+          </p>
+
+          {(!wire.data || wire.data.status === "none") && (
+            <p className="text-sm text-muted-foreground">No run yet this week.</p>
+          )}
+          {wire.data?.status === "running" && (
+            <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" /> Researching — this takes a few
+              minutes. The page updates itself.
+            </p>
+          )}
+          {wire.data?.status === "failed" && (
+            <p className="text-sm text-red-700">
+              Last run failed{wire.data.error ? `: ${wire.data.error}` : "."} Press "Run
+              research now" to retry.
+            </p>
+          )}
+          {wire.data?.status === "ready" && wire.data.wireMarkdown && (
+            <>
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-xs font-mono-data tracking-widest text-muted-foreground">
+                  PAID WIRE DRAFT — WEEK OF {wire.data.weekKey}
+                </span>
+                <button
+                  onClick={() => {
+                    void navigator.clipboard.writeText(wire.data?.wireMarkdown ?? "");
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-primary"
+                  data-testid="button-copy-wire"
+                >
+                  <Copy className="w-3 h-3" /> {copied ? "Copied!" : "Copy"}
+                </button>
+              </div>
+              <textarea
+                readOnly
+                value={wire.data.wireMarkdown}
+                rows={16}
+                className="w-full border border-border bg-background p-3 text-sm font-mono leading-relaxed focus:outline-none"
+                data-testid="text-wire-draft"
+              />
+              <div className="mt-4 flex flex-wrap items-center gap-4">
+                <button
+                  onClick={() => {
+                    setWireText(wire.data?.wireMarkdown ?? "");
+                    if (wire.data?.freeSubject) setSubject(wire.data.freeSubject);
+                    if (wire.data?.freeBody) setBodyText(wire.data.freeBody);
+                    setSentCount(null);
+                  }}
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-sm font-serif font-bold"
+                  data-testid="button-use-drafts"
+                >
+                  <Sparkles className="w-4 h-4" /> Load the Free Edition draft below
+                </button>
+              </div>
+              {Array.isArray(wire.data.sources) && wire.data.sources.length > 0 && (
+                <details className="mt-4">
+                  <summary className="text-sm font-medium cursor-pointer">
+                    Sources read this run ({wire.data.sources.length})
+                  </summary>
+                  <ul className="mt-2 space-y-1">
+                    {wire.data.sources.map((s) => (
+                      <li key={s.url} className="text-xs text-muted-foreground">
+                        <a
+                          href={s.url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="inline-flex items-center gap-1 text-primary hover:underline"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                          {s.label}
+                        </a>{" "}
+                        — {s.wordCount} words, {s.status}
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
+            </>
+          )}
+        </div>
 
         {/* Step 1 */}
         <div className="bg-card border border-border p-6 mb-6 shadow-sm">

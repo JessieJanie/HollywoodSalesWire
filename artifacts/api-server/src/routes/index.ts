@@ -4,6 +4,7 @@ import subscribeRouter from "./subscribe";
 import foundingOfferRouter from "./foundingOffer";
 import foundingCheckoutRouter from "./foundingCheckout";
 import publisherRouter from "./publisher";
+import wireRouter from "./wire";
 
 const router: IRouter = Router();
 
@@ -12,5 +13,6 @@ router.use(subscribeRouter);
 router.use(foundingOfferRouter);
 router.use(foundingCheckoutRouter);
 router.use(publisherRouter);
+router.use(wireRouter);
 
 export default router;

@@ -99,3 +99,40 @@ export const PublisherSendResponse = zod.object({
 })
 
 
+/**
+ * @summary Latest Monday research run (key-protected)
+ */
+export const PublisherWireLatestQueryParams = zod.object({
+  "key": zod.coerce.string()
+})
+
+export const PublisherWireLatestResponse = zod.object({
+  "status": zod.string(),
+  "weekKey": zod.string().optional(),
+  "startedAt": zod.string().optional(),
+  "finishedAt": zod.string().optional(),
+  "error": zod.string().optional(),
+  "wireMarkdown": zod.string().optional(),
+  "freeSubject": zod.string().optional(),
+  "freeBody": zod.string().optional(),
+  "sources": zod.array(zod.object({
+  "url": zod.string(),
+  "label": zod.string(),
+  "wordCount": zod.number(),
+  "status": zod.string()
+})).optional()
+})
+
+
+/**
+ * @summary Start a research run now (key-protected)
+ */
+export const PublisherWireRunBody = zod.object({
+  "key": zod.string()
+})
+
+export const PublisherWireRunResponse = zod.object({
+  "status": zod.string()
+})
+
+

@@ -5,6 +5,33 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface PublisherKeyInput {
+  key: string;
+}
+
+export interface WireRunStarted {
+  status: string;
+}
+
+export interface WireSource {
+  url: string;
+  label: string;
+  wordCount: number;
+  status: string;
+}
+
+export interface WireRunStatus {
+  status: string;
+  weekKey?: string;
+  startedAt?: string;
+  finishedAt?: string;
+  error?: string;
+  wireMarkdown?: string;
+  freeSubject?: string;
+  freeBody?: string;
+  sources?: WireSource[];
+}
+
 export interface PublisherStatus {
   subscriberCount: number;
   lastSentAt?: string;
@@ -62,6 +89,10 @@ token: string;
 };
 
 export type PublisherStatusParams = {
+key: string;
+};
+
+export type PublisherWireLatestParams = {
 key: string;
 };
 
