@@ -1,0 +1,58 @@
+Hello Hollywood — copy direction from Karilyn for the next pass on HSW's sales
+material. Keep this with your copy notes; it's the sharpened USP framing.
+
+## The core line (Karilyn's, verbatim — this is the keeper)
+
+> **"Leave it to the hot-lead pros to deliver the hottest sales leads."**
+
+That's customer language, not investor language. Use it (and variations of it)
+as the moat argument. Do NOT replace it with feature lists or technical
+explanations of how the research machine works.
+
+## Why this framing works — the psychology to preserve
+
+The framing makes *not subscribing* the risky-looking choice. A production
+services CEO reading:
+
+> "We watch seven studio job boards and five state incentive programs
+> continuously, so your salespeople call the moment money moves."
+
+...doesn't think "I could build that." He thinks **"my competitor might
+already get this."** Fear of missing the lead beats pride of DIY every time.
+
+That one framing is simultaneously:
+- **The launch argument** — subscribe now because money is moving now.
+- **The price-justification argument** — you're not paying for a newsletter,
+  you're paying for the machine that never stops watching.
+- **The renewal argument** — cancel, and the watching stops while your
+  competitor's doesn't.
+
+## The honest version of the moat (background, so the copy stays true)
+
+Nothing we do is secret or impossible to replicate — a determined engineer
+could rebuild any piece. What can't be cheaply replicated:
+
+1. **Accumulated gotcha knowledge** — job boards that report fake counts when
+   a search is empty, stories that reappear on re-crawls, state sites that
+   block bots. All of it is already encoded in our pipeline; a DIYer discovers
+   these failures weeks in, silently.
+2. **The maintenance treadmill** — sources change constantly; our system
+   notices when a source quietly breaks. A DIY script rots in silence.
+3. **The economics** — for anyone whose job is selling to Hollywood buyers,
+   spending engineer-months rebuilding this is a bad trade. The moat isn't
+   secrecy; it's that DIY is irrational.
+
+It's the Bloomberg moat: nothing they do is magic, nobody sane rebuilds it.
+
+## Copy guardrails (unchanged house rules — these still govern)
+
+- The "seven studio job boards and five state incentive programs" claim is
+  factual today — if the coverage changes, the number in the copy changes.
+  Every quantified claim stays literally true.
+- No "nobody else has this" claims — the moat argument is "not worth
+  replicating," never "impossible to replicate."
+- Enemy frame stays the rented list / stale directory, per the launch copy.
+- All existing pricing and offer locks remain exactly as agreed.
+
+When you run the next copy pass, consider (not a mandate because we will likely come up with more marketing ideas/angles to use in addition) drafting with this framing, then put it through
+the 9.5-or-better rewrite procedure as usual. For the 9.5 or better rewrite procedure... every draft gets rated on a scale of 1-10 including a summary of strengths and weaknesses, then used these summaries to rewrite, then repeat until a 9.5 or better rating is achieved.

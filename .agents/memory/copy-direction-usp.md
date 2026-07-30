@@ -35,4 +35,4 @@ Karilyn built the search tool HSW uses, purpose-built for exactly this ultra-pre
 - Enemy frame stays the rented list / stale directory, per launch copy.
 - All existing pricing and offer locks remain exactly as agreed.
 
-**How to apply:** On the next copy pass, draft with this framing, then run the 9.5-or-better rewrite procedure as usual. Copy remains publisher-locked — no edits without explicit request.
+**How to apply:** On the next copy pass, draft with this framing (a consideration, not a mandate — Karilyn expects more angles to accumulate and be used IN ADDITION before the pass runs), then run the 9.5-or-better rewrite procedure: rate the draft 1–10 with a summary of strengths and weaknesses, rewrite using that summary, repeat until it rates 9.5+. Copy remains publisher-locked — no edits without explicit request.
