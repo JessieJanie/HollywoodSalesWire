@@ -1,4 +1,4 @@
-modules = ["nodejs-24"]
+modules = ["nodejs-24", "postgresql-16"]
 
 [deployment]
 router = "application"
@@ -23,3 +23,6 @@ timeoutMs = 20000
 
 [userenv.shared]
 PUBLISHER_KEY = "88e9fbe421aa2a142dd8cd38e112aba86ef15299f9971e1e"
+
+[nix]
+channel = "stable-25_05"
