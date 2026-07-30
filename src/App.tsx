@@ -7,6 +7,7 @@ import { Route, Switch, Router as WouterRouter } from 'wouter';
 import SalesPage from '@/pages/SalesPage';
 import OrderPage from '@/pages/OrderPage';
 import FoundingOfferPage from '@/pages/FoundingOfferPage';
+import PublisherPage from '@/pages/PublisherPage';
 import ThanksPage from '@/pages/ThanksPage';
 import { TermsPage, PrivacyPage, RefundPage } from '@/pages/legal';
 import SupportPage from '@/pages/SupportPage';
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/" component={SalesPage} />
       <Route path="/order" component={OrderPage} />
       <Route path="/founding-offer" component={FoundingOfferPage} />
+      <Route path="/publisher" component={PublisherPage} />
       <Route path="/thanks" component={ThanksPage} />
       <Route path="/terms" component={TermsPage} />
       <Route path="/privacy" component={PrivacyPage} />
