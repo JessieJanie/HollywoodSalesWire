@@ -1,0 +1,69 @@
+
+Hello Hollywood — we're setting you up with your own research budget. Skim (skim402.com) is a pay-per-use web reader built for agents: you fetch any public web page and get back clean markdown, paying half a cent per read in USDC with no account or API key. It's how the Special Reports behind our launch were researched, and it becomes your weekly research tool. Three parts below: wallet setup, how to pay, and your research beat.
+
+Part 1 — Create your wallet (do this first, reply with the ADDRESS only)
+Generate the wallet INSIDE this project so the private key never travels through chat:
+
+// one-time, e.g. `node make-wallet.mjs` with viem installed
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+const pk = generatePrivateKey();
+const account = privateKeyToAccount(pk);
+console.log("ADDRESS (share this):", account.address);
+// Do NOT print the private key to the console or chat.
+// Store it immediately as a Replit Secret named HSW_AGENT_PRIVATE_KEY,
+// then delete this script.
+
+Rules, non-negotiable:
+
+The private key lives ONLY in the Replit Secret HSW_AGENT_PRIVATE_KEY. Never in chat, never in a file, never in git, never printed in logs.
+Reply to Karilyn with just the address (it starts with 0x — the address is public and safe to share). She'll have it funded with $10 USDC on Base — that's 2,000 reads at $0.005. No ETH needed; Skim payments are gasless.
+This is spend-only petty cash for research. If it runs low, ask Karilyn for a top-up; never move funds elsewhere.
+Part 2 — Paying Skim from code
+Full docs: https://skim402.com/docs. Any x402-capable client works; the JavaScript pattern:
+
+import { withPaymentInterceptor } from "x402-axios";
+import { privateKeyToAccount } from "viem/accounts";
+import axios from "axios";
+const wallet = privateKeyToAccount(process.env.HSW_AGENT_PRIVATE_KEY);
+// Always set a timeout — a stalled payment step can otherwise hang forever.
+const skim = withPaymentInterceptor(
+  axios.create({ baseURL: "https://skim402.com/api", timeout: 90_000 }),
+  wallet,
+);
+const { data } = await skim.post("/v1/read", {
+  url: "https://example.com/article",
+});
+// data.markdown = the clean page text
+
+There are also structured-extraction endpoints (tables, products, etc.) and paid Signal feeds — browse https://skim402.com/docs when you need more than a plain read.
+
+Part 3 — Your research beat (the sources behind the Special Reports)
+These are the source families that produced the three launch reports. Work them weekly; every issue of the wire is these reads, refreshed.
+
+A. State film-incentive award lists (prospect lists, straight from the state):
+
+California: the CFC approved-projects list at film.ca.gov (new award rounds post here — company names + qualified spend) and gov.ca.gov press releases.
+New York: ESD film-tax-credit pages incl. the quarterly reports (esd.ny.gov).
+Georgia: georgia.org incentive pages + Georgia Entertainment coverage.
+New Mexico: nmfilm.com + local press (e.g. Albuquerque Journal) for totals.
+Texas: gov.texas.gov TMIIIP program page (new fund, watch it grow).
+B. Job requisitions as buying signals (who's assembling capability):
+
+Studio careers portals directly: careers pages of WBD, Netflix, Amazon/MGM, Sony, Disney, NBCU, Paramount — search "AI", "machine learning", "content operations"; note the LOCATION (US vs offshore hubs) and the function.
+Cross-checks: LinkedIn job counts, Glassdoor/Indeed, Levels.fyi for salary bands. Treat all counts as dated snapshots — always record the pull date.
+C. Trades + primary records (verify before print):
+
+Variety, The Hollywood Reporter, Deadline for deals and production news.
+Company press releases, SEC filings, and court dockets (CourtListener) when a claim matters — the trades summarize; the primary source is the receipt.
+Studio-infrastructure news: new stage complexes (e.g. greatpointstudios.com), vendor announcements, NAB exhibitor lists.
+House research rules (from the reports — keep these):
+
+Every claim carries its receipt (source + date fetched). If a number is the state's own promotional figure, say so.
+Prefer the primary source over coverage of it.
+Job/board counts and salary aggregates drift — re-pull and re-date before any publication use.
+Public sources only. No paywalled scraping, no login walls, no personal data about individuals — companies and roles, not people's private info.
+Skim tips:
+
+Judge a read by word count: a suspiciously thin result usually means a JavaScript-only page or paywall — find the same info on a static page (press release, cached coverage) instead of re-paying the same URL.
+Batch your weekly beat into a list of URLs and loop it — at $0.005/read, the full beat costs pennies.
+Custom Signals: Skim's Signals page (skim402.com/signals) has paid feeds agents can poll (SEC filings, AI news, and more, $0.005/poll). If you find yourself re-running the same search list every week, request a custom Signal via skim402.com/contact describing what you need watched (e.g. "new state film-incentive awards + studio AI job postings") — custom Signals ship in days, and then your weekly beat becomes one poll instead of fifty reads. Since Skim is family (Karilyn's company), route the request through her and it goes to the front of the line.
