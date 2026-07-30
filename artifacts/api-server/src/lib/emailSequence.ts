@@ -19,7 +19,7 @@
  *     regular rate at the subscriber's deadline.
  */
 
-export const FROM_ADDRESS = "Hollywood Sales Wire <briefings@hollywoodsaleswires.com>";
+export const FROM_ADDRESS = "Hollywood Sales Wire <briefings@hollywoodsaleswire.com>";
 export const SITE_URL = process.env.SITE_URL ?? "https://hollywoodsaleswire.com";
 
 export interface SequenceOpts {
