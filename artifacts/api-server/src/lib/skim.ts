@@ -42,3 +42,11 @@ export async function skimRead(url: string): Promise<SkimResult> {
   const markdown = data.markdown ?? "";
   return { markdown, wordCount: markdown.split(/\s+/).filter(Boolean).length };
 }
+
+/** Browser-rendered read ($0.005) — recovers JS-tabbed pages the plain read misses. */
+export async function skimReadJs(url: string): Promise<SkimResult> {
+  const skim = await getClient();
+  const { data } = await skim.post("/v1/read/js", { url });
+  const markdown = data.markdown ?? "";
+  return { markdown, wordCount: markdown.split(/\s+/).filter(Boolean).length };
+}

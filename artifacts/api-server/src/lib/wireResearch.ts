@@ -1,6 +1,6 @@
 import { desc, eq, and, ne, sql } from "drizzle-orm";
 import { db, wireRunsTable, researchPagesTable } from "@workspace/db";
-import { skimRead } from "./skim";
+import { skimRead, skimReadJs } from "./skim";
 import { draftFreeEdition } from "./freeEdition";
 import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
@@ -67,14 +67,29 @@ interface FetchedPage {
 
 async function fetchPage(url: string, label: string): Promise<FetchedPage> {
   try {
-    const { markdown, wordCount } = await skimRead(url);
+    let { markdown, wordCount } = await skimRead(url);
+    let via = "";
+    if (wordCount < 60) {
+      // Likely a JS-tabbed page — pay for a full browser render and keep the
+      // better result (Skim agent's recommendation for pages like film.ca.gov).
+      try {
+        const js = await skimReadJs(url);
+        if (js.wordCount > wordCount) {
+          markdown = js.markdown;
+          wordCount = js.wordCount;
+          via = " via browser render";
+        }
+      } catch {
+        // keep the plain result
+      }
+    }
     const thin = wordCount < 60;
     return {
       url,
       label,
       markdown,
       wordCount,
-      status: thin ? "ok-but-thin (possible JS page — treat with suspicion)" : "ok",
+      status: thin ? "ok-but-thin (possible JS page — treat with suspicion)" : `ok${via}`,
     };
   } catch (err) {
     const e = err as { response?: { status?: number; data?: unknown }; message?: string };
