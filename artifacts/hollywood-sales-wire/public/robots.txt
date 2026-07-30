@@ -1,2 +1,36 @@
+# Hollywood Sales Wire — https://hollywoodsaleswire.com
+# Humans and AI agents are equally welcome to read the public pages.
+
 User-agent: *
 Allow: /
+Disallow: /publisher
+Disallow: /founding-offer
+Disallow: /api/
+
+# AI / answer-engine crawlers — explicitly welcome
+User-agent: GPTBot
+Allow: /
+Disallow: /publisher
+Disallow: /founding-offer
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /publisher
+Disallow: /founding-offer
+
+User-agent: Claude-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://hollywoodsaleswire.com/sitemap.xml

@@ -68,7 +68,7 @@ export const WELCOME_EMAIL = {
   body: ({ unsubscribeUrl }: { unsubscribeUrl: string }) =>
     wrap(
       `${p("Hello Reader,")}
-${p("You're on the Hollywood Sales Wire list. You'll hear from us with intelligence briefings and occasional offers — and nothing else. We never rent or share this list.")}
+${p("You're on the Hollywood Sales Wire list. Every week you'll get the free edition of the Wire — the shape of the week's buying signals, so you can see how the system works. You'll also hear from us with occasional offers — and nothing else. We never rent or share this list.")}
 ${p("In the meantime, you can learn more about the Wire and membership here:")}
 ${cta("Visit Hollywood Sales Wire", SITE_URL)}
 ${sig}`,

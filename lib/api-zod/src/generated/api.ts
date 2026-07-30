@@ -47,3 +47,55 @@ export const FoundingOfferResponse = zod.object({
 })
 
 
+/**
+ * @summary Publisher dashboard status (key-protected)
+ */
+export const PublisherStatusQueryParams = zod.object({
+  "key": zod.coerce.string()
+})
+
+export const PublisherStatusResponse = zod.object({
+  "subscriberCount": zod.number(),
+  "lastSentAt": zod.string().optional(),
+  "lastSubject": zod.string().optional()
+})
+
+
+/**
+ * @summary Draft a condensed free-edition teaser from the full Wire text
+ */
+export const publisherDraftBodyWireTextMin = 100;
+
+
+
+export const PublisherDraftBody = zod.object({
+  "key": zod.string(),
+  "wireText": zod.string().min(publisherDraftBodyWireTextMin)
+})
+
+export const PublisherDraftResponse = zod.object({
+  "subject": zod.string(),
+  "bodyText": zod.string()
+})
+
+
+/**
+ * @summary Send the weekly free edition to all active subscribers
+ */
+export const publisherSendBodySubjectMin = 3;
+
+export const publisherSendBodyBodyTextMin = 50;
+
+
+
+export const PublisherSendBody = zod.object({
+  "key": zod.string(),
+  "subject": zod.string().min(publisherSendBodySubjectMin),
+  "bodyText": zod.string().min(publisherSendBodyBodyTextMin)
+})
+
+export const PublisherSendResponse = zod.object({
+  "sent": zod.number()
+})
+
+

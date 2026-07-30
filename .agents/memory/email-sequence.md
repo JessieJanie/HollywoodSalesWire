@@ -9,6 +9,7 @@ Evergreen funnel (live since July 29, 2026, replacing the one-off campaign idea)
 - Email 5 always lands on the deadline day by construction: both E5's send time and the deadline derive from signup + 14×24h, so they share the same ET calendar day even across DST. Do NOT "fix" the deadline to calendar-day arithmetic without moving E5 in lockstep.
 - Founding checkout links are server-side only, behind `/api/founding-checkout?token=&plan=` which re-verifies the deadline before 302-ing to Stripe. Never put founding Stripe links in the client bundle.
 - Unsubscribe cancels remaining scheduled Resend emails.
+- Weekly free edition: publisher console at `/publisher?key=<PUBLISHER_KEY env var>` (key-gated, timing-safe check on every endpoint). She pastes the full paid Wire; `/api/publisher/draft` uses Anthropic (Replit AI proxy, lazy-imported so missing env vars can't crash startup) to draft a no-names teaser; she edits and `/api/publisher/send` batches to all active subscribers via Resend (records in `weekly_previews`). SHE reviews every draft before send — that human step is the leak guard; the teaser must never contain buyer names/contacts/deal specifics.
 
 **Why:** cold outreach was declined; she chose the opt-in evergreen funnel (Option 1). Copy is publisher-locked (Draft 5 at `marketing/founding-offer-email-series-draft5.txt`); only mechanical substitutions allowed (salutation, link+UTM, per-subscriber deadline dates), and she wants to see every edit before anything sends/publishes.
 

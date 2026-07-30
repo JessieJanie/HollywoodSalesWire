@@ -24,6 +24,12 @@ import type {
   FoundingOfferParams,
   FoundingOfferStatus,
   HealthStatus,
+  PublisherDraftInput,
+  PublisherDraftResult,
+  PublisherSendInput,
+  PublisherSendResult,
+  PublisherStatus,
+  PublisherStatusParams,
   SubscribeResult,
   SubscriberInput
 } from './api.schemas';
@@ -287,4 +293,230 @@ export function useFoundingOffer<TData = Awaited<ReturnType<typeof foundingOffer
 
 
 
+
+export const getPublisherStatusUrl = (params: PublisherStatusParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/publisher/status?${stringifiedParams}` : `/api/publisher/status`
+}
+
+/**
+ * @summary Publisher dashboard status (key-protected)
+ */
+export const publisherStatus = async (params: PublisherStatusParams, options?: Parameters<typeof customFetch>[1]): Promise<PublisherStatus> => {
+
+  return customFetch<PublisherStatus>(getPublisherStatusUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPublisherStatusQueryKey = (params?: PublisherStatusParams,) => {
+    return [
+    `/api/publisher/status`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getPublisherStatusQueryOptions = <TData = Awaited<ReturnType<typeof publisherStatus>>, TError = ErrorType<ApiMessage>>(params: PublisherStatusParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof publisherStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPublisherStatusQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof publisherStatus>>> = ({ signal }) => publisherStatus(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof publisherStatus>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PublisherStatusQueryResult = NonNullable<Awaited<ReturnType<typeof publisherStatus>>>
+export type PublisherStatusQueryError = ErrorType<ApiMessage>
+
+
+/**
+ * @summary Publisher dashboard status (key-protected)
+ */
+
+export function usePublisherStatus<TData = Awaited<ReturnType<typeof publisherStatus>>, TError = ErrorType<ApiMessage>>(
+ params: PublisherStatusParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof publisherStatus>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPublisherStatusQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getPublisherDraftUrl = () => {
+
+
+
+
+  return `/api/publisher/draft`
+}
+
+/**
+ * @summary Draft a condensed free-edition teaser from the full Wire text
+ */
+export const publisherDraft = async (publisherDraftInput: PublisherDraftInput, options?: Parameters<typeof customFetch>[1]): Promise<PublisherDraftResult> => {
+
+  return customFetch<PublisherDraftResult>(getPublisherDraftUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(publisherDraftInput)
+  }
+);}
+
+
+
+
+
+export const getPublisherDraftMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherDraft>>, TError,{data: BodyType<PublisherDraftInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publisherDraft>>, TError,{data: BodyType<PublisherDraftInput>}, TContext> => {
+
+const mutationKey = ['publisherDraft'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherDraft>>, {data: BodyType<PublisherDraftInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  publisherDraft(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublisherDraftMutationResult = NonNullable<Awaited<ReturnType<typeof publisherDraft>>>
+    export type PublisherDraftMutationBody = BodyType<PublisherDraftInput>
+    export type PublisherDraftMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Draft a condensed free-edition teaser from the full Wire text
+ */
+export const usePublisherDraft = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherDraft>>, TError,{data: BodyType<PublisherDraftInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publisherDraft>>,
+        TError,
+        {data: BodyType<PublisherDraftInput>},
+        TContext
+      > => {
+      return useMutation(getPublisherDraftMutationOptions(options));
+    }
+
+export const getPublisherSendUrl = () => {
+
+
+
+
+  return `/api/publisher/send`
+}
+
+/**
+ * @summary Send the weekly free edition to all active subscribers
+ */
+export const publisherSend = async (publisherSendInput: PublisherSendInput, options?: Parameters<typeof customFetch>[1]): Promise<PublisherSendResult> => {
+
+  return customFetch<PublisherSendResult>(getPublisherSendUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(publisherSendInput)
+  }
+);}
+
+
+
+
+
+export const getPublisherSendMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherSend>>, TError,{data: BodyType<PublisherSendInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publisherSend>>, TError,{data: BodyType<PublisherSendInput>}, TContext> => {
+
+const mutationKey = ['publisherSend'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherSend>>, {data: BodyType<PublisherSendInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  publisherSend(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublisherSendMutationResult = NonNullable<Awaited<ReturnType<typeof publisherSend>>>
+    export type PublisherSendMutationBody = BodyType<PublisherSendInput>
+    export type PublisherSendMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Send the weekly free edition to all active subscribers
+ */
+export const usePublisherSend = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherSend>>, TError,{data: BodyType<PublisherSendInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publisherSend>>,
+        TError,
+        {data: BodyType<PublisherSendInput>},
+        TContext
+      > => {
+      return useMutation(getPublisherSendMutationOptions(options));
+    }
 

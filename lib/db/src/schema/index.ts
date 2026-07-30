@@ -18,3 +18,4 @@
 //   export type Post = typeof postsTable.$inferSelect;
 
 export * from "./emailSubscribers";
+export * from "./weeklyPreviews";

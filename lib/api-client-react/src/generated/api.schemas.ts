@@ -5,6 +5,35 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface PublisherStatus {
+  subscriberCount: number;
+  lastSentAt?: string;
+  lastSubject?: string;
+}
+
+export interface PublisherDraftInput {
+  key: string;
+  /** @minLength 100 */
+  wireText: string;
+}
+
+export interface PublisherDraftResult {
+  subject: string;
+  bodyText: string;
+}
+
+export interface PublisherSendInput {
+  key: string;
+  /** @minLength 3 */
+  subject: string;
+  /** @minLength 50 */
+  bodyText: string;
+}
+
+export interface PublisherSendResult {
+  sent: number;
+}
+
 export interface FoundingOfferStatus {
   active: boolean;
   deadline: string;
@@ -30,5 +59,9 @@ export interface HealthStatus {
 
 export type FoundingOfferParams = {
 token: string;
+};
+
+export type PublisherStatusParams = {
+key: string;
 };
 

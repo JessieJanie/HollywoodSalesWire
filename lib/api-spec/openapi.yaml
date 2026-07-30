@@ -72,8 +72,125 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMessage"
+  /publisher/status:
+    get:
+      operationId: publisherStatus
+      tags: [publisher]
+      summary: Publisher dashboard status (key-protected)
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublisherStatus"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /publisher/draft:
+    post:
+      operationId: publisherDraft
+      tags: [publisher]
+      summary: Draft a condensed free-edition teaser from the full Wire text
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublisherDraftInput"
+      responses:
+        "200":
+          description: Drafted teaser
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublisherDraftResult"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /publisher/send:
+    post:
+      operationId: publisherSend
+      tags: [publisher]
+      summary: Send the weekly free edition to all active subscribers
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublisherSendInput"
+      responses:
+        "200":
+          description: Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublisherSendResult"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
 components:
   schemas:
+    PublisherStatus:
+      type: object
+      required: [subscriberCount]
+      properties:
+        subscriberCount:
+          type: number
+        lastSentAt:
+          type: string
+        lastSubject:
+          type: string
+    PublisherDraftInput:
+      type: object
+      required: [key, wireText]
+      properties:
+        key:
+          type: string
+        wireText:
+          type: string
+          minLength: 100
+    PublisherDraftResult:
+      type: object
+      required: [subject, bodyText]
+      properties:
+        subject:
+          type: string
+        bodyText:
+          type: string
+    PublisherSendInput:
+      type: object
+      required: [key, subject, bodyText]
+      properties:
+        key:
+          type: string
+        subject:
+          type: string
+          minLength: 3
+        bodyText:
+          type: string
+          minLength: 50
+    PublisherSendResult:
+      type: object
+      required: [sent]
+      properties:
+        sent:
+          type: number
     FoundingOfferStatus:
       type: object
       required: [active, deadline, deadlineLabel]

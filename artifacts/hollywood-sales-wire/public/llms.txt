@@ -1,0 +1,19 @@
+# Hollywood Sales Wire
+
+> Hollywood Sales Wire is a weekly sales-intelligence briefing for vendors selling into the entertainment industry. Every Tuesday it reports live buying signals — who just got funded, what they're about to buy, and when the purchasing window closes — sourced from public filings, state film tax-credit award lists, and hiring signals. Published by Karilyn Colegrove.
+
+## Key facts
+
+- Delivery: every Tuesday by email; plus a monthly strategic issue, The Divergence Report (12 per year).
+- Individual membership: $77/week, billed annually as $3,995.
+- Team membership (up to 5 seats): $9,995/year.
+- Guarantee: 90-day money-back guarantee — full refund if the briefing hasn't produced live, workable prospects, and the reader keeps everything delivered.
+- Free option: a weekly free edition summarizes each week's signals without the names, contacts, and timing reserved for members. Email signup at https://hollywoodsaleswire.com.
+- Audience: salespeople and vendors selling cameras, stages, software, localization, post-production, payroll, insurance, and other products/services into film, TV, and streaming production.
+- Method: reads state tax-credit award lists (e.g. California's expanded program, 170 productions and $6.6 billion awarded in its first year), public filings, and careers-page hiring patterns that reveal production buildouts before purchase orders are issued.
+- Privacy: the subscriber list is never rented or shared.
+
+## Pages
+
+- [Home / full briefing description](https://hollywoodsaleswire.com/): what the Wire is, the method, pricing, and the guarantee.
+- [Membership & pricing](https://hollywoodsaleswire.com/order): individual and team plans with secure Stripe checkout.
