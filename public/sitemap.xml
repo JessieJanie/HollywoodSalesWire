@@ -12,34 +12,4 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-  <url>
-    <loc>https://hollywoodsaleswire.com/articles</loc>
-    <lastmod>2026-07-30</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.7</priority>
-  </url>
-  <url>
-    <loc>https://hollywoodsaleswire.com/articles/find-film-productions-before-they-buy</loc>
-    <lastmod>2026-07-30</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://hollywoodsaleswire.com/articles/why-entertainment-lead-lists-go-stale</loc>
-    <lastmod>2026-07-30</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://hollywoodsaleswire.com/articles/hiring-signals-predict-production-purchases</loc>
-    <lastmod>2026-07-30</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
-  <url>
-    <loc>https://hollywoodsaleswire.com/articles/timing-the-greenlight-window</loc>
-    <lastmod>2026-07-30</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.6</priority>
-  </url>
 </urlset>

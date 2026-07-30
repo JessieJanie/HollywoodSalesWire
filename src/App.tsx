@@ -11,8 +11,6 @@ import PublisherPage from '@/pages/PublisherPage';
 import ThanksPage from '@/pages/ThanksPage';
 import { TermsPage, PrivacyPage, RefundPage } from '@/pages/legal';
 import SupportPage from '@/pages/SupportPage';
-import ArticlesPage from '@/pages/ArticlesPage';
-import ArticlePage from '@/pages/ArticlePage';
 
 const queryClient = new QueryClient();
 
@@ -28,8 +26,6 @@ function Router() {
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/refund-policy" component={RefundPage} />
       <Route path="/support" component={SupportPage} />
-      <Route path="/articles" component={ArticlesPage} />
-      <Route path="/articles/:slug" component={ArticlePage} />
       <Route component={NotFound} />
     </Switch>
   );

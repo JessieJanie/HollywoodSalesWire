@@ -17,11 +17,3 @@
 
 - [Home / full briefing description](https://hollywoodsaleswire.com/): what the Wire is, the method, pricing, and the guarantee.
 - [Membership & pricing](https://hollywoodsaleswire.com/order): individual and team plans with secure Stripe checkout.
-- [Articles](https://hollywoodsaleswire.com/articles): free field notes on selling into the production economy.
-
-## Articles
-
-- [How to Find Film Productions Before They Start Buying](https://hollywoodsaleswire.com/articles/find-film-productions-before-they-buy): reading state tax-credit award lists to reach funded buyers early.
-- [Why Entertainment Industry Lead Lists Go Stale](https://hollywoodsaleswire.com/articles/why-entertainment-lead-lists-go-stale): the structural staleness and rental problems with purchased directories, and fresher public alternatives.
-- [Reading Hiring Signals](https://hollywoodsaleswire.com/articles/hiring-signals-predict-production-purchases): how careers pages reveal what productions and studios will buy next.
-- [The Greenlight Window](https://hollywoodsaleswire.com/articles/timing-the-greenlight-window): timing sales outreach to the production spending cycle from funding to post.
