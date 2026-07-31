@@ -3,4 +3,5 @@
 - [Monday Wire pipeline](wire-pipeline.md) — auto-drafts paid Wire + Free Edition Mondays 5pm PT into publisher console; she reviews/sends; safety rails are deliberate.
 - [Skim research setup](skim-research.md) — pay-per-read research wallet on Base, pin x402-axios@1.2.0, verified source URLs + known bot-blocked sites.
 - [HSW copy direction](copy-direction-usp.md) — "hot-lead pros" USP framing for next sales-copy pass; moat = "not worth replicating"; quantified claims stay literally true.
+- [Articles editorial series](articles-editorial.md) — Grok-drafted editorial pieces, copy verbatim/publisher-locked; order = editorial set first, witty images over literal ones.
 - [Evergreen founding funnel](email-sequence.md) — public site sells regular rate; signup triggers welcome + 5-email founding series (days 7–14) to token-gated offer page; copy publisher-locked.

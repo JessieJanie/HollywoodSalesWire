@@ -96,6 +96,367 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
+    slug: "the-wizards-of-hollywood-behind-the-curtains",
+    title: "The Wizards of Hollywood Behind the Curtains",
+    description:
+      "Hollywood manufactures glamour after the fact. The money that pays for it is first authorized in quieter documents — the help-wanted page among them.",
+    datePublished: "2026-07-31",
+    readMinutes: 4,
+    heroImage: "images/wizards-curtain.jpeg",
+    heroImageAlt:
+      "A red theater curtain parted slightly, with a bright spotlight shining through from the stage behind it",
+    body: [
+      {
+        type: "p",
+        text: "Hollywood is a machine for manufacturing glamour after the fact.",
+      },
+      {
+        type: "p",
+        text: "By the time the premieres arrive, the clothes are perfect, the quotes are polished, and the trades are full of people explaining how inevitable it all was. The audience sees the finished surface: the stars on the steps, the flashbulbs, the official myth. What they do not see is the earlier and less photogenic stage, when the money that will eventually pay for all that glamour is first authorized and the first practical people are hired to spend it.",
+      },
+      {
+        type: "p",
+        text: "That stage does not appear on the red carpet. It appears in quieter places — among them, the help-wanted page.",
+      },
+      { type: "h2", text: "The Story Is Written Before the Story" },
+      {
+        type: "p",
+        text: "A press release is literature. A job posting is closer to a wiring instruction.",
+      },
+      {
+        type: "p",
+        text: "Before the project becomes a narrative object — before it has a tone, a theme, or a publicist prepared to call it \u201Cintimate yet epic\u201D — it needs a unit production manager, a production accountant, a coordinator, a few department heads. These are not decorative roles. They are the people who open the accounts, approve the purchase orders, and begin turning a financed project into an actual operation. When those postings appear, the big money that will later create the glamour has already begun to move.",
+      },
+      {
+        type: "p",
+        text: "The industry prefers not to dwell on this. It is more flattering to discuss attachments and creative vision than to notice that one of the first real signals of life is often a recruiting ad.",
+      },
+      { type: "h2", text: "Glamour Is Expensive. Someone Has to Start Spending." },
+      {
+        type: "p",
+        text: "The finished product is designed to look effortless. The gowns, the lighting, the interviews in which everyone pretends the whole enterprise floated into existence on pure talent and excellent taste. In reality it is assembled by people hired early, quietly, and for the unromantic purpose of making the machine run.",
+      },
+      {
+        type: "p",
+        text: "A help-wanted page does not care about prestige. It records that a budget line has been approved and that a human being is required to execute it. That is a more honest document than most of what circulates under the heading of industry news. One is composed for effect. The other is a purchase order in a different font.",
+      },
+      {
+        type: "p",
+        text: "Help-wanted ads are only one of several such precursors. Early staffing, incentive activity, entity formation, and the other unglamorous indicators that precede a public narrative do not each tell the whole story. Together, they begin to flush out where the biggest spends are preparing to happen. The market continues to stare at the curtain. The quieter documents identify the room where the money is being organized.",
+      },
+      {
+        type: "p",
+        text: "Vendors who wait for the glamorous version of events often arrive after these first practical decisions have already been made. The advantage sits with whoever noticed the earlier and less elegant paperwork.",
+      },
+      { type: "h2", text: "The Curtain Is the Entertaining Part" },
+      {
+        type: "p",
+        text: "Hollywood is very skilled at directing attention toward the curtain. The premieres. The panels. The official story. This material is not worthless. It is simply late. By the time the curtain is being discussed in public, the wizards behind it have frequently already been hired and have started doing the work that makes the curtain worth looking at.",
+      },
+      {
+        type: "p",
+        text: "The trades will continue to report the finished narrative. That is their function. A salesperson has a narrower interest: determine when the spending mechanism has been switched on, and arrive while the people switching it on are still reachable.",
+      },
+      {
+        type: "p",
+        text: "Most of the market remains hypnotized by the show. A smaller group watches the quieter documents — the help-wanted page among them — where the show is first staffed and the money first becomes real.",
+      },
+      {
+        type: "p",
+        text: "The glamour is the product. The requisition is one of the places the product begins. The rest of the early signals simply confirm where the biggest checks are getting ready to move.",
+      },
+    ],
+  },
+  {
+    slug: "hollywoods-love-affair-with-sacramento",
+    title: "Hollywood's Love Affair with Sacramento",
+    description:
+      "Hollywood hops from capital to capital in exchange for money. Tax-credit award lists are the evidence of the affairs — a roster of financed productions about to need everything.",
+    datePublished: "2026-07-31",
+    readMinutes: 4,
+    heroImage: "images/sacramento-affair.jpeg",
+    heroImageAlt:
+      "A champagne flute and hundred-dollar bills on a table in front of a state capitol building at night",
+    body: [
+      {
+        type: "p",
+        text: "Hollywood likes to pretend it is self-created.",
+      },
+      {
+        type: "p",
+        text: "It is not. It is a bed hopper.",
+      },
+      {
+        type: "p",
+        text: "It moves from capital to capital — Sacramento, Atlanta, Albany, and wherever else the terms look attractive — forming temporary arrangements in exchange for money. The public story is art, vision, and inevitable success. The private story is simpler: large productions are expensive, and states are willing to pay for the privilege of hosting them. Tax credits are the telltale sign. When the awards are published, they identify the projects that have secured a piece of their financing and have not yet finished spending it.",
+      },
+      {
+        type: "p",
+        text: "Most vendors treat these lists as administrative weather. They are closer to a map of active affairs.",
+      },
+      { type: "h2", text: "Tax Credits Are Not Cute. They Are the Evidence." },
+      {
+        type: "p",
+        text: "A tax credit is not a creative announcement. It is the receipt from the arrangement. The state puts real economic weight behind a production if that production puts real money into local labor, vendors, locations, and services. Before the spending fully begins, the award itself is often made public.",
+      },
+      {
+        type: "p",
+        text: "No gowns. No panel about the emotional journey of the material. Just a list. On that list are productions that have closed an important part of the deal and are now positioned to turn financing into purchase orders.",
+      },
+      {
+        type: "p",
+        text: "By the time the same project is being celebrated in the trades, a portion of those vendor decisions have frequently already been made. The award list appears earlier. It is quieter. It is also the moment the money becomes visible.",
+      },
+      { type: "h2", text: "Romance Prefers the Curtain. Money Prefers the File." },
+      {
+        type: "p",
+        text: "Hollywood is superb at directing attention toward the finished surface. The cast. The tone. The official explanation of why this project matters. Useful, in its way. Late, for anyone trying to sell into the production itself.",
+      },
+      {
+        type: "p",
+        text: "Tax-credit awards sit further upstream. They are the evidence of the arrangement that makes the glamour possible — and the arrangement is where the checks get authorized. A production that has secured a meaningful credit has often secured a material piece of its budget. What follows is the consequential business of turning that budget into trucks, stages, insurance, post, and every other line item the finished myth depends on.",
+      },
+      {
+        type: "p",
+        text: "The industry will continue its public romances in plain view. The quieter ones with state capitals continue to identify the projects while the money is still being organized.",
+      },
+      { type: "h2", text: "Why the Market Looks Away" },
+      {
+        type: "p",
+        text: "The material is scattered. It is formatted for government websites. It contains no gossip. It requires the unfashionable belief that a public administrative document can be more valuable than a polished press release.",
+      },
+      {
+        type: "p",
+        text: "Hollywood prefers the myth because the myth is more seductive. The myth is also later. Salespeople who wait for it often arrive after early vendor relationships have begun to harden. Those who read the award lists are looking at a different stage of the same animal: the stage when a state arrangement has unlocked private spending, and that spending has not yet been fully deployed.",
+      },
+      {
+        type: "p",
+        text: "The after-parties are held in Los Angeles and New York. A meaningful share of what pays for them is arranged, discreetly and profitably, in state capitals. Hollywood does not stay loyal to one. It hops. The tax-credit lists are how you can tell where it has been sleeping lately.",
+      },
+      { type: "h2", text: "The Open Secret" },
+      {
+        type: "p",
+        text: "None of this is hidden. States publish the awards because they must, or because they want credit for bringing business in. The information sits in the open, waiting for someone to treat it as what it is: a roster of financed productions entering the period when budgets become real.",
+      },
+      {
+        type: "p",
+        text: "Hollywood will continue its love affairs with the curtain and the capitals alike. It is gifted at both.",
+      },
+      {
+        type: "p",
+        text: "Behind the curtain, the tax-credit lists keep naming the projects that are about to need everything. The glamour is downstream. The award list is the telltale sign that the money has been arranged and is preparing to move.",
+      },
+      {
+        type: "p",
+        text: "Most of the market will keep watching the show. A smaller group will keep reading the evidence of the affairs — and getting there while the money is still in motion.",
+      },
+    ],
+  },
+  {
+    slug: "some-would-call-this-self-abuse",
+    title: "Some Would Call This Self Abuse",
+    description:
+      "All the useful early signals are public. That does not make them free — reading them properly is a discipline, and the DIY detour behaves like full-time labor in a part-time costume.",
+    datePublished: "2026-07-31",
+    readMinutes: 5,
+    heroImage: "images/diy-detour.jpeg",
+    heroImageAlt:
+      "A phone showing a text conversation: an eager dinner invitation answered with \u201CDetoured again, can\u2019t make it, sorry.\u201D",
+    body: [
+      {
+        type: "p",
+        text: "All of the useful early signals in entertainment are public.",
+      },
+      {
+        type: "p",
+        text: "That is the good news. It is also the start of a slow, voluntary decline.",
+      },
+      {
+        type: "p",
+        text: "Tax-credit award lists. Early job postings. Production filings. Entity records. The quieter documents that appear before the trades begin telling the official story. None of this is locked away. A determined person can go find it. Many salespeople tell themselves they will. High achievers are the most exposed. They try hardest. They last longest. Then the work begins to change them.",
+      },
+      { type: "h2", text: "The DIY Route, Without the Romance" },
+      {
+        type: "p",
+        text: "Suppose you do it yourself. You start with the states. Several of the most active incentive jurisdictions publish award information as PDFs, on no fixed schedule worth trusting. Some update weekly. Some update when they remember. Some hide the material three menus deep on websites abandoned by everyone except the statute that requires them. You learn each system\u2019s habits, or you miss the useful names.",
+      },
+      {
+        type: "p",
+        text: "Then the filing databases — each with its own interface, its own search logic, its own talent for withholding. Then the careers pages: studios, streamers, production companies, payroll vendors. Roles appear that can signal a project is moving. Clean feeds mostly do not. Some sources actively resist being read at scale. The clutter does not cooperate. It resists.",
+      },
+      {
+        type: "p",
+        text: "Even with modern tools, the work never becomes elegant. It becomes slightly less impossible. One clean pass across the sources is a project. A clean pass every week is a job. A bad one.",
+      },
+      {
+        type: "p",
+        text: "Free government information has a particular character. It is public in the same way a flooded basement is accessible. You can get in. You may not enjoy what the process does to your disposition.",
+      },
+      { type: "h2", text: "The DIY Detour" },
+      {
+        type: "p",
+        text: "The real damage is not any single broken page. It is recurrence — and redirection.",
+      },
+      {
+        type: "p",
+        text: "A signal three weeks old is no longer a signal. It is the trades with extra steps. The value lives in freshness — in seeing the award, the requisition, or the filing while vendor decisions are still open. That requires the same unglamorous sweep, repeated on a fixed cycle, indefinitely.",
+      },
+      {
+        type: "p",
+        text: "This is the part-time detective problem. The work looks like something a disciplined salesperson could handle on the side. In practice it behaves like full-time labor in a part-time costume. It demands consistency, source knowledge, tolerance for hostile infrastructure, and the willingness to keep going after the novelty has curdled.",
+      },
+      {
+        type: "p",
+        text: "Time is money. Even a reasonably serious DIY effort can wash out on that basis alone. The hours required to keep the pipeline current are hours not spent selling. At a certain point the detective work does not support the quota. It competes with it.",
+      },
+      { type: "h2", text: "What the Detour Costs in the Head" },
+      {
+        type: "p",
+        text: "It also takes the head. Attention spent on data drivel is attention not spent on strategy, sequencing, and the pursuit of hot leads. Every hour of DIY is a detour — away from the buyers and into the machinery that was supposed to serve them. The work expands until some people find themselves upgrading the office to accommodate a second job they were never hired to do.",
+      },
+      {
+        type: "p",
+        text: "Salespeople are paid to be out, talking, moving. They are not paid to spend their best hours waist-deep in PDFs and uncooperative websites, rebuilding the same process because last week\u2019s version has already begun to rot. Some people would love this labor. They are not salespeople. They are a different animal — calmer among broken forms, less offended by institutional mismanagement, happier in the cubicle. The rest become grumpy, then resentful, then interested in chemical solutions or a new line of work.",
+      },
+      { type: "h2", text: "Hollywood Encourages the Fantasy" },
+      {
+        type: "p",
+        text: "The industry\u2019s public face suggests that the important information will eventually arrive in a readable form. It will. Later. As an announcement. After the useful window has narrowed. The early material remains scattered, inconsistently published, and hostile to casual inspection because it was never designed for sales coverage.",
+      },
+      {
+        type: "p",
+        text: "There is no single dashboard. There is no courteous export button. There is only the recurring labor of checking, cleaning, cross-referencing, and deciding what matters before the crowd begins talking about it. Do it long enough yourself and the work stops feeling like research. It starts feeling like a private argument with infrastructure — one you are losing by the week, at your own expense.",
+      },
+      { type: "h2", text: "The Unsentimental Conclusion" },
+      {
+        type: "p",
+        text: "Yes, the signals are public. No, that does not make them free.",
+      },
+      {
+        type: "p",
+        text: "They cost attention, expertise, time, headspace, and mood. Especially time and headspace. The market is full of people who intend to watch the quiet documents themselves. The market is much thinner of people who actually do it on a schedule strict enough to matter without beginning to hate the process, the sources, and eventually the sound of their own keyboards.",
+      },
+      {
+        type: "p",
+        text: "The trades will continue to serve the finished story. The early sources will continue to publish the unfinished one, in inconvenient formats, on inconvenient timelines. Reading them properly is not a side project. It is a discipline. The discipline does not care about your quota, your disposition, or your belief that free information should feel free.",
+      },
+      {
+        type: "p",
+        text: "Most salespeople will keep meaning to get to it. A smaller group will notice that the detective work is the job before the job — and that the DIY detour, taken week after week, is less a strategy than self-abuse with a professional explanation.",
+      },
+    ],
+  },
+  {
+    slug: "hollywoods-lets-make-a-deal-clock",
+    title: "Hollywood\u2019s \u2018Let\u2019s Make a Deal\u2019 Clock",
+    description:
+      "Hollywood runs on two clocks. The general clock is optics — announcements, premieres, coverage. The deal clock is first money, early hires, and the window when vendors are actually chosen.",
+    datePublished: "2026-07-31",
+    readMinutes: 5,
+    heroImage: "images/deal-clock.jpeg",
+    heroImageAlt:
+      "Close-up of a gold luxury wristwatch with a diamond bezel",
+    body: [
+      {
+        type: "p",
+        text: "Hollywood runs on two clocks.",
+      },
+      {
+        type: "p",
+        text: "One is the general clock — announcements, premieres, festivals, press releases issued when the company is ready to be observed. It is the clock of optics. Studios frame a project for the trades; the trades package it for a broad audience; the mainstream picks up the cleaner version and runs it farther still. A major release does not conquer the country because a vendor needed an early buying signal. It gets there because the general clock is excellent at what it is for: attention.",
+      },
+      {
+        type: "p",
+        text: "The other clock is narrower and meaner. Call it the Let\u2019s Make a Deal clock — the first-money clock, the pre-production clock. Financing firms up. Early hires appear. Department heads come on. Vendors are chosen on their heels. The open window is real. It does not remain open as a courtesy. Then it narrows. Then, for most people outside the room, it shuts.",
+      },
+      {
+        type: "p",
+        text: "The production may still enjoy months of coverage on the general clock. The fiery hot period for selling into it lives on the deal clock — earlier, less photogenic, and almost never prepared for mass consumption.",
+      },
+      { type: "h2", text: "The General Clock Is Not the Villain" },
+      {
+        type: "p",
+        text: "The popular trades are not failing when they lead with names and outcomes. They are succeeding at a different business. Most readers want the official story. Supply meets demand. Money follows. There is no conspiracy here. There is audience arithmetic.",
+      },
+      {
+        type: "p",
+        text: "Who is actually buying, and when, is a specialty question — harder to obtain, less glamorous to print, and not large enough to reorganize the mainstream product around. The trades serve the general clock. Fair enough. A vendor who needs the open window is simply shopping in the wrong aisle if that is all they read.",
+      },
+      {
+        type: "p",
+        text: "By the time a project is described as inevitable, a meaningful share of its vendor relationships have often already been formed. What remains is the slower work of entering a structure that has begun to set.",
+      },
+      { type: "h2", text: "The Deal Clock" },
+      {
+        type: "p",
+        text: "The deal clock is pre-production: the first movement of money into machinery.",
+      },
+      {
+        type: "p",
+        text: "Financing firms up. Incentive awards appear. Early requisitions post — the people who will control below-the-line spending and stand up the purchase-order systems. Entities take shape. Infrastructure moves. None of this is designed for storytelling. All of it is designed to get the work paid for and underway.",
+      },
+      {
+        type: "p",
+        text: "These are the markers of the open window. No press kit. No panel. Just the quiet paperwork named in the previous articles: award lists, help-wanted pages, filings, the other early signals that precede the official narrative. Read together, they do not merely identify projects. They identify the hot ones — still in the phase when deals are being made.",
+      },
+      {
+        type: "p",
+        text: "Miss that phase and you are not slightly late. You are calling a different animal. Less urgency. More incumbents. A longer walk to yes.",
+      },
+      { type: "h2", text: "Grapevine Gold and Deal-Clock Fire" },
+      {
+        type: "p",
+        text: "Every vendor knows the other early lead: somebody who knows somebody. Heard it through the grapevine. Wonderful when it arrives. Pure gold, on occasion.",
+      },
+      {
+        type: "p",
+        text: "It also arrives on no schedule, in no reliable volume, and with no duty to continue. You cannot build a quarter on the hope that a friend of a friend is about to text you.",
+      },
+      {
+        type: "p",
+        text: "The deal clock is different. It throws off fiery hot leads in quantity — not as a favor, but because pre-production keeps happening whether or not you were invited. The only question is whether those leads are on your call list or exclusively on someone else\u2019s.",
+      },
+      {
+        type: "p",
+        text: "Why live on the occasional grapevine gift when the first-money clock is producing the same class of opportunity, repeatedly, in public, for anyone organized enough to read it?",
+      },
+      { type: "h2", text: "When You Call Matters More Than Who You Call" },
+      {
+        type: "p",
+        text: "Hollywood adores relationships, reputation, and the long romance of access. Those things matter. They are not a substitute for timing.",
+      },
+      {
+        type: "p",
+        text: "A well-placed call after the window has closed is still a late call. A less decorated vendor who arrives while the machine is being assembled often gets the simpler conversation. The difference is not always brand. It is which clock you were watching.",
+      },
+      {
+        type: "p",
+        text: "The trades will not keep the deal clock for you. They have a larger audience and a better business serving the general one. The public calendar will not keep it for you. Doing it yourself is a second job with poor benefits, as the previous article established.",
+      },
+      {
+        type: "p",
+        text: "And if you have read this far on this site, you are not entirely without a map. There is a media source that reports what time it is on the deal clock. You are already on the premises.",
+      },
+      { type: "h2", text: "The Unsentimental Close" },
+      {
+        type: "p",
+        text: "Hollywood will continue to look like weather and magic from the sidewalk. From the inside, productions still run on sequence: first money, early hires, vendor selection, closure of the easy window. The show goes on long after that window has shut. The coverage goes on longer still — because coverage is what the general audience pays to read.",
+      },
+      {
+        type: "p",
+        text: "Most of the market will keep the general clock. Rational, if the job is to stay fluent in the spectacle.",
+      },
+      {
+        type: "p",
+        text: "A smaller group will put the deal clock on the call list — the pre-production clock, the first-money clock, the one with the fiery hot leads and plenty of them.",
+      },
+      {
+        type: "p",
+        text: "In this business, when you call often matters more than who you call. The deal clock is not hidden because it is secret. It is specialized. Specialized information has always belonged to the people who bother to watch a different dial — and who know what time it actually is.",
+      },
+    ],
+  },
+  {
     slug: "find-film-productions-before-they-buy",
     title: "How to Find Film Productions Before They Start Buying",
     description:

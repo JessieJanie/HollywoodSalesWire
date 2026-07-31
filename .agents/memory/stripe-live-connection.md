@@ -11,4 +11,4 @@ Payment links (all live, annual recurring):
 - Regular team $9,995/yr: https://buy.stripe.com/9B69AN9VFf5hfTPgUf1VK03 (public order page)
 - Founding individual $1,995/yr: https://buy.stripe.com/7sYeV70l5bT5bDz47t1VK04 (server-side only, behind /api/founding-checkout)
 - Founding team $4,995/yr: https://buy.stripe.com/5kQfZb2td4qD373dI31VK05 (server-side only)
-- OLD founding links (bJebIVgk37CP9vravR1VK00 individual, 8x2dR3c3N0an3737jF1VK01 team) were public on the pre-funnel site. **Deactivate them in Stripe once Karilyn republishes** — not before, or live checkout on the currently-published site breaks.
+- OLD founding links (bJebIVgk37CP9vravR1VK00 individual, 8x2dR3c3N0an3737jF1VK01 team) were deactivated in Stripe on July 31, 2026 after the new site went live.
