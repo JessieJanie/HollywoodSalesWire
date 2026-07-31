@@ -347,6 +347,116 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
+    slug: "hollywoods-lets-make-a-deal-clock",
+    title: "Hollywood\u2019s \u2018Let\u2019s Make a Deal\u2019 Clock",
+    description:
+      "Hollywood runs on two clocks. The general clock is optics — announcements, premieres, coverage. The deal clock is first money, early hires, and the window when vendors are actually chosen.",
+    datePublished: "2026-07-31",
+    readMinutes: 5,
+    heroImage: "images/deal-clock.jpeg",
+    heroImageAlt:
+      "Close-up of a gold luxury wristwatch with a diamond bezel",
+    body: [
+      {
+        type: "p",
+        text: "Hollywood runs on two clocks.",
+      },
+      {
+        type: "p",
+        text: "One is the general clock — announcements, premieres, festivals, press releases issued when the company is ready to be observed. It is the clock of optics. Studios frame a project for the trades; the trades package it for a broad audience; the mainstream picks up the cleaner version and runs it farther still. A major release does not conquer the country because a vendor needed an early buying signal. It gets there because the general clock is excellent at what it is for: attention.",
+      },
+      {
+        type: "p",
+        text: "The other clock is narrower and meaner. Call it the Let\u2019s Make a Deal clock — the first-money clock, the pre-production clock. Financing firms up. Early hires appear. Department heads come on. Vendors are chosen on their heels. The open window is real. It does not remain open as a courtesy. Then it narrows. Then, for most people outside the room, it shuts.",
+      },
+      {
+        type: "p",
+        text: "The production may still enjoy months of coverage on the general clock. The fiery hot period for selling into it lives on the deal clock — earlier, less photogenic, and almost never prepared for mass consumption.",
+      },
+      { type: "h2", text: "The General Clock Is Not the Villain" },
+      {
+        type: "p",
+        text: "The popular trades are not failing when they lead with names and outcomes. They are succeeding at a different business. Most readers want the official story. Supply meets demand. Money follows. There is no conspiracy here. There is audience arithmetic.",
+      },
+      {
+        type: "p",
+        text: "Who is actually buying, and when, is a specialty question — harder to obtain, less glamorous to print, and not large enough to reorganize the mainstream product around. The trades serve the general clock. Fair enough. A vendor who needs the open window is simply shopping in the wrong aisle if that is all they read.",
+      },
+      {
+        type: "p",
+        text: "By the time a project is described as inevitable, a meaningful share of its vendor relationships have often already been formed. What remains is the slower work of entering a structure that has begun to set.",
+      },
+      { type: "h2", text: "The Deal Clock" },
+      {
+        type: "p",
+        text: "The deal clock is pre-production: the first movement of money into machinery.",
+      },
+      {
+        type: "p",
+        text: "Financing firms up. Incentive awards appear. Early requisitions post — the people who will control below-the-line spending and stand up the purchase-order systems. Entities take shape. Infrastructure moves. None of this is designed for storytelling. All of it is designed to get the work paid for and underway.",
+      },
+      {
+        type: "p",
+        text: "These are the markers of the open window. No press kit. No panel. Just the quiet paperwork named in the previous articles: award lists, help-wanted pages, filings, the other early signals that precede the official narrative. Read together, they do not merely identify projects. They identify the hot ones — still in the phase when deals are being made.",
+      },
+      {
+        type: "p",
+        text: "Miss that phase and you are not slightly late. You are calling a different animal. Less urgency. More incumbents. A longer walk to yes.",
+      },
+      { type: "h2", text: "Grapevine Gold and Deal-Clock Fire" },
+      {
+        type: "p",
+        text: "Every vendor knows the other early lead: somebody who knows somebody. Heard it through the grapevine. Wonderful when it arrives. Pure gold, on occasion.",
+      },
+      {
+        type: "p",
+        text: "It also arrives on no schedule, in no reliable volume, and with no duty to continue. You cannot build a quarter on the hope that a friend of a friend is about to text you.",
+      },
+      {
+        type: "p",
+        text: "The deal clock is different. It throws off fiery hot leads in quantity — not as a favor, but because pre-production keeps happening whether or not you were invited. The only question is whether those leads are on your call list or exclusively on someone else\u2019s.",
+      },
+      {
+        type: "p",
+        text: "Why live on the occasional grapevine gift when the first-money clock is producing the same class of opportunity, repeatedly, in public, for anyone organized enough to read it?",
+      },
+      { type: "h2", text: "When You Call Matters More Than Who You Call" },
+      {
+        type: "p",
+        text: "Hollywood adores relationships, reputation, and the long romance of access. Those things matter. They are not a substitute for timing.",
+      },
+      {
+        type: "p",
+        text: "A well-placed call after the window has closed is still a late call. A less decorated vendor who arrives while the machine is being assembled often gets the simpler conversation. The difference is not always brand. It is which clock you were watching.",
+      },
+      {
+        type: "p",
+        text: "The trades will not keep the deal clock for you. They have a larger audience and a better business serving the general one. The public calendar will not keep it for you. Doing it yourself is a second job with poor benefits, as the previous article established.",
+      },
+      {
+        type: "p",
+        text: "And if you have read this far on this site, you are not entirely without a map. There is a media source that reports what time it is on the deal clock. You are already on the premises.",
+      },
+      { type: "h2", text: "The Unsentimental Close" },
+      {
+        type: "p",
+        text: "Hollywood will continue to look like weather and magic from the sidewalk. From the inside, productions still run on sequence: first money, early hires, vendor selection, closure of the easy window. The show goes on long after that window has shut. The coverage goes on longer still — because coverage is what the general audience pays to read.",
+      },
+      {
+        type: "p",
+        text: "Most of the market will keep the general clock. Rational, if the job is to stay fluent in the spectacle.",
+      },
+      {
+        type: "p",
+        text: "A smaller group will put the deal clock on the call list — the pre-production clock, the first-money clock, the one with the fiery hot leads and plenty of them.",
+      },
+      {
+        type: "p",
+        text: "In this business, when you call often matters more than who you call. The deal clock is not hidden because it is secret. It is specialized. Specialized information has always belonged to the people who bother to watch a different dial — and who know what time it actually is.",
+      },
+    ],
+  },
+  {
     slug: "find-film-productions-before-they-buy",
     title: "How to Find Film Productions Before They Start Buying",
     description:
