@@ -253,6 +253,100 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
+    slug: "some-would-call-this-self-abuse",
+    title: "Some Would Call This Self Abuse",
+    description:
+      "All the useful early signals are public. That does not make them free — reading them properly is a discipline, and the DIY detour behaves like full-time labor in a part-time costume.",
+    datePublished: "2026-07-31",
+    readMinutes: 5,
+    heroImage: "images/diy-detour.jpeg",
+    heroImageAlt:
+      "A phone showing a text conversation: an eager dinner invitation answered with \u201CDetoured again, can\u2019t make it, sorry.\u201D",
+    body: [
+      {
+        type: "p",
+        text: "All of the useful early signals in entertainment are public.",
+      },
+      {
+        type: "p",
+        text: "That is the good news. It is also the start of a slow, voluntary decline.",
+      },
+      {
+        type: "p",
+        text: "Tax-credit award lists. Early job postings. Production filings. Entity records. The quieter documents that appear before the trades begin telling the official story. None of this is locked away. A determined person can go find it. Many salespeople tell themselves they will. High achievers are the most exposed. They try hardest. They last longest. Then the work begins to change them.",
+      },
+      { type: "h2", text: "The DIY Route, Without the Romance" },
+      {
+        type: "p",
+        text: "Suppose you do it yourself. You start with the states. Several of the most active incentive jurisdictions publish award information as PDFs, on no fixed schedule worth trusting. Some update weekly. Some update when they remember. Some hide the material three menus deep on websites abandoned by everyone except the statute that requires them. You learn each system\u2019s habits, or you miss the useful names.",
+      },
+      {
+        type: "p",
+        text: "Then the filing databases — each with its own interface, its own search logic, its own talent for withholding. Then the careers pages: studios, streamers, production companies, payroll vendors. Roles appear that can signal a project is moving. Clean feeds mostly do not. Some sources actively resist being read at scale. The clutter does not cooperate. It resists.",
+      },
+      {
+        type: "p",
+        text: "Even with modern tools, the work never becomes elegant. It becomes slightly less impossible. One clean pass across the sources is a project. A clean pass every week is a job. A bad one.",
+      },
+      {
+        type: "p",
+        text: "Free government information has a particular character. It is public in the same way a flooded basement is accessible. You can get in. You may not enjoy what the process does to your disposition.",
+      },
+      { type: "h2", text: "The DIY Detour" },
+      {
+        type: "p",
+        text: "The real damage is not any single broken page. It is recurrence — and redirection.",
+      },
+      {
+        type: "p",
+        text: "A signal three weeks old is no longer a signal. It is the trades with extra steps. The value lives in freshness — in seeing the award, the requisition, or the filing while vendor decisions are still open. That requires the same unglamorous sweep, repeated on a fixed cycle, indefinitely.",
+      },
+      {
+        type: "p",
+        text: "This is the part-time detective problem. The work looks like something a disciplined salesperson could handle on the side. In practice it behaves like full-time labor in a part-time costume. It demands consistency, source knowledge, tolerance for hostile infrastructure, and the willingness to keep going after the novelty has curdled.",
+      },
+      {
+        type: "p",
+        text: "Time is money. Even a reasonably serious DIY effort can wash out on that basis alone. The hours required to keep the pipeline current are hours not spent selling. At a certain point the detective work does not support the quota. It competes with it.",
+      },
+      { type: "h2", text: "What the Detour Costs in the Head" },
+      {
+        type: "p",
+        text: "It also takes the head. Attention spent on data drivel is attention not spent on strategy, sequencing, and the pursuit of hot leads. Every hour of DIY is a detour — away from the buyers and into the machinery that was supposed to serve them. The work expands until some people find themselves upgrading the office to accommodate a second job they were never hired to do.",
+      },
+      {
+        type: "p",
+        text: "Salespeople are paid to be out, talking, moving. They are not paid to spend their best hours waist-deep in PDFs and uncooperative websites, rebuilding the same process because last week\u2019s version has already begun to rot. Some people would love this labor. They are not salespeople. They are a different animal — calmer among broken forms, less offended by institutional mismanagement, happier in the cubicle. The rest become grumpy, then resentful, then interested in chemical solutions or a new line of work.",
+      },
+      { type: "h2", text: "Hollywood Encourages the Fantasy" },
+      {
+        type: "p",
+        text: "The industry\u2019s public face suggests that the important information will eventually arrive in a readable form. It will. Later. As an announcement. After the useful window has narrowed. The early material remains scattered, inconsistently published, and hostile to casual inspection because it was never designed for sales coverage.",
+      },
+      {
+        type: "p",
+        text: "There is no single dashboard. There is no courteous export button. There is only the recurring labor of checking, cleaning, cross-referencing, and deciding what matters before the crowd begins talking about it. Do it long enough yourself and the work stops feeling like research. It starts feeling like a private argument with infrastructure — one you are losing by the week, at your own expense.",
+      },
+      { type: "h2", text: "The Unsentimental Conclusion" },
+      {
+        type: "p",
+        text: "Yes, the signals are public. No, that does not make them free.",
+      },
+      {
+        type: "p",
+        text: "They cost attention, expertise, time, headspace, and mood. Especially time and headspace. The market is full of people who intend to watch the quiet documents themselves. The market is much thinner of people who actually do it on a schedule strict enough to matter without beginning to hate the process, the sources, and eventually the sound of their own keyboards.",
+      },
+      {
+        type: "p",
+        text: "The trades will continue to serve the finished story. The early sources will continue to publish the unfinished one, in inconvenient formats, on inconvenient timelines. Reading them properly is not a side project. It is a discipline. The discipline does not care about your quota, your disposition, or your belief that free information should feel free.",
+      },
+      {
+        type: "p",
+        text: "Most salespeople will keep meaning to get to it. A smaller group will notice that the detective work is the job before the job — and that the DIY detour, taken week after week, is less a strategy than self-abuse with a professional explanation.",
+      },
+    ],
+  },
+  {
     slug: "find-film-productions-before-they-buy",
     title: "How to Find Film Productions Before They Start Buying",
     description:
