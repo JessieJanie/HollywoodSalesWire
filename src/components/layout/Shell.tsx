@@ -14,7 +14,9 @@ export function Header() {
           </span>
         </Link>
         <div className="flex items-center gap-4 sm:gap-6 text-sm font-medium text-muted-foreground">
-          <Link href="/support" className="hover:text-foreground transition-colors">Support</Link>
+          <Link href="/" className="hidden sm:inline hover:text-foreground transition-colors" data-testid="link-nav-briefing">The Briefing</Link>
+          <Link href="/articles" className="hover:text-foreground transition-colors" data-testid="link-nav-articles">Articles</Link>
+          <Link href="/support" className="hidden sm:inline hover:text-foreground transition-colors">Support</Link>
           <Link
             href="/order"
             className="bg-primary text-primary-foreground px-4 py-2 font-medium hover:opacity-90 transition-opacity"
