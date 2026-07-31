@@ -96,6 +96,78 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
+    slug: "the-wizards-of-hollywood-behind-the-curtains",
+    title: "The Wizards of Hollywood Behind the Curtains",
+    description:
+      "Hollywood manufactures glamour after the fact. The money that pays for it is first authorized in quieter documents — the help-wanted page among them.",
+    datePublished: "2026-07-31",
+    readMinutes: 4,
+    heroImage: "images/wizards-curtain.jpeg",
+    heroImageAlt:
+      "A red theater curtain parted slightly, with a bright spotlight shining through from the stage behind it",
+    body: [
+      {
+        type: "p",
+        text: "Hollywood is a machine for manufacturing glamour after the fact.",
+      },
+      {
+        type: "p",
+        text: "By the time the premieres arrive, the clothes are perfect, the quotes are polished, and the trades are full of people explaining how inevitable it all was. The audience sees the finished surface: the stars on the steps, the flashbulbs, the official myth. What they do not see is the earlier and less photogenic stage, when the money that will eventually pay for all that glamour is first authorized and the first practical people are hired to spend it.",
+      },
+      {
+        type: "p",
+        text: "That stage does not appear on the red carpet. It appears in quieter places — among them, the help-wanted page.",
+      },
+      { type: "h2", text: "The Story Is Written Before the Story" },
+      {
+        type: "p",
+        text: "A press release is literature. A job posting is closer to a wiring instruction.",
+      },
+      {
+        type: "p",
+        text: "Before the project becomes a narrative object — before it has a tone, a theme, or a publicist prepared to call it \u201Cintimate yet epic\u201D — it needs a unit production manager, a production accountant, a coordinator, a few department heads. These are not decorative roles. They are the people who open the accounts, approve the purchase orders, and begin turning a financed project into an actual operation. When those postings appear, the big money that will later create the glamour has already begun to move.",
+      },
+      {
+        type: "p",
+        text: "The industry prefers not to dwell on this. It is more flattering to discuss attachments and creative vision than to notice that one of the first real signals of life is often a recruiting ad.",
+      },
+      { type: "h2", text: "Glamour Is Expensive. Someone Has to Start Spending." },
+      {
+        type: "p",
+        text: "The finished product is designed to look effortless. The gowns, the lighting, the interviews in which everyone pretends the whole enterprise floated into existence on pure talent and excellent taste. In reality it is assembled by people hired early, quietly, and for the unromantic purpose of making the machine run.",
+      },
+      {
+        type: "p",
+        text: "A help-wanted page does not care about prestige. It records that a budget line has been approved and that a human being is required to execute it. That is a more honest document than most of what circulates under the heading of industry news. One is composed for effect. The other is a purchase order in a different font.",
+      },
+      {
+        type: "p",
+        text: "Help-wanted ads are only one of several such precursors. Early staffing, incentive activity, entity formation, and the other unglamorous indicators that precede a public narrative do not each tell the whole story. Together, they begin to flush out where the biggest spends are preparing to happen. The market continues to stare at the curtain. The quieter documents identify the room where the money is being organized.",
+      },
+      {
+        type: "p",
+        text: "Vendors who wait for the glamorous version of events often arrive after these first practical decisions have already been made. The advantage sits with whoever noticed the earlier and less elegant paperwork.",
+      },
+      { type: "h2", text: "The Curtain Is the Entertaining Part" },
+      {
+        type: "p",
+        text: "Hollywood is very skilled at directing attention toward the curtain. The premieres. The panels. The official story. This material is not worthless. It is simply late. By the time the curtain is being discussed in public, the wizards behind it have frequently already been hired and have started doing the work that makes the curtain worth looking at.",
+      },
+      {
+        type: "p",
+        text: "The trades will continue to report the finished narrative. That is their function. A salesperson has a narrower interest: determine when the spending mechanism has been switched on, and arrive while the people switching it on are still reachable.",
+      },
+      {
+        type: "p",
+        text: "Most of the market remains hypnotized by the show. A smaller group watches the quieter documents — the help-wanted page among them — where the show is first staffed and the money first becomes real.",
+      },
+      {
+        type: "p",
+        text: "The glamour is the product. The requisition is one of the places the product begins. The rest of the early signals simply confirm where the biggest checks are getting ready to move.",
+      },
+    ],
+  },
+  {
     slug: "find-film-productions-before-they-buy",
     title: "How to Find Film Productions Before They Start Buying",
     description:
