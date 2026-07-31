@@ -168,6 +168,91 @@ export const ARTICLES: Article[] = [
     ],
   },
   {
+    slug: "hollywoods-love-affair-with-sacramento",
+    title: "Hollywood's Love Affair with Sacramento",
+    description:
+      "Hollywood hops from capital to capital in exchange for money. Tax-credit award lists are the evidence of the affairs — a roster of financed productions about to need everything.",
+    datePublished: "2026-07-31",
+    readMinutes: 4,
+    heroImage: "images/sacramento-affair.jpeg",
+    heroImageAlt:
+      "A champagne flute and hundred-dollar bills on a table in front of a state capitol building at night",
+    body: [
+      {
+        type: "p",
+        text: "Hollywood likes to pretend it is self-created.",
+      },
+      {
+        type: "p",
+        text: "It is not. It is a bed hopper.",
+      },
+      {
+        type: "p",
+        text: "It moves from capital to capital — Sacramento, Atlanta, Albany, and wherever else the terms look attractive — forming temporary arrangements in exchange for money. The public story is art, vision, and inevitable success. The private story is simpler: large productions are expensive, and states are willing to pay for the privilege of hosting them. Tax credits are the telltale sign. When the awards are published, they identify the projects that have secured a piece of their financing and have not yet finished spending it.",
+      },
+      {
+        type: "p",
+        text: "Most vendors treat these lists as administrative weather. They are closer to a map of active affairs.",
+      },
+      { type: "h2", text: "Tax Credits Are Not Cute. They Are the Evidence." },
+      {
+        type: "p",
+        text: "A tax credit is not a creative announcement. It is the receipt from the arrangement. The state puts real economic weight behind a production if that production puts real money into local labor, vendors, locations, and services. Before the spending fully begins, the award itself is often made public.",
+      },
+      {
+        type: "p",
+        text: "No gowns. No panel about the emotional journey of the material. Just a list. On that list are productions that have closed an important part of the deal and are now positioned to turn financing into purchase orders.",
+      },
+      {
+        type: "p",
+        text: "By the time the same project is being celebrated in the trades, a portion of those vendor decisions have frequently already been made. The award list appears earlier. It is quieter. It is also the moment the money becomes visible.",
+      },
+      { type: "h2", text: "Romance Prefers the Curtain. Money Prefers the File." },
+      {
+        type: "p",
+        text: "Hollywood is superb at directing attention toward the finished surface. The cast. The tone. The official explanation of why this project matters. Useful, in its way. Late, for anyone trying to sell into the production itself.",
+      },
+      {
+        type: "p",
+        text: "Tax-credit awards sit further upstream. They are the evidence of the arrangement that makes the glamour possible — and the arrangement is where the checks get authorized. A production that has secured a meaningful credit has often secured a material piece of its budget. What follows is the consequential business of turning that budget into trucks, stages, insurance, post, and every other line item the finished myth depends on.",
+      },
+      {
+        type: "p",
+        text: "The industry will continue its public romances in plain view. The quieter ones with state capitals continue to identify the projects while the money is still being organized.",
+      },
+      { type: "h2", text: "Why the Market Looks Away" },
+      {
+        type: "p",
+        text: "The material is scattered. It is formatted for government websites. It contains no gossip. It requires the unfashionable belief that a public administrative document can be more valuable than a polished press release.",
+      },
+      {
+        type: "p",
+        text: "Hollywood prefers the myth because the myth is more seductive. The myth is also later. Salespeople who wait for it often arrive after early vendor relationships have begun to harden. Those who read the award lists are looking at a different stage of the same animal: the stage when a state arrangement has unlocked private spending, and that spending has not yet been fully deployed.",
+      },
+      {
+        type: "p",
+        text: "The after-parties are held in Los Angeles and New York. A meaningful share of what pays for them is arranged, discreetly and profitably, in state capitals. Hollywood does not stay loyal to one. It hops. The tax-credit lists are how you can tell where it has been sleeping lately.",
+      },
+      { type: "h2", text: "The Open Secret" },
+      {
+        type: "p",
+        text: "None of this is hidden. States publish the awards because they must, or because they want credit for bringing business in. The information sits in the open, waiting for someone to treat it as what it is: a roster of financed productions entering the period when budgets become real.",
+      },
+      {
+        type: "p",
+        text: "Hollywood will continue its love affairs with the curtain and the capitals alike. It is gifted at both.",
+      },
+      {
+        type: "p",
+        text: "Behind the curtain, the tax-credit lists keep naming the projects that are about to need everything. The glamour is downstream. The award list is the telltale sign that the money has been arranged and is preparing to move.",
+      },
+      {
+        type: "p",
+        text: "Most of the market will keep watching the show. A smaller group will keep reading the evidence of the affairs — and getting there while the money is still in motion.",
+      },
+    ],
+  },
+  {
     slug: "find-film-productions-before-they-buy",
     title: "How to Find Film Productions Before They Start Buying",
     description:
