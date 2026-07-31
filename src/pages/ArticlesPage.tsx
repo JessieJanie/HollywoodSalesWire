@@ -27,6 +27,14 @@ export default function ArticlesPage() {
               data-testid={`link-article-${article.slug}`}
             >
               <article>
+                {article.heroImage && (
+                  <img
+                    src={`${import.meta.env.BASE_URL}${article.heroImage}`}
+                    alt={article.heroImageAlt ?? ""}
+                    className="w-full mb-4 border border-border"
+                    data-testid={`img-article-thumb-${article.slug}`}
+                  />
+                )}
                 <div className="font-mono-data text-muted-foreground mb-2">
                   {new Date(article.datePublished + "T12:00:00").toLocaleDateString("en-US", {
                     year: "numeric",

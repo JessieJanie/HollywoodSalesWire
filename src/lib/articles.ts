@@ -11,10 +11,90 @@ export interface Article {
   description: string;
   datePublished: string; // ISO date
   readMinutes: number;
+  /** Path under public/, relative to the site base (e.g. "images/foo.jpeg") */
+  heroImage?: string;
+  heroImageAlt?: string;
   body: ArticleBlock[];
 }
 
 export const ARTICLES: Article[] = [
+  {
+    slug: "hollywoods-comfortably-numb-herd-mentality",
+    title: "Hollywood's Comfortably Numb Herd Mentality",
+    description:
+      "Everyone reads the same trades and reaches the same conclusions at the same moment. The advantage sits with whoever watches what precedes the announcements.",
+    datePublished: "2026-07-31",
+    readMinutes: 4,
+    heroImage: "images/trades-herd.jpeg",
+    heroImageAlt:
+      "A stack of Hollywood trade publications — Deadline, Variety, and The Hollywood Reporter",
+    body: [
+      {
+        type: "p",
+        text: "Most vendors selling into entertainment read the same things everyone else reads.",
+      },
+      {
+        type: "p",
+        text: "Variety. The Hollywood Reporter. Deadline. A daily procession of announcements, greenlights, deals, and carefully laundered executive statements. It feels like staying informed. In practice it is closer to watching an index fund. By the time the information appears in the trades, the meaningful movement has often already occurred. You are not early. You are reading a polished summary of where the crowd has already been.",
+      },
+      {
+        type: "p",
+        text: "This is the comfortably numb herd mentality of the business. Everyone consumes the same after-the-fact material, reaches roughly the same conclusions, and then competes for whatever attention is left. It is a very expensive way to feel current.",
+      },
+      { type: "h2", text: "After-the-Fact Has a Stale Flavor" },
+      {
+        type: "p",
+        text: "A press release is not a signal. It is a controlled document issued when the company is finally ready for the rest of the world to know. The financing has been arranged. The key decisions have been made. The internal process has already moved. What reaches the trades is the public version of events that were, until recently, private.",
+      },
+      {
+        type: "p",
+        text: "Call it trade slop. It is served regularly, it is plentiful, and by the time it reaches the table the real cooking is mostly finished. Reading it produces a mild and reliable sensation of being up to date — the same sensation available to anyone checking which names have already risen in the Nasdaq. The information is real. It is also late.",
+      },
+      {
+        type: "p",
+        text: "Vendors who build their outreach around what has just been announced often discover they are entering conversations after the important choices have been made. The production has already begun staffing. The preferred vendors are already in place. What remains is the slower, more crowded work of trying to matter after the useful moment has passed.",
+      },
+      { type: "h2", text: "Following the Crowd Is Not Leading It" },
+      {
+        type: "p",
+        text: "There is a long and respectable tradition of relationship-driven selling in entertainment. Stay visible. Take the meetings. Cultivate people over time. Eventually something may come of it. This approach is not wrong. It is simply incomplete.",
+      },
+      {
+        type: "p",
+        text: "The difficulty is that most of the market is doing some version of the same thing, guided by the same announcements, reacting to the same stories at roughly the same moment. When the trades report that a project is moving, a small herd of vendors often begins moving with it. The result is familiar: more competition, longer cycles, and a great deal of activity that feels industrious without being early.",
+      },
+      {
+        type: "p",
+        text: "Getting ahead of the crowd requires looking at different material. Not the finished announcement, but the quieter evidence that something is forming before anyone is ready to issue a press release.",
+      },
+      { type: "h2", text: "Getting Into the Kitchen Before the Trade Slop Is Served" },
+      {
+        type: "p",
+        text: "Before the announcement there is usually a stretch of less glamorous activity. Financing is secured. Incentive applications are filed and awarded. Production entities take shape. Early hiring begins. Infrastructure starts to appear. None of this is designed for public storytelling. It is designed to get the work underway.",
+      },
+      {
+        type: "p",
+        text: "Most of it is public in one form or another. It is simply not packaged for easy consumption, and it is rarely what the trades lead with. The trades have a different job. They report what the industry is prepared to say about itself. A salesperson has a narrower one: determine where money is about to move, and arrive while the decisions are still open.",
+      },
+      {
+        type: "p",
+        text: "These are not the same activity. Confusing them is common. It is also one of the more reliable ways to stay busy without getting ahead.",
+      },
+      { type: "h2", text: "The Expensive Comfort of Staying Current" },
+      {
+        type: "p",
+        text: "It is easy to mistake familiarity with the daily flow of entertainment news for actual sales advantage. The two overlap less than they appear to. One keeps you conversant at lunch. The other determines whether you are calling while a production is still assembling its vendors or after it has largely finished doing so.",
+      },
+      {
+        type: "p",
+        text: "Cultivating relationships remains useful. Reading the trades remains useful for context. Neither substitutes for seeing the earlier signals that the rest of the market prefers to skip. The herd will always have the announcements. The advantage sits with whoever is watching what precedes them.",
+      },
+      {
+        type: "p",
+        text: "Trade slop will always be available. It arrives after the heat is off the stove. The only real question is whether you were in the kitchen earlier — or comfortably numb with everyone else, waiting to be served.",
+      },
+    ],
+  },
   {
     slug: "find-film-productions-before-they-buy",
     title: "How to Find Film Productions Before They Start Buying",

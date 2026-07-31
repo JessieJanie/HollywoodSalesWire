@@ -49,6 +49,15 @@ export default function ArticlePage() {
           </h1>
         </div>
 
+        {article.heroImage && (
+          <img
+            src={`${import.meta.env.BASE_URL}${article.heroImage}`}
+            alt={article.heroImageAlt ?? ""}
+            className="w-full mb-10 border border-border"
+            data-testid="img-article-hero"
+          />
+        )}
+
         <article className="prose prose-lg prose-zinc max-w-none prose-p:leading-[1.8] prose-headings:font-serif prose-headings:font-bold prose-headings:tracking-tight prose-strong:font-bold prose-strong:text-foreground">
           {article.body.map((block, i) =>
             block.type === "h2" ? (
