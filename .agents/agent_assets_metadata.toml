@@ -24,3 +24,10 @@ id = "0Urte1wCqeYZsCmYGNJxs"
 uri = "file://attached_assets/logos/logo-masthead-green.png"
 type = "image"
 title = "Logo C — masthead style, green (newspaper look)"
+
+[[outputs]]
+id = "d47P5XwnActGGOdhT3LQj"
+uri = "file://docs/film-incentive-pattern-test-memo.md"
+type = "text"
+title = "Book test findings memo"
+description = "Three pattern questions run against California's full film-incentive archive (907 projects, 2009–2026) — what surprised, what didn't, and a go recommendation."

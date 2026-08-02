@@ -30,5 +30,8 @@ Caveats given: moat is connecting-not-collecting (same as HSW's moat); raw-page 
 ## Structure sketch floated
 Part 1 — the seduction (why every state wants Hollywood; bidding wars; pay-twice math as fascinating fact). Part 2 — the players (how majors work the system; the unused indie carve-outs). Part 3 — follow the money yourself (public records, the method — Field Guide DNA, ending at HSW's doorstep).
 
-## Agreed next step (when she's ready to move)
+## Data-spine test (DONE Aug 2, 2026 — verdict: GO)
+Ran 3 pattern questions on CA's full archive (907 projects, FY2009-10→2025-26). Findings memo: `docs/film-incentive-pattern-test-memo.md`. Surprises: 86% of company names appear once but take only 26% of dollars (concealment is naming, not fragmentation — HBO's shows collect $183M as "Cooler Waters Productions, LLC"); indie share sat at/below the legal set-aside 2015-2021 (2.7% low in 2020-21) then stampeded post-expansion; avg award $2.1M→$9.0M, credit-per-hire tripled, 34/175 projects "Untitled" in 2025-26 vs 0 in 2015-16; largest-ever award $48M to "Unt. DET Project 13". Next chapter test: same questions on NY ESD quarterly PDFs.
+
+## Original agreed next step (context)
 Run 2–3 "pattern questions" against state incentive archives to test whether the data yields genuine surprises. Surprises = chapter one + press hook. No surprises = a day spent, not a year. Bestseller strategy: own a niche Amazon category durably rather than chase a spike; chapters double as Field Guide articles for site SEO; numbers must be literally true and sourced (same rule as the Wire).
