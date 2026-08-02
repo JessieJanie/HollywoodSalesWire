@@ -46,7 +46,8 @@ router.post("/publisher/wire/run", async (req, res): Promise<void> => {
     res.status(401).json({ error: "Invalid key" });
     return;
   }
-  const result = await runWeeklyResearch("manual");
+  const weekKey = typeof req.body?.weekKey === "string" ? req.body.weekKey : undefined;
+  const result = await runWeeklyResearch("manual", weekKey);
   res.status(result.started ? 202 : 409).json(
     result.started ? { status: "started" } : { error: result.reason ?? "Could not start." },
   );

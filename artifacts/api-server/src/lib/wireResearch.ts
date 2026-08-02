@@ -170,9 +170,21 @@ function safeExploreUrl(raw: string, pages: FetchedPage[]): boolean {
 
 let runInFlight = false;
 
-export async function runWeeklyResearch(trigger: "schedule" | "manual"): Promise<{ started: boolean; reason?: string }> {
+/** Week key for NEXT week's Monday (used to research the upcoming Wire early). */
+export function nextWeekKey(now = new Date()): string {
+  return currentWeekKey(new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000));
+}
+
+export async function runWeeklyResearch(
+  trigger: "schedule" | "manual",
+  weekKeyOverride?: string,
+): Promise<{ started: boolean; reason?: string }> {
   if (runInFlight) return { started: false, reason: "A run is already in progress." };
-  const weekKey = currentWeekKey();
+  // Only the current or next week may be targeted — the override exists so a
+  // manual weekend run can prepare Monday's Wire early (the unique week_key
+  // then makes Monday's scheduled run a no-op; nothing is bought twice).
+  const weekKey =
+    weekKeyOverride && weekKeyOverride === nextWeekKey() ? weekKeyOverride : currentWeekKey();
 
   // Atomic claim: the unique index on week_key is the distributed lock.
   const inserted = await db
