@@ -101,12 +101,24 @@ router.post("/subscribe", async (req, res): Promise<void> => {
     });
   }
 
-  // Schedule the Founding-Offer series: starts day 7, deadline day 14.
+  // Schedule the Founding-Offer series: starts day 14 (after 1–2 Free
+  // Editions), then one email every 7 days; deadline day 42.
+  // Resend only accepts scheduled_at up to ~30 days out, so later steps are
+  // stored as "pending" and handed to Resend by the scheduler when in range.
   const offerUrl = `${SITE_URL}/founding-offer?token=${token}`;
   const label = deadlineLabel(subscriber.createdAt);
   const now = Date.now();
   for (const step of SEQUENCE) {
     const scheduledAt = new Date(now + step.dayOffset * 24 * 60 * 60 * 1000);
+    if (step.dayOffset > 28) {
+      await db.insert(sequenceEmailsTable).values({
+        subscriberId: subscriber.id,
+        step: step.step,
+        scheduledAt,
+        status: "pending",
+      });
+      continue;
+    }
     try {
       const sent = await resendRequest<{ id: string }>("/emails", {
         method: "POST",
@@ -173,6 +185,15 @@ router.get("/unsubscribe", async (req, res): Promise<void> => {
     .where(eq(sequenceEmailsTable.subscriberId, subscriber.id));
 
   for (const item of scheduled) {
+    if (item.status === "pending" || item.status === "scheduling") {
+      // Not yet (fully) handed to Resend. Marking it canceled here also
+      // signals an in-flight scheduler handoff to cancel its Resend email.
+      await db
+        .update(sequenceEmailsTable)
+        .set({ status: "canceled" })
+        .where(eq(sequenceEmailsTable.id, item.id));
+      continue;
+    }
     if (item.status === "scheduled" && item.resendEmailId) {
       try {
         await resendRequest(`/emails/${item.resendEmailId}/cancel`, { method: "POST" });

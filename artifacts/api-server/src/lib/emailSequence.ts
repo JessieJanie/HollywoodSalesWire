@@ -4,10 +4,11 @@
  * 1. WELCOME_EMAIL — sent immediately on signup.
  * 2. SEQUENCE — the publisher's Founding-Offer series (Draft 5, verbatim from
  *    marketing/founding-offer-email-series-draft5.txt), evergreen-adapted:
- *    starts 7 days after signup, cadence matches her Tue/Wed/Thu/Sat/Tue
- *    rhythm (day offsets 7, 8, 9, 11, 14), and every calendar-date reference
- *    ("Tuesday, August 4") is replaced with the subscriber's own deadline —
- *    midnight Eastern at the end of day 14. Each email links to the private
+ *    starts 14 days after signup (so prospects receive 1–2 Free Editions
+ *    before any selling — publisher's Aug 2026 decision), then one email every
+ *    7 days (day offsets 14, 21, 28, 35, 42), and every calendar-date
+ *    reference ("Tuesday, August 4") is replaced with the subscriber's own
+ *    deadline — midnight Eastern at the end of day 42. Each email links to the
  *    /founding-offer page, which enforces that deadline for real.
  *
  * COPY IS PUBLISHER-LOCKED. Do not rewrite claims, pricing, or phrasing.
@@ -79,7 +80,7 @@ ${sig}`,
 export const SEQUENCE: SequenceStep[] = [
   {
     step: 1,
-    dayOffset: 7,
+    dayOffset: 14,
     subject: "The lead list your competitors bought is already dead",
     body: ({ unsubscribeUrl, offerUrl, deadlineLabel }) =>
       wrap(
@@ -94,7 +95,7 @@ ${p("Meanwhile the hot list — who got money this month and has to spend it —
 ${p("That's the entire idea behind Hollywood Sales Wire: I read the filings, the award lists, the requisitions, and the money flows every week, and every Tuesday you get the names — who just got funded, what they're about to buy, and when the window closes.")}
 ${p("Cold leads are a commodity. Hot leads are an edge.")}
 ${p(`The offer is live right now: subscribe by midnight Eastern on ${deadlineLabel} — or better, today — and you're a Founding Member at $38 a week instead of the regular $77, locked in for as long as you stay. Three Special Reports arrive free and immediately, with your first issue of the Wire this coming Tuesday.`)}
-${p("I'll make the full case over the next few days. But if you already know what a two-week-old award list is worth to your pipeline, there's no reason to wait:")}
+${p("I'll make the full case over the next few weeks. But if you already know what a two-week-old award list is worth to your pipeline, there's no reason to wait:")}
 ${cta("Become a Founding Member — $38/week", utm(offerUrl, 1))}
 ${sig}
 ${p("P.S. One question worth sitting with: when a state publishes a list of 170 funded productions worth $6.6 billion, who in your company is assigned to call those productions first? If the answer is &ldquo;nobody,&rdquo; that's fixable — by " + deadlineLabel + ".")}`,
@@ -103,7 +104,7 @@ ${p("P.S. One question worth sitting with: when a state publishes a list of 170 
   },
   {
     step: 2,
-    dayOffset: 8,
+    dayOffset: 21,
     subject: "Why your close rate is a math problem, not a talent problem",
     body: ({ unsubscribeUrl, offerUrl, deadlineLabel }) =>
       wrap(
@@ -126,14 +127,14 @@ ${p("And to hand you the system itself, three Special Reports come free with a F
 </ul>
 ${p(`Subscribe by ${deadlineLabel} — or right now — and all three are yours free, immediately, along with the Founding Member rate: $38 a week ($1,995 a year) instead of $77 ($3,995), locked for as long as you stay.`)}
 ${cta("Become a Founding Member — $38/week", utm(offerUrl, 2))}
-${p("Tomorrow I'll show you the method working on a real example.")}
+${p("Next week I'll show you the method working on a real example.")}
 ${sig}`,
         unsubscribeUrl,
       ),
   },
   {
     step: 3,
-    dayOffset: 9,
+    dayOffset: 28,
     subject: "A job posting told us a nine-figure budget had landed",
     body: ({ unsubscribeUrl, offerUrl, deadlineLabel }) =>
       wrap(
@@ -164,7 +165,7 @@ ${sig}`,
   },
   {
     step: 4,
-    dayOffset: 11,
+    dayOffset: 35,
     subject: "Everything a Founding Member gets (and the guarantee that removes the risk)",
     body: ({ unsubscribeUrl, offerUrl, deadlineLabel }) =>
       wrap(
@@ -196,7 +197,7 @@ ${p("P.S. If you're not the person who owns the sales number, forward this to wh
   },
   {
     step: 5,
-    dayOffset: 14,
+    dayOffset: 42,
     subject: "Midnight tonight: the Founding Member rate goes away",
     body: ({ unsubscribeUrl, offerUrl }) =>
       wrap(
@@ -214,7 +215,7 @@ ${p("It won't be the reps working the rented lists. Those names have been pitche
 ${p("The math one last time: $38 a week, against $1,985 in reports that are yours to keep no matter what, against a 90-day everything-to-keep guarantee, against competitors charging $15,000 for names that were cold — and worn out — before they were sold.")}
 ${p("You risk nothing. The deadline is real. It's tonight.")}
 ${cta("Become a Founding Member before midnight — $38/week", utm(offerUrl, 5))}
-${p("Whatever you decide, thank you for reading this far. If the Wire isn't for you, I hope the last five days at least changed how you look at a careers page.")}
+${p("Whatever you decide, thank you for reading this far. If the Wire isn't for you, I hope these last several weeks at least changed how you look at a careers page.")}
 ${sig}
 ${p("P.S. Midnight Eastern means midnight Eastern — your offer page switches to the $77 rate at 12:01. If you're reading this after hours, check the page: if the $38 rate is still showing, you made it.")}`,
         unsubscribeUrl,

@@ -1,11 +1,12 @@
 /**
  * Each newsletter subscriber's founding offer ends at midnight Eastern at the
- * end of the 14th day after signup — the same day email 5 ("deadline day")
- * lands. The /founding-offer page enforces this for real.
+ * end of the 42nd day after signup — the same day email 5 ("deadline day")
+ * lands. (Series starts day 14 so prospects get 1–2 Free Editions first, then
+ * one email a week.) The /founding-offer page enforces this for real.
  */
 
 const ET = "America/New_York";
-export const OFFER_DAYS = 14;
+export const OFFER_DAYS = 42;
 
 function etParts(d: Date): { y: number; m: number; d: number; hour: number } {
   const parts = new Intl.DateTimeFormat("en-US", {

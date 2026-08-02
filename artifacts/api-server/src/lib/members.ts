@@ -156,6 +156,15 @@ export async function handleStripeEvent(event: {
         .from(sequenceEmailsTable)
         .where(eq(sequenceEmailsTable.subscriberId, subscriber.id));
       for (const item of scheduled) {
+        if (item.status === "pending" || item.status === "scheduling") {
+          // Not yet (fully) handed to Resend. Marking it canceled here also
+          // signals an in-flight scheduler handoff to cancel its Resend email.
+          await db
+            .update(sequenceEmailsTable)
+            .set({ status: "canceled" })
+            .where(eq(sequenceEmailsTable.id, item.id));
+          continue;
+        }
         if (item.status === "scheduled" && item.resendEmailId) {
           try {
             await resendRequest(`/emails/${item.resendEmailId}/cancel`, { method: "POST" });
