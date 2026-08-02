@@ -5,6 +5,7 @@ import {
   usePublisherSend,
   usePublisherWireLatest,
   usePublisherWireRun,
+  usePublisherPaidSend,
 } from "@workspace/api-client-react";
 import { Loader2, Send, Sparkles, CheckCircle2, RefreshCw, Copy, ExternalLink } from "lucide-react";
 
@@ -20,12 +21,16 @@ export default function PublisherPage() {
   );
   const draft = usePublisherDraft();
   const send = usePublisherSend();
+  const paidSend = usePublisherPaidSend();
 
   const [wireText, setWireText] = useState("");
   const [subject, setSubject] = useState("");
   const [bodyText, setBodyText] = useState("");
   const [sentCount, setSentCount] = useState<number | null>(null);
   const [copied, setCopied] = useState(false);
+  const [paidSubject, setPaidSubject] = useState("");
+  const [paidBody, setPaidBody] = useState("");
+  const [paidSentCount, setPaidSentCount] = useState<number | null>(null);
 
   const wire = usePublisherWireLatest(
     { key },
@@ -59,6 +64,15 @@ export default function PublisherPage() {
         },
       },
     );
+
+  const handlePaidSend = () => {
+    const n = status.data?.memberCount ?? 0;
+    if (!window.confirm(`Send the full paid Wire "${paidSubject}" to ${n} member${n === 1 ? "" : "s"} now? This can only be done once per week.`)) return;
+    paidSend.mutate(
+      { data: { key, subject: paidSubject, bodyText: paidBody } },
+      { onSuccess: (r) => { setPaidSentCount(r.sent); status.refetch(); } },
+    );
+  };
 
   const handleSend = () => {
     const n = status.data?.subscriberCount ?? 0;
@@ -156,6 +170,17 @@ export default function PublisherPage() {
                 >
                   <Sparkles className="w-4 h-4" /> Load the Free Edition draft below
                 </button>
+                <button
+                  onClick={() => {
+                    setPaidBody(wire.data?.wireMarkdown ?? "");
+                    if (wire.data?.weekKey) setPaidSubject(`Hollywood Sales Wire — Week of ${wire.data.weekKey}`);
+                    setPaidSentCount(null);
+                  }}
+                  className="inline-flex items-center gap-2 border border-border px-4 py-2 text-sm font-medium hover:bg-muted"
+                  data-testid="button-load-paid-wire"
+                >
+                  <Send className="w-4 h-4" /> Load as this week&rsquo;s paid Wire
+                </button>
               </div>
               {Array.isArray(wire.data.sources) && wire.data.sources.length > 0 && (
                 <details className="mt-4">
@@ -179,6 +204,72 @@ export default function PublisherPage() {
                     ))}
                   </ul>
                 </details>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* Paid Wire send */}
+        <div className="bg-card border border-border p-6 mb-6 shadow-sm">
+          <h2 className="font-serif font-bold text-lg mb-2">Send the paid Wire to members</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            {status.data
+              ? <>You have <strong>{status.data.memberCount}</strong> paying member{status.data.memberCount === 1 ? "" : "s"}.{status.data.lastPaidSubject && <> Last paid send: &ldquo;{status.data.lastPaidSubject}&rdquo;.</>}{" "}The full Wire goes out exactly as you paste it — one send per week, and nothing goes out until you click send.</>
+              : "Loading…"}
+          </p>
+          {status.data?.paidSentThisWeek ? (
+            <p className="inline-flex items-center gap-2 text-primary font-medium" data-testid="text-paid-already-sent">
+              <CheckCircle2 className="w-5 h-5" /> This week&rsquo;s paid Wire has already gone out to members.
+            </p>
+          ) : (
+            <>
+              <label className="block text-xs font-mono-data tracking-widest text-muted-foreground mb-1">
+                SUBJECT LINE
+              </label>
+              <input
+                value={paidSubject}
+                onChange={(e) => setPaidSubject(e.target.value)}
+                placeholder="Hollywood Sales Wire — Week of …"
+                className="w-full border border-border bg-background p-3 text-base font-serif mb-4 focus:outline-none focus:ring-2 focus:ring-primary/40"
+                data-testid="input-paid-subject"
+              />
+              <label className="block text-xs font-mono-data tracking-widest text-muted-foreground mb-1">
+                FULL WIRE (plain paragraphs — the email adds your member-edition branding)
+              </label>
+              <textarea
+                value={paidBody}
+                onChange={(e) => setPaidBody(e.target.value)}
+                rows={12}
+                placeholder="Paste the full text of this week's paid issue here…"
+                className="w-full border border-border bg-background p-3 text-base leading-relaxed focus:outline-none focus:ring-2 focus:ring-primary/40"
+                data-testid="input-paid-body"
+              />
+              <div className="mt-4 flex items-center gap-4">
+                <button
+                  onClick={handlePaidSend}
+                  disabled={
+                    paidSend.isPending ||
+                    paidSubject.trim().length < 3 ||
+                    paidBody.trim().length < 100 ||
+                    (status.data?.memberCount ?? 0) === 0
+                  }
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 font-serif font-bold disabled:opacity-40"
+                  data-testid="button-paid-send"
+                >
+                  {paidSend.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  {paidSend.isPending ? "Sending…" : `Send to ${status.data?.memberCount ?? "…"} member${(status.data?.memberCount ?? 0) === 1 ? "" : "s"}`}
+                </button>
+                {paidSentCount !== null && (
+                  <span className="inline-flex items-center gap-2 text-primary font-medium">
+                    <CheckCircle2 className="w-5 h-5" /> Sent to {paidSentCount}!
+                  </span>
+                )}
+              </div>
+              {paidSend.isError && (
+                <p className="mt-3 text-sm text-red-700" data-testid="text-paid-send-error">
+                  {(paidSend.error as { data?: { error?: string } })?.data?.error ??
+                    "Sending failed — please try again."}
+                </p>
               )}
             </>
           )}
