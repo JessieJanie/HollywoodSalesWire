@@ -4,8 +4,8 @@ import { runWeeklyResearch, currentWeekKey } from "./wireResearch";
 import { logger } from "./logger";
 
 /**
- * Monday 5:00 PM Pacific auto-run, with catch-up: if the server was asleep
- * (autoscale) at 5 PM, the run fires on the next tick after the due moment —
+ * Monday 5:30 PM Pacific auto-run, with catch-up: if the server was asleep
+ * (autoscale) at 5:30 PM, the run fires on the next tick after the due moment —
  * including when Karilyn opens her console Monday evening or Tuesday morning.
  */
 function isDue(now = new Date()): boolean {
@@ -13,11 +13,13 @@ function isDue(now = new Date()): boolean {
     timeZone: "America/Los_Angeles",
     weekday: "short",
     hour: "2-digit",
+    minute: "2-digit",
     hour12: false,
   }).formatToParts(now);
   const dow = parts.find((p) => p.type === "weekday")?.value ?? "";
   const hour = Number(parts.find((p) => p.type === "hour")?.value ?? "0");
-  if (dow === "Mon") return hour >= 17;
+  const minute = Number(parts.find((p) => p.type === "minute")?.value ?? "0");
+  if (dow === "Mon") return hour > 17 || (hour === 17 && minute >= 30);
   // Catch-up window through Wednesday; after that the week is stale.
   return dow === "Tue" || dow === "Wed";
 }
