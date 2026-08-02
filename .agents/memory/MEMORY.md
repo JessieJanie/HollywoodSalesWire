@@ -1,4 +1,5 @@
 - [GitHub sync contract](github-sync.md) — site content is mirrored to an external GitHub repo; push after every site change, copy is publisher-locked.
+- [Stripe member automation](stripe-member-automation.md) — webhook → member record → welcome + series-cancel + notify; keep stripe-replit-sync externalized; live in prod only after Republish.
 - [Stripe live connection status](stripe-live-connection.md) — live account connected; live payment links created and swapped into CHECKOUT_LINKS July 29, 2026. Use the sk_live connection, not the sandbox one.
 - [Monday Wire pipeline](wire-pipeline.md) — auto-drafts paid Wire + Free Edition Mondays 5pm PT into publisher console; she reviews/sends; safety rails are deliberate.
 - [Skim research setup](skim-research.md) — pay-per-read research wallet on Base, pin x402-axios@1.2.0, verified source URLs + known bot-blocked sites.

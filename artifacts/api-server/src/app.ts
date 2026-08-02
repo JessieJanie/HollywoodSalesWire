@@ -26,6 +26,48 @@ app.use(
   }),
 );
 app.use(cors());
+
+// Stripe webhook needs the raw body for signature verification, so this route
+// is registered BEFORE express.json().
+app.post(
+  "/api/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    const signature = req.headers["stripe-signature"];
+    if (!signature) {
+      res.status(400).json({ error: "Missing stripe-signature" });
+      return;
+    }
+    const sig = Array.isArray(signature) ? signature[0] : signature;
+    if (!Buffer.isBuffer(req.body) || !sig) {
+      res.status(400).json({ error: "Webhook processing error" });
+      return;
+    }
+    try {
+      // Verifies the signature and syncs Stripe data into the `stripe` schema.
+      const { WebhookHandlers } = await import("./lib/webhookHandlers");
+      await WebhookHandlers.processWebhook(req.body as Buffer, sig);
+    } catch (err) {
+      req.log.error({ err }, "stripe webhook verification/sync failed");
+      res.status(400).json({ error: "Webhook processing error" });
+      return;
+    }
+    // Signature verified above — now run our membership automation.
+    try {
+      const { handleStripeEvent } = await import("./lib/members");
+      const event = JSON.parse(req.body.toString("utf8"));
+      await handleStripeEvent(event);
+    } catch (err) {
+      // Member persistence failed — return 500 so Stripe retries the event.
+      // (Email side effects never throw; they log and self-recover on retry.)
+      req.log.error({ err }, "stripe member automation failed — asking Stripe to retry");
+      res.status(500).json({ error: "Member processing failed" });
+      return;
+    }
+    res.status(200).json({ received: true });
+  },
+);
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

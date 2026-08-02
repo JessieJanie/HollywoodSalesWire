@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { startScheduler } from "./lib/scheduler";
+import { initStripe } from "./lib/stripeInit";
 
 const rawPort = process.env["PORT"];
 
@@ -24,4 +25,5 @@ app.listen(port, (err) => {
 
   logger.info({ port }, "Server listening");
   startScheduler();
+  void initStripe();
 });
