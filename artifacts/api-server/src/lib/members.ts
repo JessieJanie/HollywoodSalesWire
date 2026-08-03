@@ -10,7 +10,7 @@ import {
 } from "@workspace/db";
 import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
-import { reportDownloadUrl } from "../routes/reports";
+import { reportDownloadUrl, shelfUrl } from "../routes/reports";
 import { logger } from "./logger";
 
 const NOTIFY_EMAIL = "hello@hollywoodsaleswire.com";
@@ -170,8 +170,9 @@ export function isFoundingPlan(plan: string): boolean {
  * NEW-MEMBER WELCOME EMAIL — transactional copy, flagged for the publisher's
  * review (publisher-locked policy). Deliberately plain and claim-free.
  */
-function welcomeHtml(): string {
+function welcomeHtml(email: string): string {
   const p = (s: string) => `<p>${s}</p>`;
+  const shelfLink = shelfUrl(email, SITE_URL);
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f6f5f2;">
@@ -179,6 +180,7 @@ function welcomeHtml(): string {
       ${p("Welcome — your membership is active.")}
       ${p("Thank you for joining Hollywood Sales Wire. Your subscription is confirmed, and your first issue of the Wire arrives Tuesday morning.")}
       ${p("If you joined as a Founding Member, your three Special Reports will arrive in a separate email shortly.")}
+      ${p(`Everything we send you also lives on your <a href="${shelfLink}" style="color:#1d5c3a;font-weight:bold;">Shelf</a> — your personal page with every Wire issue and Special Report. Bookmark it; the link is yours and never expires.`)}
       ${p("Reply to this email any time — it reaches me directly.")}
       ${p("Karilyn Colegrove, Publisher<br />Hollywood Sales Wire")}
       <hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />
@@ -195,9 +197,9 @@ function welcomeHtml(): string {
  * SPECIAL REPORTS EMAIL for Founding Members.
  * Only sent when all three reports are uploaded.
  *
- * Download links are time-limited bearer URLs (HMAC-signed, valid 1 year).
- * They are not session-authenticated — a forwarded link can be used by the
- * recipient until expiry. The founding-member entitlement check on the server
+ * Download links are permanent bearer URLs (HMAC-signed, never expire —
+ * publisher policy: "yours to keep", no re-issuing admin). They are not
+ * session-authenticated. The founding-member entitlement check on the server
  * verifies the email encoded in the link still belongs to an active founding
  * member at download time.
  */
@@ -220,7 +222,7 @@ function specialReportsHtml(
       <ul style="padding-left:20px;margin:24px 0;">
         ${links}
       </ul>
-      <p>Keep this email — the links are valid for one year. If they ever expire or you need a fresh copy, just reply and ask.</p>
+      <p>These links are yours and never expire — the reports are yours to keep. They also live on your Shelf, linked in your welcome email.</p>
       <p>Karilyn Colegrove, Publisher<br />Hollywood Sales Wire</p>
       <hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />
       <p style="font-size:12px;color:#8a8577;font-family:Arial,sans-serif;">
@@ -673,7 +675,7 @@ export async function handleStripeEvent(event: {
         from: FROM_ADDRESS,
         to: [email],
         subject: "Welcome to Hollywood Sales Wire — your membership is active",
-        html: welcomeHtml(),
+        html: welcomeHtml(email),
       },
     });
   } catch (err) {

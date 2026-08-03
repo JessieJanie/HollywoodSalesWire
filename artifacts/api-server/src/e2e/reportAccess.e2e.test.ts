@@ -120,9 +120,14 @@ describe.runIf(RUN)("e2e: special report download entitlement", () => {
     expect(res.status).toBe(403);
   }, 30_000);
 
-  it("expired link is denied (403) even with a valid signature", async () => {
+  it("expired LEGACY link is denied (403); permanent links have no expiry", async () => {
+    // Legacy pre-Aug-2026 links carried an exp param covered by the old
+    // signature scheme. Those still honor their expiry. New links never expire.
     const pastExp = Date.now() - 60_000;
-    const sig = signMemberSlug(CANCELED_EMAIL, SLUG, pastExp);
+    const { createHmac } = await import("node:crypto");
+    const sig = createHmac("sha256", process.env.SESSION_SECRET!)
+      .update(`report-download:${CANCELED_EMAIL.toLowerCase()}:${SLUG}:${pastExp}`)
+      .digest("hex");
     const url = `${BASE}/api/reports/download/${SLUG}?email=${encodeURIComponent(CANCELED_EMAIL)}&exp=${pastExp}&sig=${sig}`;
     const res = await fetch(url);
     expect(res.status).toBe(403);

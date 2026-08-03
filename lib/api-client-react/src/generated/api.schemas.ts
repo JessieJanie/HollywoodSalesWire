@@ -79,6 +79,34 @@ export interface PublisherReport {
   uploaded: boolean;
   uploadedAt?: string;
 }
+
+export interface PublisherReportsList {
+  reports: PublisherReport[];
+  pendingMemberCount: number;
+}
+
+export interface PublisherReportUploadUrlInput {
+  key: string;
+  slug: string;
+}
+
+export interface PublisherReportUploadUrlResult {
+  uploadUrl: string;
+  slug: string;
+}
+
+export interface PublisherReportConfirmInput {
+  key: string;
+  slug: string;
+  uploadedUrl: string;
+}
+
+export interface PublisherReportConfirmResult {
+  slug: string;
+  objectPath: string;
+  deliveredCount: number;
+}
+
 export interface FoundingOfferStatus {
   active: boolean;
   deadline: string;
@@ -118,30 +146,3 @@ export type PublisherReportsParams = {
 key: string;
 };
 
-
-export interface PublisherReportUploadUrlResult {
-  uploadUrl: string;
-  slug: string;
-}
-
-export interface PublisherReportUploadUrlInput {
-  key: string;
-  slug: string;
-}
-
-export interface PublisherReportConfirmInput {
-  key: string;
-  slug: string;
-  uploadedUrl: string;
-}
-
-export interface PublisherReportConfirmResult {
-  slug: string;
-  objectPath: string;
-  deliveredCount: number;
-}
-
-export interface PublisherReportsList {
-  reports: PublisherReport[];
-  pendingMemberCount: number;
-}

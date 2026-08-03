@@ -1,97 +1,105 @@
 import { Router, type IRouter } from "express";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { and, eq, sql } from "drizzle-orm";
-import { db, specialReportsTable, membersTable } from "@workspace/db";
+import { db, specialReportsTable, membersTable, paidWireSendsTable } from "@workspace/db";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 import { logger } from "../lib/logger";
 
 const router: IRouter = Router();
 const storageService = new ObjectStorageService();
 
-/**
- * Default link TTL: 1 year from issue time, in milliseconds.
- * Links in member emails are valid for this duration. The email copy tells
- * members to reply if they need a refreshed link after expiry.
- */
-export const REPORT_LINK_TTL_MS = 365 * 24 * 60 * 60 * 1000;
-
-/**
- * Compute a per-member, per-slug, time-bound HMAC signature.
- *
- * The signature covers email + slug + expiry so the link cannot be extended
- * or re-targeted after it is issued. The email parameter is in the URL (not
- * in a session), so a link CAN be forwarded — the expiry limits the exposure
- * window, and the founding-member entitlement check on the server side means
- * only founding members can actually obtain a valid link in the first place.
- *
- * Special Reports are the founding member's to keep: cancellation does NOT
- * revoke download access (publisher policy — the offer says "yours to keep").
- */
-export function signMemberSlug(email: string, slug: string, expMs: number): string {
+function hmac(payload: string): string {
   const secret = process.env.SESSION_SECRET;
   if (!secret) throw new Error("SESSION_SECRET not set");
-  return createHmac("sha256", secret)
-    .update(`report-download:${email.toLowerCase()}:${slug}:${expMs}`)
-    .digest("hex");
+  return createHmac("sha256", secret).update(payload).digest("hex");
+}
+
+function timingSafeMatch(sig: string, expected: string): boolean {
+  const sigBuf = Buffer.from(sig);
+  const expBuf = Buffer.from(expected);
+  return sigBuf.length === expBuf.length && timingSafeEqual(sigBuf, expBuf);
 }
 
 /**
- * Build a time-limited download URL for a report.
+ * Compute a per-member, per-slug HMAC signature. Links are PERMANENT
+ * (publisher policy, Aug 2026): the reports are "yours to keep", so links
+ * never expire — no admin overhead of re-issuing links.
+ *
+ * The signature covers email + slug so the link cannot be re-targeted. The
+ * email is in the URL (not in a session), so a link CAN be forwarded; the
+ * founding-member entitlement check on the server means only emails belonging
+ * to founding members can download.
+ */
+export function signMemberSlug(email: string, slug: string): string {
+  return hmac(`report-download-v2:${email.toLowerCase()}:${slug}`);
+}
+
+/** Legacy (pre-Aug 2026) time-bound signature — kept so old emailed links keep working. */
+function signMemberSlugLegacy(email: string, slug: string, expMs: number): string {
+  return hmac(`report-download:${email.toLowerCase()}:${slug}:${expMs}`);
+}
+
+/**
+ * Build a permanent download URL for a report.
  * Exported so members.ts can call it without importing the route module.
  */
-export function reportDownloadUrl(
-  email: string,
-  slug: string,
-  siteUrl: string,
-  expMs?: number,
-): string {
-  const exp = expMs ?? Date.now() + REPORT_LINK_TTL_MS;
-  const sig = signMemberSlug(email, slug, exp);
+export function reportDownloadUrl(email: string, slug: string, siteUrl: string): string {
+  const sig = signMemberSlug(email, slug);
   return (
     `${siteUrl}/api/reports/download/${encodeURIComponent(slug)}` +
-    `?email=${encodeURIComponent(email.toLowerCase())}&exp=${exp}&sig=${sig}`
+    `?email=${encodeURIComponent(email.toLowerCase())}&sig=${sig}`
   );
 }
 
+/** Permanent signed URL for a member's Shelf page (their reports + Wire archive). */
+export function shelfUrl(email: string, siteUrl: string): string {
+  const sig = hmac(`shelf-v1:${email.toLowerCase()}`);
+  return `${siteUrl}/shelf?email=${encodeURIComponent(email.toLowerCase())}&sig=${sig}`;
+}
+
+export function verifyShelfSig(email: string, sig: string): boolean {
+  try {
+    return timingSafeMatch(sig, hmac(`shelf-v1:${email.toLowerCase()}`));
+  } catch {
+    return false;
+  }
+}
+
 /**
- * GET /reports/download/:slug?email=<addr>&exp=<ms>&sig=<hmac>
+ * GET /reports/download/:slug?email=<addr>&sig=<hmac>
  *
- * Time-limited per-issue download. The HMAC covers email, slug, and expiry
- * so links cannot be extended. Links are valid for 1 year from issue.
- *
- * Note: the email is in the URL, so the link is transferable during its
- * validity window. It is guarded only by HMAC integrity, expiry, and a
- * founding-member entitlement check on the email in the URL.
+ * Permanent per-member download link (legacy links carry an extra `exp`
+ * parameter and are verified against the old time-bound scheme, still
+ * honoring their original expiry).
  */
 router.get("/reports/download/:slug", async (req, res): Promise<void> => {
   const { slug } = req.params;
   const { email: rawEmail, sig, exp: rawExp } = req.query;
   const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
-  const expMs = typeof rawExp === "string" ? parseInt(rawExp, 10) : NaN;
 
-  if (!email || typeof sig !== "string" || Number.isNaN(expMs)) {
+  if (!email || typeof sig !== "string") {
     res.status(403).json({ error: "Invalid download link" });
     return;
   }
 
-  // 1. Verify expiry
-  if (Date.now() > expMs) {
-    res.status(403).json({ error: "Download link has expired — reply to your welcome email to get a new one" });
-    return;
-  }
-
-  // 2. Verify HMAC (timing-safe)
-  let expected: string;
+  // Verify HMAC (timing-safe). Permanent links have no exp; legacy links do.
   try {
-    expected = signMemberSlug(email, slug, expMs);
+    if (typeof rawExp === "string") {
+      const expMs = parseInt(rawExp, 10);
+      if (Number.isNaN(expMs) || Date.now() > expMs) {
+        res.status(403).json({ error: "Download link has expired — reply to your welcome email to get a new one" });
+        return;
+      }
+      if (!timingSafeMatch(sig, signMemberSlugLegacy(email, slug, expMs))) {
+        res.status(403).json({ error: "Invalid download link" });
+        return;
+      }
+    } else if (!timingSafeMatch(sig, signMemberSlug(email, slug))) {
+      res.status(403).json({ error: "Invalid download link" });
+      return;
+    }
   } catch {
     res.status(500).json({ error: "Server misconfiguration" });
-    return;
-  }
-  const sigBuf = Buffer.from(sig);
-  const expBuf = Buffer.from(expected);
-  if (sigBuf.length !== expBuf.length || !timingSafeEqual(sigBuf, expBuf)) {
-    res.status(403).json({ error: "Invalid download link" });
     return;
   }
 
@@ -149,6 +157,55 @@ router.get("/reports/download/:slug", async (req, res): Promise<void> => {
       res.status(502).json({ error: "Download failed" });
     }
   }
+});
+
+/**
+ * GET /shelf?email=<addr>&sig=<hmac>
+ *
+ * The member's "Shelf": their Special Reports (founding members) and every
+ * weekly Wire issue that was sent to them. Membership-window scoping falls
+ * out naturally from `recipientEmails`: an issue appears on a member's Shelf
+ * iff their email was in the frozen recipient snapshot of that send — so a
+ * canceled member keeps exactly what was sent while they were a member.
+ */
+router.get("/shelf", async (req, res): Promise<void> => {
+  const { email: rawEmail, sig } = req.query;
+  const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
+  if (!email || typeof sig !== "string" || !verifyShelfSig(email, sig)) {
+    res.status(403).json({ error: "Invalid Shelf link" });
+    return;
+  }
+
+  const [member] = await db
+    .select({ plan: membersTable.plan })
+    .from(membersTable)
+    .where(eq(membersTable.email, email));
+  if (!member) {
+    res.status(403).json({ error: "No membership found for this link" });
+    return;
+  }
+
+  const isFounding = member.plan === "founding-individual" || member.plan === "founding-team";
+  let reports: Array<{ slug: string; title: string; url: string }> = [];
+  if (isFounding) {
+    const rows = await db.select().from(specialReportsTable);
+    reports = rows
+      .filter((r) => r.objectPath)
+      .map((r) => ({ slug: r.slug, title: r.title, url: reportDownloadUrl(email, r.slug, "") }));
+  }
+
+  const sends = await db
+    .select({
+      weekKey: paidWireSendsTable.weekKey,
+      subject: paidWireSendsTable.subject,
+      bodyText: paidWireSendsTable.bodyText,
+      sentAt: paidWireSendsTable.sentAt,
+    })
+    .from(paidWireSendsTable)
+    .where(sql`${email} = any(${paidWireSendsTable.recipientEmails})`)
+    .orderBy(sql`${paidWireSendsTable.weekKey} desc`);
+
+  res.json({ plan: member.plan, isFounding, reports, issues: sends });
 });
 
 export default router;

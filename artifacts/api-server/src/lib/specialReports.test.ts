@@ -8,8 +8,7 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { signMemberSlug, reportDownloadUrl, REPORT_LINK_TTL_MS } from "../routes/reports";
-import { INACTIVE_SUB_STATUSES } from "./paidWire";
+import { signMemberSlug, reportDownloadUrl, shelfUrl, verifyShelfSig } from "../routes/reports";
 import { planFromSession, PAYMENT_LINK_TO_PLAN, type CheckoutSessionLike } from "./members";
 
 // Provide a test secret so signMemberSlug works without a real env
@@ -19,49 +18,39 @@ beforeEach(() => {
   process.env.SESSION_SECRET = TEST_SECRET;
 });
 
-describe("signMemberSlug", () => {
+describe("signMemberSlug (permanent links)", () => {
   it("produces a deterministic hex string", () => {
-    const sig = signMemberSlug("alice@example.com", "spend-map", 9999999999000);
+    const sig = signMemberSlug("alice@example.com", "spend-map");
     expect(sig).toMatch(/^[0-9a-f]{64}$/);
+    expect(sig).toBe(signMemberSlug("alice@example.com", "spend-map"));
   });
 
   it("produces different signatures for different emails", () => {
-    const exp = Date.now() + REPORT_LINK_TTL_MS;
-    const a = signMemberSlug("alice@example.com", "spend-map", exp);
-    const b = signMemberSlug("bob@example.com", "spend-map", exp);
+    const a = signMemberSlug("alice@example.com", "spend-map");
+    const b = signMemberSlug("bob@example.com", "spend-map");
     expect(a).not.toBe(b);
   });
 
   it("produces different signatures for different slugs", () => {
-    const exp = Date.now() + REPORT_LINK_TTL_MS;
-    const a = signMemberSlug("alice@example.com", "spend-map", exp);
-    const b = signMemberSlug("alice@example.com", "greenlight-window", exp);
-    expect(a).not.toBe(b);
-  });
-
-  it("produces different signatures for different expiry timestamps", () => {
-    const exp1 = 1_700_000_000_000;
-    const exp2 = 1_700_000_000_001;
-    const a = signMemberSlug("alice@example.com", "spend-map", exp1);
-    const b = signMemberSlug("alice@example.com", "spend-map", exp2);
+    const a = signMemberSlug("alice@example.com", "spend-map");
+    const b = signMemberSlug("alice@example.com", "greenlight-window");
     expect(a).not.toBe(b);
   });
 
   it("normalises email to lower-case", () => {
-    const exp = 1_700_000_000_000;
-    const lower = signMemberSlug("alice@example.com", "spend-map", exp);
-    const mixed = signMemberSlug("Alice@EXAMPLE.COM", "spend-map", exp);
+    const lower = signMemberSlug("alice@example.com", "spend-map");
+    const mixed = signMemberSlug("Alice@EXAMPLE.COM", "spend-map");
     expect(lower).toBe(mixed);
   });
 });
 
-describe("reportDownloadUrl", () => {
-  it("includes email, exp, and sig query parameters", () => {
+describe("reportDownloadUrl (permanent links — publisher policy Aug 2026)", () => {
+  it("includes email and sig, and no expiry parameter", () => {
     const url = reportDownloadUrl("alice@example.com", "spend-map", "https://example.com");
     const parsed = new URL(url);
     expect(parsed.searchParams.get("email")).toBe("alice@example.com");
-    expect(parsed.searchParams.has("exp")).toBe(true);
     expect(parsed.searchParams.has("sig")).toBe(true);
+    expect(parsed.searchParams.has("exp")).toBe(false); // links never expire
   });
 
   it("encodes the slug in the pathname", () => {
@@ -69,73 +58,44 @@ describe("reportDownloadUrl", () => {
     expect(url).toContain("/api/reports/download/spend-map");
   });
 
-  it("generates a sig that verifies against the embedded exp", () => {
+  it("generates a sig that verifies", () => {
     const url = reportDownloadUrl("alice@example.com", "spend-map", "https://example.com");
     const parsed = new URL(url);
-    const email = parsed.searchParams.get("email")!;
-    const exp = parseInt(parsed.searchParams.get("exp")!, 10);
-    const sig = parsed.searchParams.get("sig")!;
-    const expected = signMemberSlug(email, "spend-map", exp);
-    expect(sig).toBe(expected);
-  });
-
-  it("accepts an explicit expiry override", () => {
-    const fixedExp = 2_000_000_000_000;
-    const url = reportDownloadUrl("a@b.com", "spend-map", "https://example.com", fixedExp);
-    const parsed = new URL(url);
-    expect(parseInt(parsed.searchParams.get("exp")!, 10)).toBe(fixedExp);
-  });
-
-  it("default expiry is approximately one year from now", () => {
-    const before = Date.now();
-    const url = reportDownloadUrl("a@b.com", "spend-map", "https://example.com");
-    const after = Date.now();
-    const parsed = new URL(url);
-    const exp = parseInt(parsed.searchParams.get("exp")!, 10);
-    expect(exp).toBeGreaterThanOrEqual(before + REPORT_LINK_TTL_MS);
-    expect(exp).toBeLessThanOrEqual(after + REPORT_LINK_TTL_MS);
-  });
-});
-
-describe("download link expiry model", () => {
-  it("an expired link fails the expiry check", () => {
-    const expiredExp = Date.now() - 1_000; // 1 second in the past
-    const sig = signMemberSlug("alice@example.com", "spend-map", expiredExp);
-    // Simulate what the download handler checks:
-    const isExpired = Date.now() > expiredExp;
-    expect(isExpired).toBe(true);
-    // The signature itself is still valid — expiry is a separate runtime check
-    const expected = signMemberSlug("alice@example.com", "spend-map", expiredExp);
-    expect(sig).toBe(expected);
-  });
-
-  it("a future link passes the expiry check", () => {
-    const futureExp = Date.now() + 60_000;
-    const isExpired = Date.now() > futureExp;
-    expect(isExpired).toBe(false);
+    expect(parsed.searchParams.get("sig")).toBe(
+      signMemberSlug(parsed.searchParams.get("email")!, "spend-map"),
+    );
   });
 
   it("a tampered sig does not equal the recomputed sig", () => {
-    const exp = Date.now() + REPORT_LINK_TTL_MS;
-    const correctSig = signMemberSlug("alice@example.com", "spend-map", exp);
+    const correctSig = signMemberSlug("alice@example.com", "spend-map");
     const tamperedSig = correctSig.slice(0, -1) + (correctSig.endsWith("a") ? "b" : "a");
     expect(tamperedSig).not.toBe(correctSig);
   });
 
   it("a sig issued for one email does not verify for a different email", () => {
-    const exp = Date.now() + REPORT_LINK_TTL_MS;
-    const aliceSig = signMemberSlug("alice@example.com", "spend-map", exp);
-    const bobSig = signMemberSlug("bob@example.com", "spend-map", exp);
-    expect(aliceSig).not.toBe(bobSig);
+    expect(signMemberSlug("alice@example.com", "spend-map")).not.toBe(
+      signMemberSlug("bob@example.com", "spend-map"),
+    );
+  });
+});
+
+describe("shelfUrl / verifyShelfSig", () => {
+  it("builds a /shelf link whose sig verifies for the same email", () => {
+    const url = shelfUrl("Alice@Example.com", "https://example.com");
+    const parsed = new URL(url);
+    expect(parsed.pathname).toBe("/shelf");
+    const email = parsed.searchParams.get("email")!;
+    const sig = parsed.searchParams.get("sig")!;
+    expect(email).toBe("alice@example.com");
+    expect(verifyShelfSig(email, sig)).toBe(true);
+    expect(verifyShelfSig("mallory@example.com", sig)).toBe(false);
   });
 
-  it("extending the exp in the URL breaks the signature", () => {
-    const exp = Date.now() + REPORT_LINK_TTL_MS;
-    const sig = signMemberSlug("alice@example.com", "spend-map", exp);
-    // Attacker tries to extend by 1 year
-    const attackerExp = exp + REPORT_LINK_TTL_MS;
-    const recomputed = signMemberSlug("alice@example.com", "spend-map", attackerExp);
-    expect(sig).not.toBe(recomputed);
+  it("rejects a tampered sig", () => {
+    const parsed = new URL(shelfUrl("alice@example.com", "https://example.com"));
+    const sig = parsed.searchParams.get("sig")!;
+    const tampered = sig.slice(0, -1) + (sig.endsWith("a") ? "b" : "a");
+    expect(verifyShelfSig("alice@example.com", tampered)).toBe(false);
   });
 });
 
