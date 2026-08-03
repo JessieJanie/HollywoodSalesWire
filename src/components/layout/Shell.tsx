@@ -43,7 +43,7 @@ export function Footer() {
             </span>
           </Link>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            A premium direct-response subscription intelligence service. The trade's private ticker for the production economy.
+            Your weekly source for entertainment industry sales intelligence. We report it first, others report it months later.
           </p>
         </div>
         <div className="flex flex-col gap-2 text-sm text-muted-foreground">
