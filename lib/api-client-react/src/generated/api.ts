@@ -28,6 +28,12 @@ import type {
   PublisherDraftInput,
   PublisherDraftResult,
   PublisherKeyInput,
+  PublisherReportConfirmInput,
+  PublisherReportConfirmResult,
+  PublisherReportUploadUrlInput,
+  PublisherReportUploadUrlResult,
+  PublisherReportsList,
+  PublisherReportsParams,
   PublisherSendInput,
   PublisherSendResult,
   PublisherStatus,
@@ -50,7 +56,6 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
-
 const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKey: K } => {
   const result = { queryKey } as T & { queryKey: K };
   for (const key of Object.keys(query)) {
@@ -67,8 +72,6 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
 };
 
 export const getHealthCheckUrl = () => {
-
-
 
 
   return `/api/healthz`
@@ -90,9 +93,6 @@ export const healthCheck = async ( options?: Parameters<typeof customFetch>[1]):
 );}
 
 
-
-
-
 export const getHealthCheckQueryKey = () => {
     return [
     `/api/healthz`
@@ -108,11 +108,7 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
   const queryKey =  queryOptions?.queryKey ?? getHealthCheckQueryKey();
 
 
-
     const queryFn: QueryFunction<Awaited<ReturnType<typeof healthCheck>>> = ({ signal }) => healthCheck({ signal, ...requestOptions });
-
-
-
 
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof healthCheck>>, TError, TData> & { queryKey: QueryKey }
@@ -139,14 +135,7 @@ export function useHealthCheck<TData = Awaited<ReturnType<typeof healthCheck>>, 
 }
 
 
-
-
-
-
-
 export const getSubscribeUrl = () => {
-
-
 
 
   return `/api/subscribe`
@@ -167,9 +156,6 @@ export const subscribe = async (subscriberInput: SubscriberInput, options?: Para
 );}
 
 
-
-
-
 export const getSubscribeMutationOptions = <TError = ErrorType<ApiMessage>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof subscribe>>, TError,{data: BodyType<SubscriberInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof subscribe>>, TError,{data: BodyType<SubscriberInput>}, TContext> => {
@@ -182,17 +168,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       : {mutation: { mutationKey, }, request: undefined};
 
 
-
-
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof subscribe>>, {data: BodyType<SubscriberInput>}> = (props) => {
           const {data} = props ?? {};
 
           return  subscribe(data,requestOptions)
         }
-
-
-
-
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -245,9 +225,6 @@ export const foundingOffer = async (params: FoundingOfferParams, options?: Param
 );}
 
 
-
-
-
 export const getFoundingOfferQueryKey = (params?: FoundingOfferParams,) => {
     return [
     `/api/founding-offer`, ...(params ? [params] : [])
@@ -263,11 +240,7 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
   const queryKey =  queryOptions?.queryKey ?? getFoundingOfferQueryKey(params);
 
 
-
     const queryFn: QueryFunction<Awaited<ReturnType<typeof foundingOffer>>> = ({ signal }) => foundingOffer(params, { signal, ...requestOptions });
-
-
-
 
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof foundingOffer>>, TError, TData> & { queryKey: QueryKey }
@@ -292,11 +265,6 @@ export function useFoundingOffer<TData = Awaited<ReturnType<typeof foundingOffer
 
   return withQueryKey(query, queryOptions.queryKey);
 }
-
-
-
-
-
 
 
 export const getPublisherStatusUrl = (params: PublisherStatusParams,) => {
@@ -329,9 +297,6 @@ export const publisherStatus = async (params: PublisherStatusParams, options?: P
 );}
 
 
-
-
-
 export const getPublisherStatusQueryKey = (params?: PublisherStatusParams,) => {
     return [
     `/api/publisher/status`, ...(params ? [params] : [])
@@ -347,11 +312,7 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
   const queryKey =  queryOptions?.queryKey ?? getPublisherStatusQueryKey(params);
 
 
-
     const queryFn: QueryFunction<Awaited<ReturnType<typeof publisherStatus>>> = ({ signal }) => publisherStatus(params, { signal, ...requestOptions });
-
-
-
 
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof publisherStatus>>, TError, TData> & { queryKey: QueryKey }
@@ -378,14 +339,7 @@ export function usePublisherStatus<TData = Awaited<ReturnType<typeof publisherSt
 }
 
 
-
-
-
-
-
 export const getPublisherDraftUrl = () => {
-
-
 
 
   return `/api/publisher/draft`
@@ -406,9 +360,6 @@ export const publisherDraft = async (publisherDraftInput: PublisherDraftInput, o
 );}
 
 
-
-
-
 export const getPublisherDraftMutationOptions = <TError = ErrorType<ApiMessage>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherDraft>>, TError,{data: BodyType<PublisherDraftInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof publisherDraft>>, TError,{data: BodyType<PublisherDraftInput>}, TContext> => {
@@ -421,17 +372,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       : {mutation: { mutationKey, }, request: undefined};
 
 
-
-
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherDraft>>, {data: BodyType<PublisherDraftInput>}> = (props) => {
           const {data} = props ?? {};
 
           return  publisherDraft(data,requestOptions)
         }
-
-
-
-
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -457,8 +402,6 @@ export const usePublisherDraft = <TError = ErrorType<ApiMessage>,
 export const getPublisherSendUrl = () => {
 
 
-
-
   return `/api/publisher/send`
 }
 
@@ -477,9 +420,6 @@ export const publisherSend = async (publisherSendInput: PublisherSendInput, opti
 );}
 
 
-
-
-
 export const getPublisherSendMutationOptions = <TError = ErrorType<ApiMessage>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherSend>>, TError,{data: BodyType<PublisherSendInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof publisherSend>>, TError,{data: BodyType<PublisherSendInput>}, TContext> => {
@@ -492,17 +432,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       : {mutation: { mutationKey, }, request: undefined};
 
 
-
-
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherSend>>, {data: BodyType<PublisherSendInput>}> = (props) => {
           const {data} = props ?? {};
 
           return  publisherSend(data,requestOptions)
         }
-
-
-
-
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -528,8 +462,6 @@ export const usePublisherSend = <TError = ErrorType<ApiMessage>,
 export const getPublisherPaidSendUrl = () => {
 
 
-
-
   return `/api/publisher/paid-send`
 }
 
@@ -548,9 +480,6 @@ export const publisherPaidSend = async (paidWireSendInput: PaidWireSendInput, op
 );}
 
 
-
-
-
 export const getPublisherPaidSendMutationOptions = <TError = ErrorType<ApiMessage>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherPaidSend>>, TError,{data: BodyType<PaidWireSendInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof publisherPaidSend>>, TError,{data: BodyType<PaidWireSendInput>}, TContext> => {
@@ -563,17 +492,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       : {mutation: { mutationKey, }, request: undefined};
 
 
-
-
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherPaidSend>>, {data: BodyType<PaidWireSendInput>}> = (props) => {
           const {data} = props ?? {};
 
           return  publisherPaidSend(data,requestOptions)
         }
-
-
-
-
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -626,9 +549,6 @@ export const publisherWireLatest = async (params: PublisherWireLatestParams, opt
 );}
 
 
-
-
-
 export const getPublisherWireLatestQueryKey = (params?: PublisherWireLatestParams,) => {
     return [
     `/api/publisher/wire/latest`, ...(params ? [params] : [])
@@ -644,11 +564,7 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
   const queryKey =  queryOptions?.queryKey ?? getPublisherWireLatestQueryKey(params);
 
 
-
     const queryFn: QueryFunction<Awaited<ReturnType<typeof publisherWireLatest>>> = ({ signal }) => publisherWireLatest(params, { signal, ...requestOptions });
-
-
-
 
 
    return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof publisherWireLatest>>, TError, TData> & { queryKey: QueryKey }
@@ -674,15 +590,21 @@ export function usePublisherWireLatest<TData = Awaited<ReturnType<typeof publish
   return withQueryKey(query, queryOptions.queryKey);
 }
 
+export const getPublisherReportsUrl = (params: PublisherReportsParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-
-
+  return stringifiedParams.length > 0 ? `/api/publisher/reports?${stringifiedParams}` : `/api/publisher/reports`
+}
 export const getPublisherWireRunUrl = () => {
-
-
 
 
   return `/api/publisher/wire/run`
@@ -703,9 +625,6 @@ export const publisherWireRun = async (publisherKeyInput: PublisherKeyInput, opt
 );}
 
 
-
-
-
 export const getPublisherWireRunMutationOptions = <TError = ErrorType<ApiMessage>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherWireRun>>, TError,{data: BodyType<PublisherKeyInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof publisherWireRun>>, TError,{data: BodyType<PublisherKeyInput>}, TContext> => {
@@ -718,17 +637,11 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       : {mutation: { mutationKey, }, request: undefined};
 
 
-
-
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherWireRun>>, {data: BodyType<PublisherKeyInput>}> = (props) => {
           const {data} = props ?? {};
 
           return  publisherWireRun(data,requestOptions)
         }
-
-
-
-
 
 
   return  { mutationFn, ...mutationOptions }}
@@ -751,3 +664,179 @@ export const usePublisherWireRun = <TError = ErrorType<ApiMessage>,
       return useMutation(getPublisherWireRunMutationOptions(options));
     }
 
+
+    /**
+ * @summary Confirm report upload and trigger pending deliveries (key-protected)
+ */
+export const usePublisherReportsConfirm = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherReportsConfirm>>, TError,{data: BodyType<PublisherReportConfirmInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publisherReportsConfirm>>,
+        TError,
+        {data: BodyType<PublisherReportConfirmInput>},
+        TContext
+      > => {
+      return useMutation(getPublisherReportsConfirmMutationOptions(options));
+    }
+
+    export type PublisherReportsUploadUrlMutationError = ErrorType<ApiMessage>
+
+export type PublisherReportsQueryError = ErrorType<ApiMessage>
+
+    export type PublisherReportsConfirmMutationResult = NonNullable<Awaited<ReturnType<typeof publisherReportsConfirm>>>
+
+    export type PublisherReportsConfirmMutationError = ErrorType<ApiMessage>
+
+export const getPublisherReportsQueryOptions = <TData = Awaited<ReturnType<typeof publisherReports>>, TError = ErrorType<ApiMessage>>(params: PublisherReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof publisherReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPublisherReportsQueryKey(params);
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof publisherReports>>> = ({ signal }) => publisherReports(params, { signal, ...requestOptions });
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof publisherReports>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export const getPublisherReportsUploadUrlUrl = () => {
+
+
+  return `/api/publisher/reports/upload-url`
+}
+
+    export type PublisherReportsUploadUrlMutationResult = NonNullable<Awaited<ReturnType<typeof publisherReportsUploadUrl>>>
+
+/**
+ * @summary List special report upload statuses (key-protected)
+ */
+export const publisherReports = async (params: PublisherReportsParams, options?: Parameters<typeof customFetch>[1]): Promise<PublisherReportsList> => {
+
+  return customFetch<PublisherReportsList>(getPublisherReportsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+/**
+ * @summary Get presigned URL for uploading a special report PDF (key-protected)
+ */
+export const publisherReportsUploadUrl = async (publisherReportUploadUrlInput: PublisherReportUploadUrlInput, options?: Parameters<typeof customFetch>[1]): Promise<PublisherReportUploadUrlResult> => {
+
+  return customFetch<PublisherReportUploadUrlResult>(getPublisherReportsUploadUrlUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(publisherReportUploadUrlInput)
+  }
+);}
+
+export const getPublisherReportsQueryKey = (params?: PublisherReportsParams,) => {
+    return [
+    `/api/publisher/reports`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+/**
+ * @summary Confirm report upload and trigger pending deliveries (key-protected)
+ */
+export const publisherReportsConfirm = async (publisherReportConfirmInput: PublisherReportConfirmInput, options?: Parameters<typeof customFetch>[1]): Promise<PublisherReportConfirmResult> => {
+
+  return customFetch<PublisherReportConfirmResult>(getPublisherReportsConfirmUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(publisherReportConfirmInput)
+  }
+);}
+
+/**
+ * @summary List special report upload statuses (key-protected)
+ */
+
+export function usePublisherReports<TData = Awaited<ReturnType<typeof publisherReports>>, TError = ErrorType<ApiMessage>>(
+ params: PublisherReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof publisherReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPublisherReportsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+export const getPublisherReportsUploadUrlMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherReportsUploadUrl>>, TError,{data: BodyType<PublisherReportUploadUrlInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publisherReportsUploadUrl>>, TError,{data: BodyType<PublisherReportUploadUrlInput>}, TContext> => {
+
+const mutationKey = ['publisherReportsUploadUrl'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherReportsUploadUrl>>, {data: BodyType<PublisherReportUploadUrlInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  publisherReportsUploadUrl(data,requestOptions)
+        }
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+export type PublisherReportsQueryResult = NonNullable<Awaited<ReturnType<typeof publisherReports>>>
+
+export const getPublisherReportsConfirmMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherReportsConfirm>>, TError,{data: BodyType<PublisherReportConfirmInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publisherReportsConfirm>>, TError,{data: BodyType<PublisherReportConfirmInput>}, TContext> => {
+
+const mutationKey = ['publisherReportsConfirm'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherReportsConfirm>>, {data: BodyType<PublisherReportConfirmInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  publisherReportsConfirm(data,requestOptions)
+        }
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublisherReportsUploadUrlMutationBody = BodyType<PublisherReportUploadUrlInput>
+
+    export type PublisherReportsConfirmMutationBody = BodyType<PublisherReportConfirmInput>
+
+    /**
+ * @summary Get presigned URL for uploading a special report PDF (key-protected)
+ */
+export const usePublisherReportsUploadUrl = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherReportsUploadUrl>>, TError,{data: BodyType<PublisherReportUploadUrlInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publisherReportsUploadUrl>>,
+        TError,
+        {data: BodyType<PublisherReportUploadUrlInput>},
+        TContext
+      > => {
+      return useMutation(getPublisherReportsUploadUrlMutationOptions(options));
+    }
+
+export const getPublisherReportsConfirmUrl = () => {
+
+
+  return `/api/publisher/reports/confirm`
+}

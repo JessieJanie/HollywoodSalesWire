@@ -198,6 +198,90 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMessage"
+  /publisher/reports:
+    get:
+      operationId: publisherReports
+      tags: [publisher]
+      summary: List special report upload statuses (key-protected)
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Report list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublisherReportsList"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /publisher/reports/upload-url:
+    post:
+      operationId: publisherReportsUploadUrl
+      tags: [publisher]
+      summary: Get presigned URL for uploading a special report PDF (key-protected)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublisherReportUploadUrlInput"
+      responses:
+        "200":
+          description: Presigned upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublisherReportUploadUrlResult"
+        "400":
+          description: Bad slug
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+  /publisher/reports/confirm:
+    post:
+      operationId: publisherReportsConfirm
+      tags: [publisher]
+      summary: Confirm report upload and trigger pending deliveries (key-protected)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublisherReportConfirmInput"
+      responses:
+        "200":
+          description: Confirmed; deliveredCount = founding members just emailed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublisherReportConfirmResult"
+        "400":
+          description: Bad input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
   /publisher/wire/run:
     post:
       operationId: publisherWireRun
@@ -343,6 +427,64 @@ components:
       properties:
         sent:
           type: number
+    PublisherReport:
+      type: object
+      required: [slug, title, uploaded]
+      properties:
+        slug:
+          type: string
+        title:
+          type: string
+        uploaded:
+          type: boolean
+        uploadedAt:
+          type: string
+    PublisherReportsList:
+      type: object
+      required: [reports, pendingMemberCount]
+      properties:
+        reports:
+          type: array
+          items:
+            $ref: "#/components/schemas/PublisherReport"
+        pendingMemberCount:
+          type: number
+    PublisherReportUploadUrlInput:
+      type: object
+      required: [key, slug]
+      properties:
+        key:
+          type: string
+        slug:
+          type: string
+    PublisherReportUploadUrlResult:
+      type: object
+      required: [uploadUrl, slug]
+      properties:
+        uploadUrl:
+          type: string
+        slug:
+          type: string
+    PublisherReportConfirmInput:
+      type: object
+      required: [key, slug, uploadedUrl]
+      properties:
+        key:
+          type: string
+        slug:
+          type: string
+        uploadedUrl:
+          type: string
+    PublisherReportConfirmResult:
+      type: object
+      required: [slug, objectPath, deliveredCount]
+      properties:
+        slug:
+          type: string
+        objectPath:
+          type: string
+        deliveredCount:
+          type: number
     FoundingOfferStatus:
       type: object
       required: [active, deadline, deadlineLabel]
@@ -379,4 +521,3 @@ components:
           type: string
       required:
         - status
-

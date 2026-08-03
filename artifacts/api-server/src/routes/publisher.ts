@@ -7,6 +7,7 @@ import {
   weeklyPreviewsTable,
   membersTable,
   paidWireSendsTable,
+  specialReportsTable,
 } from "@workspace/db";
 import { PublisherSendResponse } from "@workspace/api-zod";
 import { resendRequest } from "../lib/resend";
@@ -19,8 +20,18 @@ import {
   sendPaidWireBatches,
   type PaidRecipient,
 } from "../lib/paidWire";
+import { ObjectStorageService } from "../lib/objectStorage";
+import { deliverReportsToPendingFoundingMembers } from "../lib/members";
 
 const router: IRouter = Router();
+
+const REPORT_DEFINITIONS = [
+  { slug: "spend-map", title: "The Spend Map" },
+  { slug: "greenlight-window", title: "The $6.6 Billion Greenlight Window" },
+  { slug: "requisition-read", title: "The Requisition Read" },
+] as const;
+
+const storageService = new ObjectStorageService();
 
 function keyOk(key: unknown): boolean {
   const expected = process.env.PUBLISHER_KEY;
@@ -193,15 +204,6 @@ router.post("/publisher/paid-send", async (req, res): Promise<void> => {
   }
 
   // Atomic claim: the unique index on week_key makes a double-send impossible.
-  // The claim freezes the eligible-recipient snapshot AND the content, and is
-  // NEVER deleted on failure — a failed request may still have been accepted
-  // by Resend. Retries replay the SAME snapshot in the same order with the
-  // same per-batch idempotency keys, so payloads are identical and Resend
-  // deduplicates, even if membership changed between attempts.
-  //
-  // The existing claim is checked FIRST: a retry must replay the frozen
-  // snapshot unconditionally, never consult current entitlement (a snapshot
-  // whose members all became inactive must still be deliverable on retry).
   const weekKey = currentWeekKey();
   const loadExisting = () =>
     db
@@ -318,6 +320,127 @@ router.get("/publisher/status", async (req, res): Promise<void> => {
       ? { lastPaidSentAt: lastPaid.sentAt.toISOString(), lastPaidSubject: lastPaid.subject }
       : {}),
   });
+});
+
+// ---------------------------------------------------------------------------
+// Special Reports management
+// ---------------------------------------------------------------------------
+
+/** Idempotent: inserts the three report rows if they don't exist yet. */
+async function ensureReportRows(): Promise<void> {
+  for (const r of REPORT_DEFINITIONS) {
+    await db
+      .insert(specialReportsTable)
+      .values({ slug: r.slug, title: r.title })
+      .onConflictDoNothing();
+  }
+}
+
+router.get("/publisher/reports", async (req, res): Promise<void> => {
+  if (!keyOk(req.query.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  await ensureReportRows();
+
+  const rows = await db.select().from(specialReportsTable);
+  const reportsMap = new Map(rows.map((r) => [r.slug, r]));
+
+  const reports = REPORT_DEFINITIONS.map((def) => {
+    const row = reportsMap.get(def.slug);
+    return {
+      slug: def.slug,
+      title: def.title,
+      uploaded: !!(row?.objectPath),
+      ...(row?.uploadedAt ? { uploadedAt: row.uploadedAt.toISOString() } : {}),
+    };
+  });
+
+  // Count founding members who haven't received reports yet
+  const [{ count: pendingMemberCount }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(membersTable)
+    .where(
+      sql`${membersTable.specialReportsSentAt} IS NULL AND ${membersTable.plan} IN ('founding-individual', 'founding-team')`,
+    );
+
+  res.json({ reports, pendingMemberCount });
+});
+
+router.post("/publisher/reports/upload-url", async (req, res): Promise<void> => {
+  if (!keyOk(req.body?.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  const slug = typeof req.body?.slug === "string" ? req.body.slug.trim() : "";
+  if (!REPORT_DEFINITIONS.find((d) => d.slug === slug)) {
+    res.status(400).json({ error: "Unknown report slug" });
+    return;
+  }
+  try {
+    const uploadUrl = await storageService.getObjectEntityUploadURL();
+    res.json({ uploadUrl, slug });
+  } catch (err) {
+    console.error("reports upload-url error:", err);
+    res.status(502).json({ error: "Could not generate upload URL" });
+  }
+});
+
+router.post("/publisher/reports/confirm", async (req, res): Promise<void> => {
+  if (!keyOk(req.body?.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  const slug = typeof req.body?.slug === "string" ? req.body.slug.trim() : "";
+  const uploadedUrl = typeof req.body?.uploadedUrl === "string" ? req.body.uploadedUrl.trim() : "";
+  if (!REPORT_DEFINITIONS.find((d) => d.slug === slug) || !uploadedUrl) {
+    res.status(400).json({ error: "slug and uploadedUrl are required" });
+    return;
+  }
+
+  // Normalize GCS presigned URL → /objects/... path
+  const objectPath = storageService.normalizeObjectEntityPath(uploadedUrl);
+
+  // Validate: must be under the uploads prefix (not an arbitrary object path).
+  // getObjectEntityUploadURL always writes to ${PRIVATE_OBJECT_DIR}/uploads/<uuid>
+  // which normalizes to /objects/uploads/<uuid>.
+  if (!objectPath.startsWith("/objects/uploads/")) {
+    res.status(400).json({ error: "Uploaded URL does not point to an expected object path" });
+    return;
+  }
+
+  // Validate: object exists and is a PDF.
+  let contentType: string;
+  try {
+    const { ObjectStorageService: _OSS, ...rest } = await import("../lib/objectStorage");
+    void rest;
+    const file = await storageService.getObjectEntityFile(objectPath);
+    const [metadata] = await file.getMetadata();
+    contentType = String(metadata.contentType ?? "");
+  } catch {
+    res.status(400).json({ error: "Uploaded object could not be found in storage" });
+    return;
+  }
+  if (!contentType.startsWith("application/pdf")) {
+    res.status(400).json({ error: "Uploaded file must be a PDF (got: " + contentType + ")" });
+    return;
+  }
+
+  await ensureReportRows();
+  await db
+    .update(specialReportsTable)
+    .set({ objectPath, uploadedAt: new Date() })
+    .where(eq(specialReportsTable.slug, slug));
+
+  // Deliver to any founding members still waiting for their reports
+  let deliveredCount = 0;
+  try {
+    deliveredCount = await deliverReportsToPendingFoundingMembers();
+  } catch (err) {
+    console.error("reports confirm: delivery error:", err);
+  }
+
+  res.json({ slug, objectPath, deliveredCount });
 });
 
 export default router;

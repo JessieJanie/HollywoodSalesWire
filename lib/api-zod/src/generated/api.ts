@@ -23,7 +23,6 @@ export const HealthCheckResponse = zod.object({
 export const subscribeBodyEmailMin = 3;
 
 
-
 export const SubscribeBody = zod.object({
   "email": zod.string().min(subscribeBodyEmailMin)
 })
@@ -71,7 +70,6 @@ export const PublisherStatusResponse = zod.object({
 export const publisherDraftBodyWireTextMin = 100;
 
 
-
 export const PublisherDraftBody = zod.object({
   "key": zod.string(),
   "wireText": zod.string().min(publisherDraftBodyWireTextMin)
@@ -91,7 +89,6 @@ export const publisherSendBodySubjectMin = 3;
 export const publisherSendBodyBodyTextMin = 50;
 
 
-
 export const PublisherSendBody = zod.object({
   "key": zod.string(),
   "subject": zod.string().min(publisherSendBodySubjectMin),
@@ -109,7 +106,6 @@ export const PublisherSendResponse = zod.object({
 export const publisherPaidSendBodySubjectMin = 3;
 
 export const publisherPaidSendBodyBodyTextMin = 100;
-
 
 
 export const PublisherPaidSendBody = zod.object({
@@ -147,7 +143,12 @@ export const PublisherWireLatestResponse = zod.object({
 })).optional()
 })
 
-
+/**
+ * @summary List special report upload statuses (key-protected)
+ */
+export const PublisherReportsQueryParams = zod.object({
+  "key": zod.coerce.string()
+})
 /**
  * @summary Start a research run now (key-protected)
  */
@@ -160,3 +161,40 @@ export const PublisherWireRunResponse = zod.object({
 })
 
 
+export const PublisherReportsResponse = zod.object({
+  "reports": zod.array(zod.object({
+  "slug": zod.string(),
+  "title": zod.string(),
+  "uploaded": zod.boolean(),
+  "uploadedAt": zod.string().optional()
+})),
+  "pendingMemberCount": zod.number()
+})
+
+export const PublisherReportsUploadUrlResponse = zod.object({
+  "uploadUrl": zod.string(),
+  "slug": zod.string()
+})
+
+/**
+ * @summary Confirm report upload and trigger pending deliveries (key-protected)
+ */
+export const PublisherReportsConfirmBody = zod.object({
+  "key": zod.string(),
+  "slug": zod.string(),
+  "uploadedUrl": zod.string()
+})
+
+export const PublisherReportsConfirmResponse = zod.object({
+  "slug": zod.string(),
+  "objectPath": zod.string(),
+  "deliveredCount": zod.number()
+})
+
+/**
+ * @summary Get presigned URL for uploading a special report PDF (key-protected)
+ */
+export const PublisherReportsUploadUrlBody = zod.object({
+  "key": zod.string(),
+  "slug": zod.string()
+})

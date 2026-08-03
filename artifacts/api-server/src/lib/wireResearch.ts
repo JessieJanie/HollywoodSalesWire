@@ -1,6 +1,6 @@
 import { desc, eq, and, ne, sql } from "drizzle-orm";
 import { db, wireRunsTable, researchPagesTable } from "@workspace/db";
-import { skimRead, skimReadJs, skimFilmIncentives, skimStudioJobs } from "./skim";
+import { skimRead, skimReadJs, skimFilmIncentives, skimStudioJobs, skimEntityFormations } from "./skim";
 import { draftFreeEdition } from "./freeEdition";
 import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
@@ -264,6 +264,32 @@ export async function runWeeklyResearch(
         }
       } catch (err) {
         logger.warn({ err }, "studio-jobs signal unavailable; continuing without it");
+      }
+      try {
+        const { items, crawlStatus, degradedSources } = await skimEntityFormations(100);
+        const cutoff = Date.now() - 10 * 24 * 3600 * 1000;
+        const fresh = items.filter((i) => Date.parse(i.payload.publishedAt) > cutoff);
+        if (fresh.length > 0) {
+          const md =
+            `New business-entity formations from official state registries, keyword-filtered for film/TV terms (Productions/Pictures/Films/Studios/Media/Entertainment/Post/VFX/Television).\n` +
+            `READING RULES: coverage is NY + TX ONLY (CA/GA/NM are known gaps — never claim national coverage). Expect non-film noise ("NOVA WELLNESS STUDIOS") — apply second-pass relevance judgment: keep only names suggesting a production entity or project LLC; drop wellness/photo/generic media. TX filingDate can be future-dated (declared "responsibility beginning" date) — cite publishedAt for freshness. A new production LLC is an early signal a project is spinning up: banking, insurance, payroll, legal, stage/vendor spend follow.` +
+            `${degradedSources?.length ? ` DEGRADED SOURCES (live source down this crawl): ${degradedSources.join(", ")}.` : ""} Crawl status: ${crawlStatus ?? "ok"}.\n\n` +
+            fresh
+              .map(
+                (i) =>
+                  `- [${i.payload.jurisdiction}] ${i.payload.publishedAt.slice(0, 10)}: ${i.payload.entityName} (${i.payload.entityType}, filed ${i.payload.filingDate}${i.payload.registeredAgent ? `, agent: ${i.payload.registeredAgent}` : ""})\n  ${i.payload.sourceUrl}`,
+              )
+              .join("\n");
+          pages.push({
+            url: "https://skim402.com/api/v2/signal/entity-formations/latest",
+            label: "Skim Signal — new film/TV entity formations (NY + TX official registries)",
+            markdown: md,
+            wordCount: md.split(/\s+/).filter(Boolean).length,
+            status: "ok (structured signal)",
+          });
+        }
+      } catch (err) {
+        logger.warn({ err }, "entity-formations signal unavailable; continuing without it");
       }
 
       // 1. Fetch the beat (sequentially — be a polite payer).

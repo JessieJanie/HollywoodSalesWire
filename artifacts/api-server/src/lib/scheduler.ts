@@ -1,5 +1,6 @@
 import { and, eq, lte, or } from "drizzle-orm";
 import { db, wireRunsTable, emailSubscribersTable, sequenceEmailsTable } from "@workspace/db";
+import { deliverReportsToPendingFoundingMembers, resetStaleReportLeases } from "./members";
 import { runWeeklyResearch, currentWeekKey } from "./wireResearch";
 import { FROM_ADDRESS, SEQUENCE, SITE_URL } from "./emailSequence";
 import { deadlineLabel } from "./foundingDeadline";
@@ -146,11 +147,29 @@ async function tickPendingEmails(): Promise<void> {
   }
 }
 
+/**
+ * Recover stale report-delivery leases and retry any undelivered founding
+ * members. Runs every scheduler tick (5 min) alongside pending-email
+ * processing, so a failed delivery from the checkout webhook or the upload-
+ * confirm path is automatically retried without publisher intervention.
+ */
+async function tickReportDeliveries(): Promise<void> {
+  // Reset leases older than 15 minutes whose delivery was never confirmed.
+  await resetStaleReportLeases();
+  // Deliver to any founding members still waiting (new or stale-lease-reset).
+  await deliverReportsToPendingFoundingMembers();
+}
+
 async function tick(): Promise<void> {
   try {
     await tickPendingEmails();
   } catch (err) {
     logger.error({ err }, "pending-email tick failed");
+  }
+  try {
+    await tickReportDeliveries();
+  } catch (err) {
+    logger.error({ err }, "report-delivery tick failed");
   }
   try {
     if (!isDue()) return;

@@ -131,3 +131,43 @@ export async function skimStudioJobs(limit = 100): Promise<{ items: StudioJobsIt
   )) as { items?: StudioJobsItem[]; crawl?: { status?: string } };
   return { items: data.items ?? [], crawlStatus: data.crawl?.status };
 }
+
+export interface EntityFormationItem {
+  title?: string;
+  url?: string;
+  summary?: string;
+  payload: {
+    entityName: string;
+    jurisdiction: string;
+    country: string;
+    filingDate: string;
+    entityNumber: string;
+    entityType: string;
+    registeredAgent?: string | null;
+    sourceUrl: string;
+    official: boolean;
+    publishedAt: string;
+  };
+}
+
+/**
+ * New film/TV-adjacent entity formations (LLCs etc.) from official registries.
+ * Coverage: NY + TX only (CA/GA/NM are bot-walled — known gaps, not failures,
+ * so crawl.status stays "ok"; degradedSources means NY or TX itself broke).
+ * Keyword-filtered upstream with word boundaries; expect non-film noise —
+ * caller must do second-pass relevance judgment. Dedupe is by registry ID.
+ * Use payload.publishedAt for freshness (TX filingDate can be future-dated).
+ * Refreshes every 6h — poll at most once or twice a day.
+ */
+export async function skimEntityFormations(
+  limit = 100,
+): Promise<{ items: EntityFormationItem[]; crawlStatus?: string; degradedSources?: string[] }> {
+  const data = (await v2Fetch(
+    `https://skim402.com/api/v2/signal/entity-formations/latest?limit=${limit}`,
+  )) as { items?: EntityFormationItem[]; crawl?: { status?: string; degradedSources?: string[] } };
+  return {
+    items: data.items ?? [],
+    crawlStatus: data.crawl?.status,
+    degradedSources: data.crawl?.degradedSources,
+  };
+}

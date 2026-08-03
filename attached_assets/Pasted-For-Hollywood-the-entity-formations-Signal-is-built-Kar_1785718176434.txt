@@ -1,0 +1,44 @@
+For Hollywood: the entity-formations Signal is built
+(Karilyn — paste this whole file to Hollywood in his project.)
+
+Hi Hollywood — Ziggy here. Your third custom Skim Signal is implemented and will be live at the next publish of skim402.com.
+
+Endpoint
+GET https://skim402.com/api/v2/signal/entity-formations/latest?limit=50
+
+Same x402 v2 payment pattern as studio-jobs and film-incentives.
+Price: $0.005 per poll (confirmed — all Signals share one price).
+?limit= 1–100, default 50. Newest first.
+Refresh cycle: 6 hours (a poll inside the window costs the same but serves cached data — poll once or twice a day, no more needed).
+What each item looks like
+payload carries exactly the fields you specced:
+
+{
+  "entityName": "BLUE HARVEST PRODUCTIONS LLC",
+  "jurisdiction": "NY",
+  "country": "US",
+  "filingDate": "2026-07-30",
+  "entityNumber": "7981000",
+  "entityType": "DOMESTIC LIMITED LIABILITY COMPANY",
+  "registeredAgent": "Sloane & Partners LLP",
+  "sourceUrl": "https://data.ny.gov/resource/n9v6-gdp6.json?dos_id=7981000",
+  "official": true,
+  "publishedAt": "2026-07-30T00:00:00.000Z"
+}
+
+Name filter is your keyword list (Productions/Pictures/Films/Studios/Media/Entertainment/Post/VFX/Television) with word boundaries. Expect some non-film noise ("NOVA WELLNESS STUDIOS") — your pipeline should do the second-pass relevance judgment.
+Dedupe is by official registry ID, so an entity never repeats across polls.
+Use publishedAt for your 10-day freshness filter, not filingDate (see the TX note below).
+Phase 1 source status — read this part carefully
+Source	Status	Notes
+NY	✅ live	NY Dept of State open-data feed, updated daily. Filing date, entity type, registered agent where the registry publishes one.
+TX	✅ live	Official Texas Comptroller franchise-tax registrations (the TX SOS itself only sells records behind a paywall). Can lag the SOS filing by a few days. filingDate is the declared "responsibility beginning" date and is occasionally future-dated — that's in the record itself; publishedAt reflects when the registration actually became public. No registered agent in this dataset.
+CA	❌ blocked	bizfile is behind an Imperva bot wall. CA offers an official API (CALICO) that needs an account signup — Karilyn, that's a to-do for us at calicodev.sos.ca.gov if CA matters enough.
+GA	❌ blocked	eCorp sits behind a Cloudflare challenge that defeats even browser rendering.
+NM	❌ blocked	The portal drops datacenter traffic and exposes no public searchable formation feed.
+CA/GA/NM are known coverage gaps, not failures, so the response reports crawl.status: "ok" when NY and TX both succeed — degradedSources is reserved for a live source that breaks (exactly like studio-jobs when a board fails). Every crawl probes the three walled registries anyway; if a wall ever comes down our alarms fire and we add the adapter.
+
+Phase 2: UK Companies House has a genuinely free API with SIC-code filtering (59111/59112/59113 — exactly your film/TV production codes). It's the easiest and highest-quality next add — say the word and it goes in.
+
+Suggested weekly prompt addition
+Poll GET https://skim402.com/api/v2/signal/entity-formations/latest?limit=100 (x402, $0.005). Keep items with publishedAt in the last 10 days. Second-pass filter for film/TV relevance (drop wellness studios, photo studios, generic media LLCs unless the name pattern suggests a production entity or project LLC). Coverage is currently NY + TX only; treat a non-empty degradedSources as one of those two being down.

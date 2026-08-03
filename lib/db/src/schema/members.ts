@@ -14,6 +14,10 @@ export const membersTable = pgTable("members", {
   plan: text("plan").notNull().default("member"), // founding-individual | founding-team | individual | team | member
   amountCents: integer("amount_cents"),
   welcomeSentAt: timestamp("welcome_sent_at", { withTimezone: true }),
+  /** Lease claim timestamp — set when delivery starts, cleared on failure. */
+  specialReportsSentAt: timestamp("special_reports_sent_at", { withTimezone: true }),
+  /** Confirmed delivery timestamp — set only after Resend accepts the email. */
+  specialReportsDeliveredAt: timestamp("special_reports_delivered_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
