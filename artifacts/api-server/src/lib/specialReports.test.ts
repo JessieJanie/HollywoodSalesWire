@@ -9,6 +9,7 @@
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { signMemberSlug, reportDownloadUrl, REPORT_LINK_TTL_MS } from "../routes/reports";
+import { INACTIVE_SUB_STATUSES } from "./paidWire";
 import { planFromSession, PAYMENT_LINK_TO_PLAN, type CheckoutSessionLike } from "./members";
 
 // Provide a test secret so signMemberSlug works without a real env

@@ -45,3 +45,7 @@ Ordered precedence (most → least stable):
 - Key: `sha256("special-reports-v1:<normalized-email>")` 
 - Same key on checkout path and retroactive delivery path
 - **Why:** Resend deduplicates within 24h; stale-lease recovery retries within 15 min — well inside window.
+
+## Entitlement policy + e2e coverage (Aug 2026)
+Reports are "yours to keep": the download route checks HMAC + expiry + founding plan only — deliberately no subscription-status check. Canceled founding members keep access.
+Opt-in e2e test: `RUN_E2E=1 pnpm --filter @workspace/api-server exec vitest run src/e2e` (needs live api-server, dev DB, object storage; seeds and cleans its own rows).
