@@ -9,6 +9,7 @@ import {
   usePublisherReports,
   usePublisherReportsUploadUrl,
   usePublisherReportsConfirm,
+  usePublisherCompMember,
 } from "@workspace/api-client-react";
 import {
   Loader2,
@@ -44,6 +45,12 @@ export default function PublisherPage() {
   const [paidSubject, setPaidSubject] = useState("");
   const [paidBody, setPaidBody] = useState("");
   const [paidSentCount, setPaidSentCount] = useState<number | null>(null);
+
+  // Complimentary member
+  const compMember = usePublisherCompMember();
+  const [compEmail, setCompEmail] = useState("");
+  const [compPlan, setCompPlan] = useState("founding-individual");
+  const [compResult, setCompResult] = useState<string | null>(null);
 
   const wire = usePublisherWireLatest(
     { key },
@@ -243,6 +250,60 @@ export default function PublisherPage() {
               )}
             </>
           )}
+        </div>
+
+        {/* ---------------------------------------------------------------- */}
+        {/* Complimentary member                                              */}
+        {/* ---------------------------------------------------------------- */}
+        <div className="bg-card border border-border p-6 mb-6 shadow-sm">
+          <h2 className="font-serif font-bold text-lg mb-1">Add a Complimentary Member</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Adds a member without billing. They get the standard welcome email with their Shelf
+            link, the Special Reports (founding plans, once uploaded), and the latest Wire issue.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <input
+              type="email"
+              value={compEmail}
+              onChange={(e) => setCompEmail(e.target.value)}
+              placeholder="member@example.com"
+              className="flex-1 border border-border bg-background px-3 py-2 text-sm"
+            />
+            <select
+              value={compPlan}
+              onChange={(e) => setCompPlan(e.target.value)}
+              className="border border-border bg-background px-3 py-2 text-sm"
+            >
+              <option value="founding-individual">Founding — Individual</option>
+              <option value="founding-team">Founding — Team</option>
+              <option value="individual">Individual</option>
+              <option value="team">Team</option>
+            </select>
+            <button
+              onClick={() =>
+                compMember.mutate(
+                  { data: { key, email: compEmail.trim(), plan: compPlan as never } },
+                  {
+                    onSuccess: (r) => {
+                      setCompResult(
+                        r.welcomed
+                          ? `Added ${compEmail.trim()} — welcome email sent.`
+                          : `${compEmail.trim()} is already a member — nothing re-sent.`,
+                      );
+                      setCompEmail("");
+                    },
+                    onError: () => setCompResult("Could not add the member — please try again."),
+                  },
+                )
+              }
+              disabled={compMember.isPending || compEmail.trim() === ""}
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-sm font-medium disabled:opacity-50"
+            >
+              {compMember.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              Add member
+            </button>
+          </div>
+          {compResult && <p className="mt-3 text-sm text-primary">{compResult}</p>}
         </div>
 
         {/* ---------------------------------------------------------------- */}

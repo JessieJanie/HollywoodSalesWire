@@ -174,6 +174,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMessage"
+  /publisher/comp-member:
+    post:
+      operationId: publisherCompMember
+      tags: [publisher]
+      summary: Add a complimentary member (no Stripe) and send their welcome email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompMemberInput"
+      responses:
+        "200":
+          description: Member added (or already existed)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompMemberResult"
+        "400":
+          description: Invalid email or plan
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
   /publisher/wire/latest:
     get:
       operationId: publisherWireLatest
@@ -392,6 +422,27 @@ components:
         bodyText:
           type: string
           minLength: 100
+    CompMemberInput:
+      type: object
+      required: [key, email]
+      properties:
+        key:
+          type: string
+        email:
+          type: string
+          minLength: 5
+        plan:
+          type: string
+          enum: [founding-individual, founding-team, individual, team, member]
+          default: founding-individual
+    CompMemberResult:
+      type: object
+      required: [created, welcomed]
+      properties:
+        created:
+          type: boolean
+        welcomed:
+          type: boolean
     PublisherDraftInput:
       type: object
       required: [key, wireText]

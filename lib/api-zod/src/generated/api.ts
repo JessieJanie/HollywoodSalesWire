@@ -124,6 +124,25 @@ export const PublisherPaidSendResponse = zod.object({
 
 
 /**
+ * @summary Add a complimentary member (no Stripe) and send their welcome email
+ */
+export const publisherCompMemberBodyEmailMin = 5;
+
+export const publisherCompMemberBodyPlanDefault = `founding-individual`;
+
+export const PublisherCompMemberBody = zod.object({
+  "key": zod.string(),
+  "email": zod.string().min(publisherCompMemberBodyEmailMin),
+  "plan": zod.enum(['founding-individual', 'founding-team', 'individual', 'team', 'member']).default(publisherCompMemberBodyPlanDefault)
+})
+
+export const PublisherCompMemberResponse = zod.object({
+  "created": zod.boolean(),
+  "welcomed": zod.boolean()
+})
+
+
+/**
  * @summary Latest Monday research run (key-protected)
  */
 export const PublisherWireLatestQueryParams = zod.object({

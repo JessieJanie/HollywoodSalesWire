@@ -21,6 +21,8 @@ import type {
 
 import type {
   ApiMessage,
+  CompMemberInput,
+  CompMemberResult,
   FoundingOfferParams,
   FoundingOfferStatus,
   HealthStatus,
@@ -600,6 +602,77 @@ export const usePublisherPaidSend = <TError = ErrorType<ApiMessage>,
         TContext
       > => {
       return useMutation(getPublisherPaidSendMutationOptions(options));
+    }
+
+export const getPublisherCompMemberUrl = () => {
+
+
+
+
+  return `/api/publisher/comp-member`
+}
+
+/**
+ * @summary Add a complimentary member (no Stripe) and send their welcome email
+ */
+export const publisherCompMember = async (compMemberInput: CompMemberInput, options?: Parameters<typeof customFetch>[1]): Promise<CompMemberResult> => {
+
+  return customFetch<CompMemberResult>(getPublisherCompMemberUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(compMemberInput)
+  }
+);}
+
+
+
+
+
+export const getPublisherCompMemberMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherCompMember>>, TError,{data: BodyType<CompMemberInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publisherCompMember>>, TError,{data: BodyType<CompMemberInput>}, TContext> => {
+
+const mutationKey = ['publisherCompMember'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherCompMember>>, {data: BodyType<CompMemberInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  publisherCompMember(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublisherCompMemberMutationResult = NonNullable<Awaited<ReturnType<typeof publisherCompMember>>>
+    export type PublisherCompMemberMutationBody = BodyType<CompMemberInput>
+    export type PublisherCompMemberMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Add a complimentary member (no Stripe) and send their welcome email
+ */
+export const usePublisherCompMember = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherCompMember>>, TError,{data: BodyType<CompMemberInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publisherCompMember>>,
+        TError,
+        {data: BodyType<CompMemberInput>},
+        TContext
+      > => {
+      return useMutation(getPublisherCompMemberMutationOptions(options));
     }
 
 export const getPublisherWireLatestUrl = (params: PublisherWireLatestParams,) => {

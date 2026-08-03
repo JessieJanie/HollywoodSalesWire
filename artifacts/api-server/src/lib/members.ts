@@ -547,6 +547,64 @@ interface CheckoutSessionLineItem {
   price?: string | { id?: string } | null;
 }
 
+/**
+ * Create a complimentary (no-Stripe) member from the publisher console.
+ * Mirrors the paid-member flow minus billing: upsert the member, send the
+ * welcome email once (atomic claim), then Special Reports (founding plans)
+ * and the latest Wire issue. Idempotent: re-adding an existing member never
+ * re-sends the welcome email.
+ */
+export async function createCompMember(
+  rawEmail: string,
+  plan: string,
+): Promise<{ created: boolean; welcomed: boolean }> {
+  const email = rawEmail.trim().toLowerCase();
+  const inserted = await db
+    .insert(membersTable)
+    .values({ email, plan })
+    .onConflictDoUpdate({ target: membersTable.email, set: { plan: sql`excluded.plan` } })
+    .returning({ id: membersTable.id, welcomeSentAt: membersTable.welcomeSentAt });
+  logger.info({ email, plan }, "publisher: complimentary member recorded");
+
+  const claimed = await db
+    .update(membersTable)
+    .set({ welcomeSentAt: new Date() })
+    .where(and(eq(membersTable.email, email), isNull(membersTable.welcomeSentAt)))
+    .returning({ id: membersTable.id });
+  if (claimed.length === 0) {
+    return { created: inserted.length > 0, welcomed: false };
+  }
+
+  try {
+    await resendRequest("/emails", {
+      method: "POST",
+      body: {
+        from: FROM_ADDRESS,
+        to: [email],
+        subject: "Welcome to Hollywood Sales Wire — your membership is active",
+        html: welcomeHtml(email),
+      },
+    });
+  } catch (err) {
+    logger.error({ err, email }, "publisher: failed to send comp-member welcome — releasing claim");
+    await db
+      .update(membersTable)
+      .set({ welcomeSentAt: null })
+      .where(eq(membersTable.email, email));
+    throw err;
+  }
+
+  if (isFoundingPlan(plan)) {
+    try {
+      await sendSpecialReportsToMember(email);
+    } catch (err) {
+      logger.error({ err, email }, "publisher: failed to send special reports to comp member");
+    }
+  }
+  await maybeSendLatestWire(email);
+  return { created: true, welcomed: true };
+}
+
 export interface CheckoutSessionLike {
   id?: string;
   mode?: string;

@@ -50,6 +50,29 @@ export interface PaidWireSendInput {
   bodyText: string;
 }
 
+export type CompMemberInputPlan = typeof CompMemberInputPlan[keyof typeof CompMemberInputPlan];
+
+
+export const CompMemberInputPlan = {
+  'founding-individual': 'founding-individual',
+  'founding-team': 'founding-team',
+  individual: 'individual',
+  team: 'team',
+  member: 'member',
+} as const;
+
+export interface CompMemberInput {
+  key: string;
+  /** @minLength 5 */
+  email: string;
+  plan?: CompMemberInputPlan;
+}
+
+export interface CompMemberResult {
+  created: boolean;
+  welcomed: boolean;
+}
+
 export interface PublisherDraftInput {
   key: string;
   /** @minLength 100 */

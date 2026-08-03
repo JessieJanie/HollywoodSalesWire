@@ -41,6 +41,38 @@ function keyOk(key: unknown): boolean {
   return a.length === b.length && timingSafeEqual(a, b);
 }
 
+const COMP_PLANS = new Set(["founding-individual", "founding-team", "individual", "team", "member"]);
+
+/**
+ * POST /publisher/comp-member — add a complimentary member (no Stripe).
+ * Sends the standard welcome email (with Shelf link), Special Reports for
+ * founding plans, and the latest Wire issue. Idempotent on email.
+ */
+router.post("/publisher/comp-member", async (req, res): Promise<void> => {
+  if (!keyOk(req.body?.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  const email = typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : "";
+  const plan = typeof req.body?.plan === "string" ? req.body.plan : "founding-individual";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    res.status(400).json({ error: "Enter a valid email address." });
+    return;
+  }
+  if (!COMP_PLANS.has(plan)) {
+    res.status(400).json({ error: "Unknown plan." });
+    return;
+  }
+  try {
+    const { createCompMember } = await import("../lib/members");
+    const result = await createCompMember(email, plan);
+    res.json(result);
+  } catch (err) {
+    req.log?.error?.({ err }, "comp-member failed");
+    res.status(502).json({ error: "Could not add the member — please try again." });
+  }
+});
+
 router.post("/publisher/draft", async (req, res): Promise<void> => {
   if (!keyOk(req.body?.key)) {
     res.status(401).json({ error: "Invalid key" });

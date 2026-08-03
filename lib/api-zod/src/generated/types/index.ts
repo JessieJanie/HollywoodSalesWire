@@ -7,6 +7,9 @@
  */
 
 export * from './apiMessage';
+export * from './compMemberInput';
+export * from './compMemberInputPlan';
+export * from './compMemberResult';
 export * from './foundingOfferParams';
 export * from './foundingOfferStatus';
 export * from './healthStatus';
