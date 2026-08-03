@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   usePublisherStatus,
   usePublisherDraft,
@@ -6,8 +6,21 @@ import {
   usePublisherWireLatest,
   usePublisherWireRun,
   usePublisherPaidSend,
+  usePublisherReports,
+  usePublisherReportsUploadUrl,
+  usePublisherReportsConfirm,
 } from "@workspace/api-client-react";
-import { Loader2, Send, Sparkles, CheckCircle2, RefreshCw, Copy, ExternalLink } from "lucide-react";
+import {
+  Loader2,
+  Send,
+  Sparkles,
+  CheckCircle2,
+  RefreshCw,
+  Copy,
+  ExternalLink,
+  Upload,
+  FileText,
+} from "lucide-react";
 
 /**
  * Private weekly-preview console. Reached only via the publisher's bookmarked
@@ -44,6 +57,46 @@ export default function PublisherPage() {
     },
   );
   const runWire = usePublisherWireRun();
+
+  // Special Reports
+  const reports = usePublisherReports(
+    { key },
+    { query: { queryKey: ["publisher-reports", key], enabled: key !== "", retry: false } },
+  );
+  const getUploadUrl = usePublisherReportsUploadUrl();
+  const confirmUpload = usePublisherReportsConfirm();
+  const [uploadingSlug, setUploadingSlug] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [uploadedSlugs, setUploadedSlugs] = useState<Set<string>>(new Set());
+  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  async function handleFileSelect(slug: string, file: File) {
+    setUploadingSlug(slug);
+    setUploadError(null);
+    try {
+      // 1. Get presigned URL
+      const { uploadUrl } = await getUploadUrl.mutateAsync({ data: { key, slug } });
+
+      // 2. Upload directly to GCS
+      const putRes = await fetch(uploadUrl, {
+        method: "PUT",
+        headers: { "Content-Type": "application/pdf" },
+        body: file,
+      });
+      if (!putRes.ok) throw new Error(`Upload failed: ${putRes.status}`);
+
+      // 3. Confirm with our server
+      await confirmUpload.mutateAsync({ data: { key, slug, uploadedUrl: uploadUrl } });
+
+      setUploadedSlugs((prev) => new Set([...prev, slug]));
+      reports.refetch();
+    } catch (err) {
+      console.error("upload error:", err);
+      setUploadError(`Upload failed for "${slug}" — please try again.`);
+    } finally {
+      setUploadingSlug(null);
+    }
+  }
 
   if (!key || status.isError) {
     return (
@@ -83,14 +136,122 @@ export default function PublisherPage() {
     );
   };
 
+  const allReportsUploaded =
+    reports.data?.reports.every((r) => r.uploaded || uploadedSlugs.has(r.slug)) ?? false;
+
   return (
     <div className="min-h-screen bg-[#F6F5F2] font-sans text-foreground">
       <div className="max-w-3xl mx-auto px-4 py-12">
         <p className="font-mono-data text-xs tracking-widest text-muted-foreground mb-2">
           HOLLYWOOD SALES WIRE — PUBLISHER CONSOLE
         </p>
-        <h1 className="text-3xl font-serif font-bold mb-2">Weekly Free Edition</h1>
-        <p className="text-muted-foreground mb-8">
+        <h1 className="text-3xl font-serif font-bold mb-8">Publisher Console</h1>
+
+        {/* ---------------------------------------------------------------- */}
+        {/* Special Reports                                                   */}
+        {/* ---------------------------------------------------------------- */}
+        <div className="bg-card border border-border p-6 mb-6 shadow-sm">
+          <h2 className="font-serif font-bold text-lg mb-1">Special Reports</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Upload a PDF for each report. Once all three are uploaded, any Founding Members who
+            haven't received them yet will be emailed automatically. New Founding Members are
+            emailed immediately after purchase.
+          </p>
+
+          {reports.isLoading && (
+            <p className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="w-4 h-4 animate-spin" /> Loading…
+            </p>
+          )}
+
+          {reports.data && (
+            <>
+              <div className="space-y-3 mb-4">
+                {reports.data.reports.map((report) => {
+                  const isUploaded = report.uploaded || uploadedSlugs.has(report.slug);
+                  const isUploading = uploadingSlug === report.slug;
+                  return (
+                    <div
+                      key={report.slug}
+                      className="flex items-center justify-between gap-4 border border-border p-4 bg-background"
+                    >
+                      <div className="flex items-center gap-3">
+                        <FileText
+                          className={`w-5 h-5 flex-shrink-0 ${isUploaded ? "text-primary" : "text-muted-foreground"}`}
+                        />
+                        <div>
+                          <p className="font-medium text-sm">{report.title}</p>
+                          {isUploaded && report.uploadedAt && (
+                            <p className="text-xs text-muted-foreground">
+                              Uploaded {new Date(report.uploadedAt).toLocaleDateString()}
+                            </p>
+                          )}
+                          {isUploaded && uploadedSlugs.has(report.slug) && !report.uploadedAt && (
+                            <p className="text-xs text-muted-foreground">Just uploaded</p>
+                          )}
+                          {!isUploaded && (
+                            <p className="text-xs text-amber-700">Not yet uploaded</p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {isUploaded && (
+                          <span className="inline-flex items-center gap-1 text-xs text-primary font-medium">
+                            <CheckCircle2 className="w-4 h-4" /> Ready
+                          </span>
+                        )}
+                        <input
+                          ref={(el) => { fileInputRefs.current[report.slug] = el; }}
+                          type="file"
+                          accept=".pdf,application/pdf"
+                          className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) void handleFileSelect(report.slug, file);
+                            e.target.value = "";
+                          }}
+                        />
+                        <button
+                          onClick={() => fileInputRefs.current[report.slug]?.click()}
+                          disabled={isUploading}
+                          className="inline-flex items-center gap-1.5 border border-border px-3 py-1.5 text-sm font-medium hover:bg-muted disabled:opacity-40"
+                        >
+                          {isUploading ? (
+                            <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Uploading…</>
+                          ) : (
+                            <><Upload className="w-3.5 h-3.5" /> {isUploaded ? "Replace" : "Upload PDF"}</>
+                          )}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {uploadError && (
+                <p className="text-sm text-red-700 mb-3">{uploadError}</p>
+              )}
+
+              {allReportsUploaded && (
+                <p className="inline-flex items-center gap-2 text-sm text-primary font-medium">
+                  <CheckCircle2 className="w-4 h-4" />
+                  All three reports are uploaded and will be delivered automatically to Founding Members.
+                  {(reports.data.pendingMemberCount ?? 0) > 0 && (
+                    <> {reports.data.pendingMemberCount} member{reports.data.pendingMemberCount === 1 ? "" : "s"} will receive them now.</>
+                  )}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+
+        {/* ---------------------------------------------------------------- */}
+        {/* Free subscribers status                                           */}
+        {/* ---------------------------------------------------------------- */}
+        <p className="font-mono-data text-xs tracking-widest text-muted-foreground mb-2">
+          WEEKLY FREE EDITION
+        </p>
+        <p className="text-muted-foreground mb-6">
           {status.data
             ? <>Your free list has <strong>{status.data.subscriberCount}</strong> active subscriber{status.data.subscriberCount === 1 ? "" : "s"}.{status.data.lastSubject && <> Last sent: &ldquo;{status.data.lastSubject}&rdquo;.</>}</>
             : "Loading…"}
