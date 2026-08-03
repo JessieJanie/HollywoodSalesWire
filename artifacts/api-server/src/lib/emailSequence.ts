@@ -94,7 +94,7 @@ ${p("And it's worse than stale: the list companies rent those same names out, ov
 ${p("Meanwhile the hot list — who got money this month and has to spend it — sits in public filings that almost nobody in sales reads, because reading them is a genuinely tedious skill.")}
 ${p("That's the entire idea behind Hollywood Sales Wire: I read the filings, the award lists, the requisitions, and the money flows every week, and every Tuesday you get the names — who just got funded, what they're about to buy, and when the window closes.")}
 ${p("Cold leads are a commodity. Hot leads are an edge.")}
-${p(`The offer is live right now: subscribe by midnight Eastern on ${deadlineLabel} — or better, today — and you're a Founding Member at $38 a week instead of the regular $77, locked in for as long as you stay. Three Special Reports arrive free and immediately, with your first issue of the Wire this coming Tuesday.`)}
+${p(`The offer is live right now: subscribe by midnight Eastern on ${deadlineLabel} — or better, today — and you're a Founding Member at $38 a week instead of the regular $77, locked in for as long as you stay. Three Special Reports arrive free and immediately with your membership, alongside your first issue of the Wire this coming Tuesday.`)}
 ${p("I'll make the full case over the next few weeks. But if you already know what a two-week-old award list is worth to your pipeline, there's no reason to wait:")}
 ${cta("Become a Founding Member — $38/week", utm(offerUrl, 1))}
 ${sig}
@@ -125,7 +125,7 @@ ${p("And to hand you the system itself, three Special Reports come free with you
 <li><strong>The $6.6 Billion Greenlight Window</strong> — the state tax-credit system, decoded as a prospecting machine. Which states publish award lists, on what calendar, where to find them — and the window between greenlight and spend, when a production hires, books, and buys nearly everything it will ever buy. Get the calendar right and you're calling the week the money lands, not the quarter after it's spent.</li>
 <li><strong>The Requisition Read</strong> — careers pages as disclosure documents. The job titles that mean &ldquo;a budget just landed here,&rdquo; the posting patterns that reveal a buildout weeks before any purchase order, and a glossary of the tells — walked through on a real nine-figure case you'll recognize.</li>
 </ul>
-${p(`Subscribe by ${deadlineLabel} — or right now — and all three are yours free, immediately, along with the Founding Member rate: $38 a week ($1,995 a year) instead of $77 ($3,995), locked for as long as you stay.`)}
+${p(`Subscribe by ${deadlineLabel} — or right now — and all three are yours immediately, along with the Founding Member rate: $38 a week ($1,995 a year) instead of $77 ($3,995), locked for as long as you stay.`)}
 ${cta("Become a Founding Member — $38/week", utm(offerUrl, 2))}
 ${p("Next week I'll show you the method working on a real example.")}
 ${sig}`,
@@ -146,7 +146,7 @@ ${p("You can't see the purchase orders. But you can see the hiring.")}
 ${p("Within weeks of one such deal, the requisitions started appearing on the streamer's own careers page. Not vague postings — roles like Broadcast Systems Engineer, Live Production and Technical Program Manager, Live Events, dated, specific, and useless to explain unless a broadcast operation was being built from scratch.")}
 ${p("To a salesperson who knows how to read them, those postings said: the budget is real, the buildout has started, and the vendor decisions are being made right now. The purchase orders followed within the quarter. The signal had been public the whole time.")}
 ${p("Anyone could have seen it. Almost nobody looked — because almost nobody in sales has been taught that a careers page is a disclosure document.")}
-${p("The Requisition Read — one of the three Special Reports included free with a Hollywood Sales Wire membership — teaches exactly this. Inside:")}
+${p("The Requisition Read — one of the three Special Reports you get free with your membership — teaches exactly this. Inside:")}
 <ul>
 <li>The full walkthrough of that live-sports buildout, named, dated, requisition by requisition — what each posting revealed and when.</li>
 <li>The glossary of job-title tells: which titles reliably mean money has landed, ranked by how early they show up in a buildout — and the ones that look promising but mean nothing.</li>
@@ -157,7 +157,7 @@ ${p("On its own I'd price it at $495, and I'd be underpricing it: this is the ki
 ${p("The other two reports do the same for the other two signal sources. The Spend Map ($795 value) hands you the territory — the three oceans of spend the trade press barely covers, from the sports-rights buildouts to the localization wave to where the money actually pools while everyone watches Ellison's Paramount circle Warner Bros. Discovery. The $6.6 Billion Greenlight Window ($695 value) hands you the calendar — the state-by-state award-list schedule and the spend window when a production does nearly all of its buying.")}
 ${p("Map, calendar, craft. A complete prospecting system — and the fountainhead of the numbers the $15K databases keep promising and keep not delivering.")}
 ${p("Reports teach you to fish. The Wire hands you fish every Tuesday — because you have a quota, and the filings don't read themselves.")}
-${p(`All three reports come free with membership — they only come with a Hollywood Sales Wire subscription and aren't for sale anywhere else. Subscribe by ${deadlineLabel} and you also lock in the Founding Member rate: $38 a week ($1,995 a year) instead of the regular $77 ($3,995). Subscribe today and the reports hit your inbox today, with your first Wire this Tuesday.`)}
+${p(`All three reports are free with your membership. Subscribe by ${deadlineLabel} and you're in at the Founding Member rate — $38 a week ($1,995 a year) instead of the regular $77 ($3,995), locked for as long as you stay. Subscribe today and the reports hit your inbox today, with your first Wire this Tuesday.`)}
 ${cta("Become a Founding Member — $38/week", utm(offerUrl, 3))}
 ${sig}`,
         unsubscribeUrl,
@@ -175,7 +175,7 @@ ${p("<strong>What the subscription is.</strong> Hollywood Sales Wire is a weekly
 ${p("Every Tuesday, you get the week's live buying signals — new tax-credit awards, requisition sweeps, money flows — read and translated into who to call, what they're about to buy, and when the window closes. Fifty-two issues a year.")}
 ${p("Once a month, subscribers also receive The Divergence Report — the strategic layer on top of the weekly wire. Where the Tuesday wire tells you who to call this week, the Divergence Report is the deeper monthly read on where the money is moving next quarter — the spend shifts, the buildouts forming, the territories opening — so you're positioned before the crowd shows up.")}
 ${p("The wire is your calls for the week. The Divergence Report is your plan for the season. Both come with the subscription, every month you're a member.")}
-${p("<strong>The three Special Reports.</strong> These come free with your membership — they're not for sale anywhere else — delivered immediately, and yours to keep forever.")}
+${p("<strong>The three Special Reports — free with your membership, delivered immediately, yours to keep forever.</strong> These are one-time bonuses included with every membership:")}
 <ul>
 <li><strong>The Spend Map</strong> ($795 value) — the honest map of the production economy's money. Three oceans the headlines ignore — physical production, sports rights, localization — each walked with receipts. Plus the truth about AI spend: real, growing, honestly sized fourth.</li>
 <li><strong>The $6.6 Billion Greenlight Window</strong> ($695 value) — the tax-credit award system as a prospecting machine: which states publish award lists, on what calendar, and the greenlight-to-spend window when a production does nearly all of its buying. The report that turns a government filing into a call sheet.</li>
@@ -208,7 +208,7 @@ ${p("At midnight Eastern tonight, this launch offer closes. Here's what changes 
 <li>The rate goes from $38 a week to $77 a week ($1,995 to $3,995 a year).</li>
 <li>The lock disappears. Founding Members keep $38 a week for as long as they stay members. Everyone after tonight pays the going rate, including future increases.</li>
 </ul>
-${p("Subscribe before midnight and everything is immediate: the three Special Reports in your inbox tonight, your first issue of the Wire tomorrow morning.")}
+${p("Subscribe before midnight and everything is immediate: the three Special Reports and your first issue of the Wire, both in your inbox.")}
 ${p("And here's what doesn't change either way: every week, somewhere in the public record, productions with fresh budgets and hard spending deadlines quietly announce themselves — in award lists, in requisitions, in money flows. Somebody's going to read those signals and make the first call.")}
 ${p("It won't be the reps working the rented lists. Those names have been pitched to death by everyone who rented them — the prospects stopped listening months ago. The first call that lands will come from someone working leads that are two weeks old instead of six months, calling prospects who still answer the phone. The only question is whether that someone works for you or for your competitor.")}
 ${p("The math one last time: $38 a week, against $1,985 in reports that are yours to keep no matter what, against a 90-day everything-to-keep guarantee, against competitors charging $15,000 for names that were cold — and worn out — before they were sold.")}

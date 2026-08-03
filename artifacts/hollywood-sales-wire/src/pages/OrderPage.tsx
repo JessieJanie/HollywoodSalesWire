@@ -47,6 +47,9 @@ export function PricingContent({
     : [
         "52 issues of the Tuesday Wire",
         "12 issues of The Divergence Report",
+        <span key="1"><strong>Bonus:</strong> The Spend Map ($795 value)</span>,
+        <span key="2"><strong>Bonus:</strong> The $6.6 Billion Greenlight Window ($695 value)</span>,
+        <span key="3"><strong>Bonus:</strong> The Requisition Read ($495 value)</span>,
         "90-day money-back guarantee"
       ];
 
@@ -64,7 +67,7 @@ export function PricingContent({
         <p className="text-lg text-muted-foreground leading-relaxed text-balance max-w-2xl mx-auto">
           {founding
             ? "Lock in the half-price rate for as long as your membership continues. Get the three Special Reports ($1,985 value) immediately, free to keep forever. Backed by a 90-day money-back guarantee."
-            : "Every Tuesday: the week's live buying signals — who just got funded, what they're about to buy, and when the window closes. Backed by a 90-day money-back guarantee."}
+            : "Every Tuesday: the week's live buying signals — who just got funded, what they're about to buy, and when the window closes. Plus three Special Reports ($1,985 value) free with your membership. Backed by a 90-day money-back guarantee."}
         </p>
       </div>
 
@@ -203,7 +206,7 @@ export function PricingContent({
           <p className="text-muted-foreground leading-relaxed text-base">
             {founding
               ? "If Hollywood Sales Wire hasn't put live, workable prospects in front of you within 90 days, we'll refund every penny of your membership. You keep the three Special Reports ($1,985 value) and every issue delivered as a professional courtesy. The risk is entirely on our side of the table."
-              : "If Hollywood Sales Wire hasn't put live, workable prospects in front of you within 90 days, we'll refund every penny of your membership. You keep every issue delivered as a professional courtesy. The risk is entirely on our side of the table."}
+              : "If Hollywood Sales Wire hasn't put live, workable prospects in front of you within 90 days, we'll refund every penny of your membership. You keep the three Special Reports ($1,985 value) and every issue delivered as a professional courtesy. The risk is entirely on our side of the table."}
           </p>
         </div>
       </motion.div>
