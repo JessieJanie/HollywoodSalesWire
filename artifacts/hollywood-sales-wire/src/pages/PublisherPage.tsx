@@ -27,8 +27,32 @@ import {
  * Private weekly-preview console. Reached only via the publisher's bookmarked
  * link (/publisher?key=...); every API call re-verifies the key server-side.
  */
+const PUBLISHER_KEY_STORAGE = "hsw-publisher-key";
+
+/** Read the key from the URL (and remember it), else from this browser's storage. */
+function resolvePublisherKey(): string {
+  const urlKey = new URLSearchParams(window.location.search).get("key") ?? "";
+  if (urlKey) {
+    try {
+      localStorage.setItem(PUBLISHER_KEY_STORAGE, urlKey);
+      // Only drop the key from the address bar once the browser has
+      // actually remembered it (private browsing may block storage —
+      // in that case keep the key in the URL so refresh still works).
+      window.history.replaceState(null, "", window.location.pathname);
+    } catch {
+      /* private browsing — keep key in URL */
+    }
+    return urlKey;
+  }
+  try {
+    return localStorage.getItem(PUBLISHER_KEY_STORAGE) ?? "";
+  } catch {
+    return "";
+  }
+}
+
 export default function PublisherPage() {
-  const key = new URLSearchParams(window.location.search).get("key") ?? "";
+  const [key] = useState(resolvePublisherKey);
   const status = usePublisherStatus(
     { key },
     { query: { queryKey: ["publisher-status", key], enabled: key !== "", retry: false } },
@@ -106,6 +130,13 @@ export default function PublisherPage() {
   }
 
   if (!key || status.isError) {
+    // A stored key that no longer verifies is stale — forget it so the next
+    // click on the emailed link starts clean.
+    try {
+      localStorage.removeItem(PUBLISHER_KEY_STORAGE);
+    } catch {
+      /* ignore */
+    }
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F6F5F2] font-sans">
         <p className="text-muted-foreground">This page requires your private publisher link.</p>

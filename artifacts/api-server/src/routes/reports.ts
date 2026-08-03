@@ -4,6 +4,8 @@ import { and, eq, sql } from "drizzle-orm";
 import { db, specialReportsTable, membersTable, paidWireSendsTable } from "@workspace/db";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 import { logger } from "../lib/logger";
+import { resendRequest } from "../lib/resend";
+import { FROM_ADDRESS, SITE_URL } from "../lib/emailSequence";
 
 const router: IRouter = Router();
 const storageService = new ObjectStorageService();
@@ -65,6 +67,48 @@ export function verifyShelfSig(email: string, sig: string): boolean {
   } catch {
     return false;
   }
+}
+
+/**
+ * Long-lived "remember me" session for the Shelf.
+ *
+ * When a member opens their signed Shelf link once, we set an HttpOnly
+ * cookie so every later visit to /shelf just works — no link needed.
+ * The cookie value is `email|hmac("shelf-session-v1:" + email)`, i.e. the
+ * same secret-keyed HMAC scheme as the links themselves. Revocation story
+ * matches the links: membership is checked on every request, so a removed
+ * member loses access immediately even with a valid cookie.
+ */
+export const SHELF_COOKIE = "hsw_shelf";
+const SHELF_COOKIE_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000; // 1 year
+
+export function shelfSessionValue(email: string): string {
+  const e = email.toLowerCase();
+  return `${e}|${hmac(`shelf-session-v1:${e}`)}`;
+}
+
+/** Returns the email if the cookie is valid, else null. */
+export function verifyShelfSession(cookieValue: unknown): string | null {
+  if (typeof cookieValue !== "string") return null;
+  const idx = cookieValue.lastIndexOf("|");
+  if (idx <= 0) return null;
+  const email = cookieValue.slice(0, idx).toLowerCase();
+  const sig = cookieValue.slice(idx + 1);
+  try {
+    return timingSafeMatch(sig, hmac(`shelf-session-v1:${email}`)) ? email : null;
+  } catch {
+    return null;
+  }
+}
+
+export function shelfCookieOptions() {
+  return {
+    httpOnly: true,
+    secure: true,
+    sameSite: "lax" as const,
+    maxAge: SHELF_COOKIE_MAX_AGE_MS,
+    path: "/",
+  };
 }
 
 /**
@@ -167,10 +211,19 @@ router.get("/reports/download/:slug", async (req, res): Promise<void> => {
  */
 router.get("/shelf", async (req, res): Promise<void> => {
   const { email: rawEmail, sig } = req.query;
-  const email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
-  if (!email || typeof sig !== "string" || !verifyShelfSig(email, sig)) {
-    res.status(403).json({ error: "Invalid Shelf link" });
-    return;
+  let email = typeof rawEmail === "string" ? rawEmail.trim().toLowerCase() : "";
+
+  if (email && typeof sig === "string" && verifyShelfSig(email, sig)) {
+    // Signed link — remember this browser so future visits need no link.
+    res.cookie(SHELF_COOKIE, shelfSessionValue(email), shelfCookieOptions());
+  } else {
+    // No (valid) link — fall back to the remember-me cookie.
+    const fromCookie = verifyShelfSession(req.cookies?.[SHELF_COOKIE]);
+    if (!fromCookie) {
+      res.status(403).json({ error: email || sig ? "Invalid Shelf link" : "Not signed in" });
+      return;
+    }
+    email = fromCookie;
   }
 
   const [member] = await db
@@ -201,6 +254,97 @@ router.get("/shelf", async (req, res): Promise<void> => {
     .orderBy(sql`${paidWireSendsTable.weekKey} desc`);
 
   res.json({ plan: member.plan, isFounding, reports, issues: sends });
+});
+
+/**
+ * POST /shelf/request-link  { email }
+ *
+ * Self-serve "email me my link": if the email belongs to a member, we email
+ * them their permanent signed Shelf link. Always responds with a generic
+ * success so the endpoint can't be used to probe which emails are members.
+ * An hourly Resend Idempotency-Key caps sends to one email per address per
+ * hour, so the public form can't be abused to spam a member's inbox.
+ */
+// Lightweight in-memory throttle for the public link-mailer: per-IP and
+// global caps per hour. Resets on process restart, which is fine — the goal
+// is stopping bulk abuse (mass-mailing members from a script), not perfect
+// accounting. Resend's per-address Idempotency-Key already caps duplicates.
+const requestLinkHits = new Map<string, { count: number; windowStart: number }>();
+const REQUEST_LINK_WINDOW_MS = 60 * 60 * 1000;
+const REQUEST_LINK_PER_IP = 10;
+const REQUEST_LINK_GLOBAL = 100;
+
+function requestLinkAllowed(ip: string): boolean {
+  const now = Date.now();
+  for (const scope of [`ip:${ip}`, "global"]) {
+    const hit = requestLinkHits.get(scope);
+    if (!hit || now - hit.windowStart > REQUEST_LINK_WINDOW_MS) {
+      requestLinkHits.set(scope, { count: 1, windowStart: now });
+      continue;
+    }
+    const cap = scope === "global" ? REQUEST_LINK_GLOBAL : REQUEST_LINK_PER_IP;
+    if (hit.count >= cap) return false;
+    hit.count += 1;
+  }
+  // Opportunistic cleanup so the map can't grow unbounded.
+  if (requestLinkHits.size > 5000) {
+    for (const [k, v] of requestLinkHits) {
+      if (now - v.windowStart > REQUEST_LINK_WINDOW_MS) requestLinkHits.delete(k);
+    }
+  }
+  return true;
+}
+
+router.post("/shelf/request-link", async (req, res): Promise<void> => {
+  const raw = (req.body as { email?: unknown })?.email;
+  const email = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+  const generic = {
+    ok: true,
+    message: "If that address has a membership, your private link is on its way.",
+  };
+  if (!email || !email.includes("@") || email.length > 320) {
+    res.json(generic);
+    return;
+  }
+  if (!requestLinkAllowed(req.ip ?? "unknown")) {
+    logger.warn({ ip: req.ip }, "shelf request-link: rate limited");
+    res.json(generic);
+    return;
+  }
+
+  const [member] = await db
+    .select({ email: membersTable.email })
+    .from(membersTable)
+    .where(eq(membersTable.email, email));
+  if (!member) {
+    logger.info({ email }, "shelf request-link: no membership for address");
+    res.json(generic);
+    return;
+  }
+
+  const link = shelfUrl(email, SITE_URL);
+  const hourBucket = new Date().toISOString().slice(0, 13); // e.g. 2026-08-03T07
+  try {
+    await resendRequest("/emails", {
+      method: "POST",
+      headers: { "Idempotency-Key": `shelf-link-v1:${email}:${hourBucket}` },
+      body: {
+        from: FROM_ADDRESS,
+        to: [email],
+        subject: "Your Hollywood Sales Wire Shelf link",
+        html:
+          `<p>Here's your private Shelf link — every issue and report we've sent you, yours to keep:</p>` +
+          `<p><a href="${link}">Open your Shelf</a></p>` +
+          `<p>Once you open it, this browser will remember you — next time, just visit ` +
+          `<a href="${SITE_URL}/shelf">${SITE_URL.replace("https://", "")}/shelf</a>.</p>`,
+      },
+    });
+    logger.info({ email }, "shelf request-link: link email sent");
+  } catch (err) {
+    // Don't leak membership existence via error responses.
+    logger.error({ err, email }, "shelf request-link: send failed");
+  }
+  res.json(generic);
 });
 
 export default router;
