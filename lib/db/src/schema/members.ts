@@ -9,6 +9,8 @@ import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
 export const membersTable = pgTable("members", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
+  /** Full name from Stripe checkout (customer_details.name); used to personalize the welcome email. */
+  name: text("name"),
   stripeCustomerId: text("stripe_customer_id"),
   stripeSubscriptionId: text("stripe_subscription_id"),
   plan: text("plan").notNull().default("member"), // founding-individual | founding-team | individual | team | member

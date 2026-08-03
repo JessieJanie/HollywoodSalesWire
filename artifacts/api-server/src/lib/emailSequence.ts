@@ -145,18 +145,18 @@ ${p("Between &ldquo;we own the rights&rdquo; and &ldquo;we're on the air&rdquo; 
 ${p("You can't see the purchase orders. But you can see the hiring.")}
 ${p("Within weeks of one such deal, the requisitions started appearing on the streamer's own careers page. Not vague postings — roles like Broadcast Systems Engineer, Live Production and Technical Program Manager, Live Events, dated, specific, and useless to explain unless a broadcast operation was being built from scratch.")}
 ${p("To a salesperson who knows how to read them, those postings said: the budget is real, the buildout has started, and the vendor decisions are being made right now. The purchase orders followed within the quarter. The signal had been public the whole time.")}
-${p("Anyone could have seen it. Almost nobody looked — because almost nobody in sales has been taught that a careers page is a disclosure document.")}
-${p("Help-Wanted Pages Are Purchase Orders — one of the three Special Reports you get free with your membership — teaches exactly this. Inside:")}
+${p("Anyone could have seen it. Almost nobody looked — because almost nobody in sales has ever been shown that a careers page is a disclosure document.")}
+${p("Help-Wanted Pages Are Purchase Orders — one of the three Special Reports you get free with your membership — reveals exactly this. Inside:")}
 <ul>
 <li>The full walkthrough of that live-sports buildout, named, dated, requisition by requisition — what each posting revealed and when.</li>
 <li>The glossary of job-title tells: which titles reliably mean money has landed, ranked by how early they show up in a buildout — and the ones that look promising but mean nothing.</li>
 <li>The rights-deal-to-requisition timeline, so you know when to start watching a target account.</li>
 <li>How to run a requisition sweep on any account in about twenty minutes a week, with nothing but public pages.</li>
 </ul>
-${p("On its own I'd price it at $495, and I'd be underpricing it: this is the kind of thing you could sit through a $2,000 sales conference and never hear, because the people who know it are using it, not teaching it.")}
+${p("On its own I'd price it at $495, and I'd be underpricing it: this is the kind of thing you could sit through a $2,000 sales conference and never hear, because the people who know it are using it, not sharing it.")}
 ${p("The other two reports round out the system. Under the Hood: The WBD AI Buildout ($795 value) hands you the method at full scale — one entertainment giant's AI capability buildout traced end to end through job postings, government records, corporate filings, and salary data on two continents, so you see exactly what a landed budget looks like from the outside. The $6.6 Billion Greenlight Window ($695 value) hands you the calendar — the state-by-state award-list schedule and the spend window when a production does nearly all of its buying.")}
 ${p("Case, calendar, craft. A complete prospecting system — and the fountainhead of the numbers the $15K databases keep promising and keep not delivering.")}
-${p("Reports teach you to fish. The Wire hands you fish every Tuesday — because you have a quota, and the filings don't read themselves.")}
+${p("The reports show you how to fish. The Wire hands you fish every Tuesday — because you have a quota, and the filings don't read themselves.")}
 ${p(`All three reports are free with your membership. Subscribe by ${deadlineLabel} and you're in at the Founding Member rate — $38 a week ($1,995 a year) instead of the regular $77 ($3,995), locked for as long as you stay. Subscribe today and the reports hit your inbox today, with your first Wire this Tuesday.`)}
 ${cta("Become a Founding Member — $38/week", utm(offerUrl, 3))}
 ${sig}`,
@@ -173,7 +173,7 @@ ${sig}`,
 ${p("Today, the whole offer, plainly, so you can make the call with all the facts in front of you.")}
 ${p("<strong>What the subscription is.</strong> Hollywood Sales Wire is a weekly intelligence briefing for people who sell into the production economy.")}
 ${p("Every Tuesday, you get the week's live buying signals — new tax-credit awards, requisition sweeps, money flows — read and translated into who to call, what they're about to buy, and when the window closes. Fifty-two issues a year.")}
-${p("Once a month, subscribers also receive The Divergence Report — the strategic layer on top of the weekly wire. Where the Tuesday wire tells you who to call this week, the Divergence Report is the deeper monthly read on where the money is moving next quarter — the spend shifts, the buildouts forming, the territories opening — so you're positioned before the crowd shows up.")}
+${p("Once a month, subscribers also receive The Divergence Report — the strategic layer on top of the HSW Weekly Wire. Where the Tuesday issue tells you who to call this week, the Divergence Report is the deeper monthly read on where the money is moving next quarter — the spend shifts, the buildouts forming, the territories opening — so you're positioned before the crowd shows up.")}
 ${p("The wire is your calls for the week. The Divergence Report is your plan for the season. Both come with the subscription, every month you're a member.")}
 ${p("<strong>The three Special Reports — free with your membership, delivered immediately, yours to keep forever.</strong> These are one-time bonuses included with every membership:")}
 <ul>
@@ -181,7 +181,7 @@ ${p("<strong>The three Special Reports — free with your membership, delivered 
 <li><strong>The $6.6 Billion Greenlight Window</strong> ($695 value) — the tax-credit award system as a prospecting machine: which states publish award lists, on what calendar, and the greenlight-to-spend window when a production does nearly all of its buying. The report that turns a government filing into a call sheet.</li>
 <li><strong>Help-Wanted Pages Are Purchase Orders</strong> ($495 value) — careers pages as buying signals: the job-title tells glossary, the posting patterns that announce a landed budget before any purchase order, and the full named walkthrough of a nine-figure streaming-sports buildout.</li>
 </ul>
-${p("That's $1,985 in Special Reports — a crash course in producing your own hot leads that the $15,000-a-year databases don't teach, because their business is renting the same tired names to everyone.")}
+${p("That's $1,985 in Special Reports — a crash course in producing your own hot leads that the $15,000-a-year databases will never reveal, because their business is renting the same tired names to everyone.")}
 ${p("(And no — I will never rent this subscriber list to anyone, for any purpose. Your prospects stay fresh and so does your inbox.)")}
 ${p("<strong>The price.</strong> The regular rate for Hollywood Sales Wire is $77 a week — $3,995 a year, billed annually. One closed deal sourced from one issue pays for years of it.")}
 ${p("Subscribe during this launch offer and you pay the Founding Member rate instead: $38 a week — $1,995 a year — locked in for as long as you stay a member. Half the regular rate, and when rates rise for everyone who comes after you, yours never moves.")}

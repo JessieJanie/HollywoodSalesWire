@@ -182,19 +182,21 @@ const WELCOME_REPORT_DESCRIPTIONS: Record<string, string> = {
 
 function welcomeHtml(
   email: string,
+  firstName: string | null,
   reports: Array<{ slug: string; title: string }> | null,
-  latestWire: { subject: string; bodyText: string } | null,
 ): string {
   const p = (s: string) => `<p>${s}</p>`;
   const h = (s: string) =>
     `<p style="font-family:Arial,sans-serif;font-size:12px;letter-spacing:2px;color:#8a8577;text-transform:uppercase;margin:32px 0 12px;">${s}</p>`;
   const shelfLink = shelfUrl(email, SITE_URL);
+  const greeting = firstName ? `Hello ${escapeHtml(firstName)},` : "Hello,";
 
   // Special Reports section — identical for every plan (publisher policy,
-  // Aug 2026: all members receive the three Special Reports).
+  // Aug 2026: all members receive the three Special Reports). Links open the
+  // report readable in the browser (inline PDF); members can save from there.
   const reportsSection = reports
-    ? `${h("Your three free Special Reports are ready")}
-      ${p("These come free with your membership. They are not for sale separately, and they never will be — they are for members only. Click any title to download:")}
+    ? `${h("Your three free Special Reports")}
+      ${p("These are free with your membership. They are not for sale separately, and they never will be — they are for members only.")}
       <ul style="padding-left:20px;margin:24px 0;">
         ${reports
           .map(
@@ -205,42 +207,32 @@ function welcomeHtml(
           )
           .join("\n")}
       </ul>
-      ${p("Every link above downloads directly — no login needed. The links are personal to your membership and never expire; the reports are yours to keep.")}`
+      ${p("These links never expire and will also continue to be available to you on the website on your HSW Shelf.")}`
     : `${h("Your three free Special Reports")}
-      ${p("These come free with your membership. They are not for sale separately, and they never will be — they are for members only. They'll arrive in a separate email as soon as they're ready, and they'll be waiting on your Shelf too.")}`;
-
-  const wireSection = latestWire
-    ? `${h("Your first issue of the Wire")}
-      <p style="font-weight:bold;">${escapeHtml(latestWire.subject)}</p>
-      ${latestWire.bodyText
-        .split(/\n\s*\n/)
-        .map((s) => s.trim())
-        .filter(Boolean)
-        .map((s) => `<p>${escapeHtml(s)}</p>`)
-        .join("\n")}`
-    : `${h("Your first issue of the Wire")}
-      ${p("This week's issue of the Wire is being prepared now and arrives Tuesday morning — who's spending, who's hiring, and where the door is open this week. It will land in this inbox, and a copy goes straight to your Shelf.")}`;
+      ${p("These are free with your membership. They are not for sale separately, and they never will be — they are for members only. They'll arrive in a separate email as soon as they're ready, and they'll also be available on the website on your HSW Shelf.")}`;
 
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f6f5f2;">
     <div style="max-width:560px;margin:0 auto;padding:32px 24px;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;font-size:17px;line-height:1.6;background:#ffffff;">
-      ${p("Hello,")}
-      ${p("Thank you for choosing Hollywood Sales Wire, and welcome. Your membership is now active, and everything you were promised is below — delivered the way this business usually works. Fast.")}
+      ${p(greeting)}
+      ${p("Thank you for choosing Hollywood Sales Wire, and welcome. Your membership is now active, and everything that comes with your subscription is below.")}
       ${reportsSection}
-      ${wireSection}
+      ${h("The latest issue of the HSW Weekly Wire")}
+      ${p(`<a href="${shelfLink}" style="color:#1d5c3a;font-weight:bold;">Click here</a> for the latest issue of the HSW Weekly Wire. Your subscription will actually start with next Tuesday's issue. It will arrive in your inbox here as well.`)}
       ${h("Your account")}
-      ${p(`Everything above is also stored on your <a href="${shelfLink}" style="color:#1d5c3a;font-weight:bold;">Hollywood Sales Wire Shelf</a> — sign in any time with this email address. Past issues stay there too, so you never have to dig through your inbox for one.`)}
+      ${p(`Everything above is stored on your <a href="${shelfLink}" style="color:#1d5c3a;font-weight:bold;">HSW Shelf</a>, with new HSW Weekly Wire issues automatically added every week. Both the Special Reports and every HSW Weekly Wire issue you receive are stored here for your convenience. Sign in any time with this email address. Past issues stay here too, so you never have to dig through your inbox for anything.`)}
       ${h("What happens next")}
-      ${p("Every Tuesday morning, your issue of the Wire arrives in this inbox: the week's production spending signals, entity formations, and hiring tells — read, sorted, and turned into calls you can make the same day. Nothing to remember, nothing to log in for — and your Shelf is always there with everything you've received to date, for easy reference.")}
+      ${p("Every Tuesday your issue of the HSW Weekly Wire arrives in this inbox: the latest week's production spending signals, entity formations, and hiring tells — read, sorted, and turned into calls you can make the same day. Nothing to remember, nothing to log in for — and your HSW Shelf is always there with everything you've received to date, for easy reference.")}
       ${h("Getting the most from your first hour")}
-      ${p("Start with the Special Reports — they teach the reading method the Wire uses every week, so each Tuesday issue lands with full context. Then, when your first issue arrives, pick the one signal closest to your territory and make that call the same day.")}
-      ${p("One more thing: reply to this email any time — it reaches me directly. If a report raises a question, or an issue points somewhere you'd like more on, tell me. This is a small wire service on purpose; the members shape it.")}
-      ${p("Karilyn Colegrove, Publisher<br />Hollywood Sales Wire")}
+      ${p("Start with the Special Reports — they review the reading method the Wire uses every week, to help you evaluate each issue with full context. Then, review the above HSW Weekly Wire for your latest hot leads – the ones closest to your territory and map out your strategies.")}
+      ${p("One more thing: reply to this email any time — it reaches me directly. If a report raises a question, or an issue points somewhere you'd like more information on, please don't hesitate to let me know. This is your service, and your suggestions will help shape it going forward.")}
+      ${p("Warm regards,")}
+      ${p("Karilyn Colegrove,<br />Publisher, Hollywood Sales Wire")}
       <hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />
       <p style="font-size:12px;color:#8a8577;font-family:Arial,sans-serif;">
         Hollywood Sales Wire &middot; <a href="${SITE_URL}" style="color:#8a8577;">hollywoodsaleswire.com</a><br />
-        This is a receipt-of-membership email for your paid subscription.
+        This is a receipt-of-membership email for your subscription.
       </p>
     </div>
   </body>
@@ -279,7 +271,7 @@ function specialReportsHtml(
       <ul style="padding-left:20px;margin:24px 0;">
         ${links}
       </ul>
-      <p>These links are yours and never expire — the reports are yours to keep. They also live on your Shelf, linked in your welcome email.</p>
+      <p>These links are yours and never expire — the reports are yours to keep. They also live on your HSW Shelf, linked in your welcome email.</p>
       <p>Karilyn Colegrove, Publisher<br />Hollywood Sales Wire</p>
       <hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />
       <p style="font-size:12px;color:#8a8577;font-family:Arial,sans-serif;">
@@ -500,27 +492,6 @@ export async function deliverReportsToPendingMembers(): Promise<number> {
 }
 
 /**
- * Load the latest free-edition Wire for inclusion in the welcome email,
- * if it is fresh (less than 8 days old). Returns null otherwise.
- */
-async function loadLatestFreshWire(): Promise<{ subject: string; bodyText: string } | null> {
-  try {
-    const [latest] = await db
-      .select()
-      .from(weeklyPreviewsTable)
-      .orderBy(desc(weeklyPreviewsTable.sentAt))
-      .limit(1);
-    if (!latest) return null;
-    const ageMs = Date.now() - latest.sentAt.getTime();
-    if (ageMs > 8 * 24 * 60 * 60 * 1000) return null;
-    return { subject: latest.subject, bodyText: latest.bodyText };
-  } catch (err) {
-    logger.error({ err }, "members: failed to load latest Wire for welcome email");
-    return null;
-  }
-}
-
-/**
  * When a member's subscription is fully canceled, move them onto the free
  * weekly newsletter list (publisher policy, Aug 2026): the Free Edition keeps
  * HSW in their inbox and encourages resubscribing. Rules:
@@ -581,7 +552,11 @@ async function sendUnifiedWelcome(email: string): Promise<void> {
     reportsClaimId = await claimReportDeliveryByEmail(email);
     if (!reportsClaimId) reports = null; // already delivered — don't repeat links
   }
-  const latestWire = await loadLatestFreshWire();
+  const [memberRow] = await db
+    .select({ name: membersTable.name })
+    .from(membersTable)
+    .where(eq(membersTable.email, email));
+  const firstName = memberRow?.name?.trim().split(/\s+/)[0] || null;
 
   // Deterministic idempotency key: Stripe webhook retries and welcome-claim
   // releases can re-invoke this — Resend dedupes for 24 h, so the member can
@@ -600,7 +575,7 @@ async function sendUnifiedWelcome(email: string): Promise<void> {
       from: FROM_ADDRESS,
       to: [email],
       subject: "Welcome to Hollywood Sales Wire — your membership is active",
-      html: welcomeHtml(email, reports, latestWire),
+      html: welcomeHtml(email, firstName, reports),
     },
     headers: { "Idempotency-Key": idempotencyKey },
   });
@@ -720,10 +695,18 @@ export async function handleStripeEvent(event: {
   // Atomic upsert — if this throws, the caller returns 500 and Stripe retries.
   await db
     .insert(membersTable)
-    .values({ email, stripeCustomerId: customerId, stripeSubscriptionId: subscriptionId, plan, amountCents })
+    .values({
+      email,
+      name: session.customer_details?.name?.trim() || null,
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: subscriptionId,
+      plan,
+      amountCents,
+    })
     .onConflictDoUpdate({
       target: membersTable.email,
       set: {
+        name: sql`coalesce(excluded.name, ${membersTable.name})`,
         stripeCustomerId: sql`coalesce(excluded.stripe_customer_id, ${membersTable.stripeCustomerId})`,
         stripeSubscriptionId: sql`coalesce(excluded.stripe_subscription_id, ${membersTable.stripeSubscriptionId})`,
         plan: sql`excluded.plan`,

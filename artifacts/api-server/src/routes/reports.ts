@@ -6,6 +6,7 @@ import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage"
 import { logger } from "../lib/logger";
 import { resendRequest } from "../lib/resend";
 import { FROM_ADDRESS, SITE_URL } from "../lib/emailSequence";
+import { entitledToNewPaidContent } from "../lib/entitlement";
 
 const router: IRouter = Router();
 const storageService = new ObjectStorageService();
@@ -178,7 +179,9 @@ router.get("/reports/download/:slug", async (req, res): Promise<void> => {
     const response = await storageService.downloadObject(file, 86400);
 
     res.setHeader("Content-Type", response.headers.get("Content-Type") ?? "application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="${slug}.pdf"`);
+    // Inline: the report opens readable in the browser (publisher preference,
+    // Aug 2026) — members can save it from the viewer if they like.
+    res.setHeader("Content-Disposition", `inline; filename="${slug}.pdf"`);
     const ct = response.headers.get("Content-Length");
     if (ct) res.setHeader("Content-Length", ct);
     res.setHeader("Cache-Control", "private, no-store");
@@ -227,7 +230,7 @@ router.get("/shelf", async (req, res): Promise<void> => {
   }
 
   const [member] = await db
-    .select({ plan: membersTable.plan })
+    .select({ plan: membersTable.plan, stripeSubscriptionId: membersTable.stripeSubscriptionId })
     .from(membersTable)
     .where(eq(membersTable.email, email));
   if (!member) {
@@ -252,6 +255,29 @@ router.get("/shelf", async (req, res): Promise<void> => {
     .from(paidWireSendsTable)
     .where(sql`${email} = any(${paidWireSendsTable.recipientEmails})`)
     .orderBy(sql`${paidWireSendsTable.weekKey} desc`);
+
+  // New members joined mid-week haven't received an issue yet — show them the
+  // latest HSW Weekly Wire anyway (publisher policy, Aug 2026: the welcome
+  // email links here for "the latest issue"). Gated: only CURRENTLY entitled
+  // members (same rule as the weekly paid send — no sub id means comp/one-time,
+  // still entitled), and only a finalized ("sent") issue. Canceled members'
+  // historical access stays scoped by their recipientEmails snapshots above.
+  if (sends.length === 0) {
+    if (await entitledToNewPaidContent(member.stripeSubscriptionId)) {
+      const [latest] = await db
+        .select({
+          weekKey: paidWireSendsTable.weekKey,
+          subject: paidWireSendsTable.subject,
+          bodyText: paidWireSendsTable.bodyText,
+          sentAt: paidWireSendsTable.sentAt,
+        })
+        .from(paidWireSendsTable)
+        .where(eq(paidWireSendsTable.status, "sent"))
+        .orderBy(sql`${paidWireSendsTable.weekKey} desc`)
+        .limit(1);
+      if (latest) sends.push(latest);
+    }
+  }
 
   res.json({ plan: member.plan, isFounding, reports, issues: sends });
 });
@@ -331,10 +357,10 @@ router.post("/shelf/request-link", async (req, res): Promise<void> => {
       body: {
         from: FROM_ADDRESS,
         to: [email],
-        subject: "Your Hollywood Sales Wire Shelf link",
+        subject: "Your HSW Shelf link",
         html:
-          `<p>Here's your private Shelf link — every issue and report we've sent you, yours to keep:</p>` +
-          `<p><a href="${link}">Open your Shelf</a></p>` +
+          `<p>Here&#8217;s your private HSW Shelf link — every issue and report we've sent you, yours to keep:</p>` +
+          `<p><a href="${link}">Open your HSW Shelf</a></p>` +
           `<p>Once you open it, this browser will remember you — next time, just visit ` +
           `<a href="${SITE_URL}/shelf">${SITE_URL.replace("https://", "")}/shelf</a>.</p>`,
       },
