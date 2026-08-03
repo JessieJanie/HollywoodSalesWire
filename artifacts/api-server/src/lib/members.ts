@@ -1,5 +1,5 @@
 import { eq, and, isNull, inArray, sql, desc } from "drizzle-orm";
-import { createHash } from "node:crypto";
+import { createHash, randomBytes } from "node:crypto";
 import {
   db,
   membersTable,
@@ -503,6 +503,44 @@ async function maybeSendLatestWire(email: string): Promise<void> {
   }
 }
 
+/**
+ * When a member's subscription is fully canceled, move them onto the free
+ * weekly newsletter list (publisher policy, Aug 2026): the Free Edition keeps
+ * HSW in their inbox and encourages resubscribing. Rules:
+ * - Insert as an active free subscriber if they're not on the list.
+ * - If they previously UNSUBSCRIBED from the free list, respect that — do
+ *   not re-activate them (consent).
+ * - Never (re)start the founding-offer sales series — they're ex-members,
+ *   not prospects; only the weekly Free Edition applies.
+ * - Idempotent and non-fatal: Stripe may retry; failures are logged only.
+ */
+async function handleSubscriptionCanceled(object: unknown): Promise<void> {
+  const sub = (object ?? {}) as { id?: string };
+  if (!sub.id) return;
+  try {
+    const [member] = await db
+      .select({ email: membersTable.email })
+      .from(membersTable)
+      .where(eq(membersTable.stripeSubscriptionId, sub.id));
+    if (!member) {
+      logger.warn({ subscriptionId: sub.id }, "stripe: canceled subscription has no member row");
+      return;
+    }
+    const token = randomBytes(24).toString("hex");
+    const inserted = await db
+      .insert(emailSubscribersTable)
+      .values({ email: member.email, unsubscribeToken: token })
+      .onConflictDoNothing({ target: emailSubscribersTable.email })
+      .returning({ id: emailSubscribersTable.id });
+    logger.info(
+      { email: member.email, addedToFreeList: inserted.length > 0 },
+      "stripe: member subscription canceled — free-newsletter handoff",
+    );
+  } catch (err) {
+    logger.error({ err, subscriptionId: sub.id }, "stripe: free-newsletter handoff failed");
+  }
+}
+
 interface CheckoutSessionLineItem {
   price?: string | { id?: string } | null;
 }
@@ -542,6 +580,10 @@ export async function handleStripeEvent(event: {
   type?: string;
   data?: { object?: unknown };
 }): Promise<void> {
+  if (event.type === "customer.subscription.deleted") {
+    await handleSubscriptionCanceled(event.data?.object);
+    return;
+  }
   if (event.type !== "checkout.session.completed") return;
   const session = (event.data?.object ?? {}) as CheckoutSessionLike;
   if (session.payment_status && session.payment_status !== "paid") return;

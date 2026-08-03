@@ -14,3 +14,8 @@ Durable rules & quirks:
 - Special Reports delivery to founding members is still MANUAL (notification email reminds her).
 - Welcome-email copy was agent-drafted and flagged for the publisher's review (publisher-locked policy).
 - Dev registers a dev-domain webhook; production registers its own on first boot after Republish — automation is NOT live in production until she republishes.
+
+## Cancellation handoff (Aug 2, 2026 publisher decisions)
+- Weekly Wire: canceled members stop getting NEW issues (past emails are theirs; nothing to revoke).
+- Special Reports: kept forever (see special-reports-delivery.md — "yours to keep").
+- On `customer.subscription.deleted` the webhook adds the ex-member to the FREE newsletter list to encourage resubscribing — but never re-activates someone who explicitly unsubscribed from it, and never restarts the founding sales series (they're ex-members, not prospects).
