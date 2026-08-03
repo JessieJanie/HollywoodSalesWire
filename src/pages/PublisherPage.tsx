@@ -160,8 +160,8 @@ export default function PublisherPage() {
         <div className="bg-card border border-border p-6 mb-6 shadow-sm">
           <h2 className="font-serif font-bold text-lg mb-1">Special Reports</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Upload a PDF for each report. Once all three are uploaded, any Founding Members who
-            haven't received them yet will be emailed automatically. New Founding Members are
+            Upload a PDF for each report. Once all three are uploaded, any members who
+            haven't received them yet will be emailed automatically. New members are
             emailed immediately after purchase.
           </p>
 
@@ -242,7 +242,7 @@ export default function PublisherPage() {
               {allReportsUploaded && (
                 <p className="inline-flex items-center gap-2 text-sm text-primary font-medium">
                   <CheckCircle2 className="w-4 h-4" />
-                  All three reports are uploaded and will be delivered automatically to Founding Members.
+                  All three reports are uploaded and will be delivered automatically to members.
                   {(reports.data.pendingMemberCount ?? 0) > 0 && (
                     <> {reports.data.pendingMemberCount} member{reports.data.pendingMemberCount === 1 ? "" : "s"} will receive them now.</>
                   )}
@@ -259,7 +259,7 @@ export default function PublisherPage() {
           <h2 className="font-serif font-bold text-lg mb-1">Add a Complimentary Member</h2>
           <p className="text-sm text-muted-foreground mb-4">
             Adds a member without billing. They get the standard welcome email with their Shelf
-            link, the Special Reports (founding plans, once uploaded), and the latest Wire issue.
+            link, the three Special Reports (once uploaded), and the latest Wire issue.
           </p>
           <div className="flex flex-col sm:flex-row gap-3">
             <input

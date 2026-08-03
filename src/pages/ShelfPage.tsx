@@ -79,12 +79,12 @@ export default function ShelfPage() {
 
         {data && (
           <>
-            {data.isFounding && (
-              <section className="mb-12">
-                <h2 className="text-2xl font-serif font-bold mb-1">Special Reports</h2>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Your three Founding Member reports. These are yours permanently.
-                </p>
+            <section className="mb-12">
+              <h2 className="text-2xl font-serif font-bold mb-1">Special Reports</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Your three Special Reports, included with your membership. These are yours
+                permanently.
+              </p>
                 {data.reports.length === 0 ? (
                   <p className="text-muted-foreground text-sm">
                     Your reports are being prepared — they&apos;ll appear here as soon as they&apos;re
@@ -107,8 +107,7 @@ export default function ShelfPage() {
                     ))}
                   </ul>
                 )}
-              </section>
-            )}
+            </section>
 
             <section>
               <h2 className="text-2xl font-serif font-bold mb-1">The Wire</h2>
