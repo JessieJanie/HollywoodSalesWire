@@ -26,9 +26,9 @@ import { deliverReportsToPendingMembers } from "../lib/members";
 const router: IRouter = Router();
 
 const REPORT_DEFINITIONS = [
-  { slug: "spend-map", title: "The Spend Map" },
+  { slug: "spend-map", title: "Under the Hood: The WBD AI Buildout" },
   { slug: "greenlight-window", title: "The $6.6 Billion Greenlight Window" },
-  { slug: "requisition-read", title: "The Requisition Read" },
+  { slug: "requisition-read", title: "Help-Wanted Pages Are Purchase Orders" },
 ] as const;
 
 const storageService = new ObjectStorageService();
@@ -364,7 +364,12 @@ async function ensureReportRows(): Promise<void> {
     await db
       .insert(specialReportsTable)
       .values({ slug: r.slug, title: r.title })
-      .onConflictDoNothing();
+      // Heal stale titles: if the row exists with an old title (e.g. rows
+      // created before the Aug 2026 report renames), bring it up to date.
+      .onConflictDoUpdate({
+        target: specialReportsTable.slug,
+        set: { title: r.title },
+      });
   }
 }
 

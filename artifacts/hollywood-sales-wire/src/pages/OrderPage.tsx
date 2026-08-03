@@ -39,17 +39,17 @@ export function PricingContent({
     ? [
         "52 issues of the Tuesday Wire",
         "12 issues of The Divergence Report",
-        <span key="1"><strong>Bonus:</strong> The Spend Map ($795 value)</span>,
+        <span key="1"><strong>Bonus:</strong> Under the Hood: The WBD AI Buildout ($795 value)</span>,
         <span key="2"><strong>Bonus:</strong> The $6.6 Billion Greenlight Window ($695 value)</span>,
-        <span key="3"><strong>Bonus:</strong> The Requisition Read ($495 value)</span>,
+        <span key="3"><strong>Bonus:</strong> Help-Wanted Pages Are Purchase Orders ($495 value)</span>,
         "90-day money-back guarantee"
       ]
     : [
         "52 issues of the Tuesday Wire",
         "12 issues of The Divergence Report",
-        <span key="1"><strong>Bonus:</strong> The Spend Map ($795 value)</span>,
+        <span key="1"><strong>Bonus:</strong> Under the Hood: The WBD AI Buildout ($795 value)</span>,
         <span key="2"><strong>Bonus:</strong> The $6.6 Billion Greenlight Window ($695 value)</span>,
-        <span key="3"><strong>Bonus:</strong> The Requisition Read ($495 value)</span>,
+        <span key="3"><strong>Bonus:</strong> Help-Wanted Pages Are Purchase Orders ($495 value)</span>,
         "90-day money-back guarantee"
       ];
 

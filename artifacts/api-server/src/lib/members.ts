@@ -16,9 +16,9 @@ import { logger } from "./logger";
 const NOTIFY_EMAIL = "hello@hollywoodsaleswire.com";
 
 const REPORT_SLUGS = [
-  { slug: "spend-map", title: "The Spend Map" },
+  { slug: "spend-map", title: "Under the Hood: The WBD AI Buildout" },
   { slug: "greenlight-window", title: "The $6.6 Billion Greenlight Window" },
-  { slug: "requisition-read", title: "The Requisition Read" },
+  { slug: "requisition-read", title: "Help-Wanted Pages Are Purchase Orders" },
 ] as const;
 
 const VALID_PLANS = new Set([
