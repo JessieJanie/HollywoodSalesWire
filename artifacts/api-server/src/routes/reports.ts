@@ -105,22 +105,17 @@ router.get("/reports/download/:slug", async (req, res): Promise<void> => {
     return;
   }
 
-  // 3. Entitlement check: email must belong to a founding member. That's it —
-  //    the Special Reports were sold as "yours to keep even if you cancel",
-  //    so we deliberately do NOT check subscription status here (unlike the
-  //    paid-Wire path). Keeping report access also nudges canceled members
-  //    to resubscribe.
+  // 3. Entitlement check: email must belong to a member — ANY plan (publisher
+  //    policy, Aug 2026: the Special Reports are included for every member).
+  //    The reports are "yours to keep even if you cancel", so we deliberately
+  //    do NOT check subscription status here (unlike the paid-Wire path).
+  //    Keeping report access also nudges canceled members to resubscribe.
   const [member] = await db
     .select({ plan: membersTable.plan })
     .from(membersTable)
-    .where(
-      and(
-        eq(membersTable.email, email),
-        sql`${membersTable.plan} IN ('founding-individual', 'founding-team')`,
-      ),
-    );
+    .where(eq(membersTable.email, email));
   if (!member) {
-    res.status(403).json({ error: "Access restricted to Founding Members" });
+    res.status(403).json({ error: "Access restricted to members" });
     return;
   }
   // 4. Look up the report file
@@ -164,7 +159,7 @@ router.get("/reports/download/:slug", async (req, res): Promise<void> => {
 /**
  * GET /shelf?email=<addr>&sig=<hmac>
  *
- * The member's "Shelf": their Special Reports (founding members) and every
+ * The member's "Shelf": their Special Reports (all plans) and every
  * weekly Wire issue that was sent to them. Membership-window scoping falls
  * out naturally from `recipientEmails`: an issue appears on a member's Shelf
  * iff their email was in the frozen recipient snapshot of that send — so a
@@ -187,14 +182,12 @@ router.get("/shelf", async (req, res): Promise<void> => {
     return;
   }
 
+  // Special Reports are included for every member (all plans).
   const isFounding = member.plan === "founding-individual" || member.plan === "founding-team";
-  let reports: Array<{ slug: string; title: string; url: string }> = [];
-  if (isFounding) {
-    const rows = await db.select().from(specialReportsTable);
-    reports = rows
-      .filter((r) => r.objectPath)
-      .map((r) => ({ slug: r.slug, title: r.title, url: reportDownloadUrl(email, r.slug, "") }));
-  }
+  const rows = await db.select().from(specialReportsTable);
+  const reports = rows
+    .filter((r) => r.objectPath)
+    .map((r) => ({ slug: r.slug, title: r.title, url: reportDownloadUrl(email, r.slug, "") }));
 
   const sends = await db
     .select({

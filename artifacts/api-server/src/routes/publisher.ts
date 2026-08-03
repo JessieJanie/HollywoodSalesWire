@@ -21,7 +21,7 @@ import {
   type PaidRecipient,
 } from "../lib/paidWire";
 import { ObjectStorageService } from "../lib/objectStorage";
-import { deliverReportsToPendingFoundingMembers } from "../lib/members";
+import { deliverReportsToPendingMembers } from "../lib/members";
 
 const router: IRouter = Router();
 
@@ -393,7 +393,7 @@ router.get("/publisher/reports", async (req, res): Promise<void> => {
     .select({ count: sql<number>`count(*)::int` })
     .from(membersTable)
     .where(
-      sql`${membersTable.specialReportsSentAt} IS NULL AND ${membersTable.plan} IN ('founding-individual', 'founding-team')`,
+      sql`${membersTable.specialReportsDeliveredAt} IS NULL`,
     );
 
   res.json({ reports, pendingMemberCount });
@@ -467,7 +467,7 @@ router.post("/publisher/reports/confirm", async (req, res): Promise<void> => {
   // Deliver to any founding members still waiting for their reports
   let deliveredCount = 0;
   try {
-    deliveredCount = await deliverReportsToPendingFoundingMembers();
+    deliveredCount = await deliverReportsToPendingMembers();
   } catch (err) {
     console.error("reports confirm: delivery error:", err);
   }

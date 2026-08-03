@@ -1,6 +1,6 @@
 import { and, eq, lte, or } from "drizzle-orm";
 import { db, wireRunsTable, emailSubscribersTable, sequenceEmailsTable } from "@workspace/db";
-import { deliverReportsToPendingFoundingMembers, resetStaleReportLeases } from "./members";
+import { deliverReportsToPendingMembers, resetStaleReportLeases } from "./members";
 import { runWeeklyResearch, currentWeekKey } from "./wireResearch";
 import { FROM_ADDRESS, SEQUENCE, SITE_URL } from "./emailSequence";
 import { deadlineLabel } from "./foundingDeadline";
@@ -157,7 +157,7 @@ async function tickReportDeliveries(): Promise<void> {
   // Reset leases older than 15 minutes whose delivery was never confirmed.
   await resetStaleReportLeases();
   // Deliver to any founding members still waiting (new or stale-lease-reset).
-  await deliverReportsToPendingFoundingMembers();
+  await deliverReportsToPendingMembers();
 }
 
 async function tick(): Promise<void> {

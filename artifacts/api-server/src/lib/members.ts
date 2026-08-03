@@ -170,19 +170,52 @@ export function isFoundingPlan(plan: string): boolean {
  * NEW-MEMBER WELCOME EMAIL — transactional copy, flagged for the publisher's
  * review (publisher-locked policy). Deliberately plain and claim-free.
  */
-function welcomeHtml(email: string): string {
+function welcomeHtml(
+  email: string,
+  reports: Array<{ slug: string; title: string }> | null,
+  latestWire: { subject: string; bodyText: string } | null,
+): string {
   const p = (s: string) => `<p>${s}</p>`;
   const shelfLink = shelfUrl(email, SITE_URL);
+
+  // Special Reports section — identical for every plan (publisher policy,
+  // Aug 2026: all members receive the three Special Reports).
+  const reportsSection = reports
+    ? `${p("Your three Special Reports are included with your membership — click any title to download:")}
+      <ul style="padding-left:20px;margin:24px 0;">
+        ${reports
+          .map(
+            (r) =>
+              `<li style="margin:12px 0;"><a href="${reportDownloadUrl(email, r.slug, SITE_URL)}" style="color:#1d5c3a;font-weight:bold;">${r.title}</a></li>`,
+          )
+          .join("\n")}
+      </ul>
+      ${p("These links never expire — the reports are yours to keep.")}`
+    : p("Your three Special Reports are included with your membership and will follow in a separate email as soon as they're ready.");
+
+  const wireSection = latestWire
+    ? `<hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0;" />
+      <p style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;color:#8a8577;text-transform:uppercase;">This Week's Issue</p>
+      <p style="font-weight:bold;">${escapeHtml(latestWire.subject)}</p>
+      ${latestWire.bodyText
+        .split(/\n\s*\n/)
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((s) => `<p>${escapeHtml(s)}</p>`)
+        .join("\n")}`
+    : "";
+
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f6f5f2;">
     <div style="max-width:560px;margin:0 auto;padding:32px 24px;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;font-size:17px;line-height:1.6;background:#ffffff;">
       ${p("Welcome — your membership is active.")}
-      ${p("Thank you for joining Hollywood Sales Wire. Your subscription is confirmed, and your first issue of the Wire arrives Tuesday morning.")}
-      ${p("If you joined as a Founding Member, your three Special Reports will arrive in a separate email shortly.")}
+      ${p("Thank you for joining Hollywood Sales Wire. Your subscription is confirmed, and your next issue of the Wire arrives Tuesday morning.")}
+      ${reportsSection}
       ${p(`Everything we send you also lives on your <a href="${shelfLink}" style="color:#1d5c3a;font-weight:bold;">Shelf</a> — your personal page with every Wire issue and Special Report. Bookmark it; the link is yours and never expires.`)}
       ${p("Reply to this email any time — it reaches me directly.")}
       ${p("Karilyn Colegrove, Publisher<br />Hollywood Sales Wire")}
+      ${wireSection}
       <hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />
       <p style="font-size:12px;color:#8a8577;font-family:Arial,sans-serif;">
         Hollywood Sales Wire &middot; <a href="${SITE_URL}" style="color:#8a8577;">hollywoodsaleswire.com</a><br />
@@ -193,8 +226,12 @@ function welcomeHtml(email: string): string {
 </html>`;
 }
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
 /**
- * SPECIAL REPORTS EMAIL for Founding Members.
+ * SPECIAL REPORTS catch-up email — sent to any member whose reports were not included in their welcome email (PDFs uploaded later).
  * Only sent when all three reports are uploaded.
  *
  * Download links are permanent bearer URLs (HMAC-signed, never expire —
@@ -217,8 +254,7 @@ function specialReportsHtml(
 <html>
   <body style="margin:0;padding:0;background:#f6f5f2;">
     <div style="max-width:560px;margin:0 auto;padding:32px 24px;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;font-size:17px;line-height:1.6;background:#ffffff;">
-      <p>Your three Special Reports are ready.</p>
-      <p>As a Founding Member, you have immediate access to all three. Click any title to download:</p>
+      <p>Your three Special Reports are ready. Click any title to download:</p>
       <ul style="padding-left:20px;margin:24px 0;">
         ${links}
       </ul>
@@ -317,7 +353,7 @@ async function confirmReportDelivery(memberId: number): Promise<void> {
 }
 
 /**
- * Reset stale leases for founding members whose claim is older than the lease
+ * Reset stale leases for members whose claim is older than the lease
  * window but whose delivery was never confirmed. Called by the scheduler before
  * each retry pass so process-crash stranded claims are recovered automatically.
  */
@@ -331,7 +367,6 @@ export async function resetStaleReportLeases(leaseTtlMs = 15 * 60 * 1000): Promi
         sql`${membersTable.specialReportsSentAt} IS NOT NULL`,
         isNull(membersTable.specialReportsDeliveredAt),
         sql`${membersTable.specialReportsSentAt} < ${staleBefore.toISOString()}`,
-        sql`${membersTable.plan} IN ('founding-individual', 'founding-team')`,
       ),
     )
     .returning({ id: membersTable.id });
@@ -342,7 +377,7 @@ export async function resetStaleReportLeases(leaseTtlMs = 15 * 60 * 1000): Promi
 }
 
 /**
- * Send Special Reports email to a founding member.
+ * Send Special Reports catch-up email to a member.
  *
  * Delivery protocol:
  * 1. `loadAllRequiredReports` — bail if PDFs not all uploaded yet.
@@ -388,12 +423,12 @@ export async function sendSpecialReportsToMember(email: string): Promise<boolean
   });
 
   await confirmReportDelivery(claimedId);
-  logger.info({ email }, "special-reports: delivered to founding member");
+  logger.info({ email }, "special-reports: delivered to member");
   return true;
 }
 
 /**
- * Deliver reports to all founding members who haven't received them yet.
+ * Deliver reports to ALL members (any plan) who have not received them yet.
  *
  * Queries by `deliveredAt IS NULL` (not sentAt) so stale-lease-reset members
  * are included, and members with an active in-flight claim (sentAt NOT NULL)
@@ -402,19 +437,14 @@ export async function sendSpecialReportsToMember(email: string): Promise<boolean
  * Called from the checkout webhook and the scheduler retry tick.
  * Returns count of members successfully delivered to.
  */
-export async function deliverReportsToPendingFoundingMembers(): Promise<number> {
+export async function deliverReportsToPendingMembers(): Promise<number> {
   const reports = await loadAllRequiredReports();
   if (!reports) return 0;
 
   const pending = await db
     .select({ id: membersTable.id, email: membersTable.email })
     .from(membersTable)
-    .where(
-      and(
-        isNull(membersTable.specialReportsDeliveredAt),
-        sql`${membersTable.plan} IN ('founding-individual', 'founding-team')`,
-      ),
-    );
+    .where(isNull(membersTable.specialReportsDeliveredAt));
 
   let sent = 0;
   for (const member of pending) {
@@ -449,59 +479,23 @@ export async function deliverReportsToPendingFoundingMembers(): Promise<number> 
 }
 
 /**
- * Send the latest free-edition Wire to a new paid member.
- * Lets them read the most recent issue immediately instead of waiting until next Tuesday.
+ * Load the latest free-edition Wire for inclusion in the welcome email,
+ * if it is fresh (less than 8 days old). Returns null otherwise.
  */
-async function maybeSendLatestWire(email: string): Promise<void> {
+async function loadLatestFreshWire(): Promise<{ subject: string; bodyText: string } | null> {
   try {
     const [latest] = await db
       .select()
       .from(weeklyPreviewsTable)
       .orderBy(desc(weeklyPreviewsTable.sentAt))
       .limit(1);
-    if (!latest) return;
-
-    // Only send issues less than 8 days old (don't deliver stale issues)
+    if (!latest) return null;
     const ageMs = Date.now() - latest.sentAt.getTime();
-    if (ageMs > 8 * 24 * 60 * 60 * 1000) return;
-
-    const paragraphs = latest.bodyText
-      .split(/\n\s*\n/)
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .map(
-        (s) =>
-          `<p>${s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</p>`,
-      )
-      .join("\n");
-
-    const html = `<!doctype html>
-<html>
-  <body style="margin:0;padding:0;background:#f6f5f2;">
-    <div style="max-width:560px;margin:0 auto;padding:32px 24px;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;font-size:17px;line-height:1.6;background:#ffffff;">
-      <p style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;color:#8a8577;text-transform:uppercase;">Hollywood Sales Wire — This Week's Issue</p>
-      <p>Here's the latest issue, sent while you were signing up:</p>
-      ${paragraphs}
-      <hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />
-      <p style="font-size:12px;color:#8a8577;font-family:Arial,sans-serif;">
-        Hollywood Sales Wire &middot; <a href="${SITE_URL}" style="color:#8a8577;">hollywoodsaleswire.com</a>
-      </p>
-    </div>
-  </body>
-</html>`;
-
-    await resendRequest("/emails", {
-      method: "POST",
-      body: {
-        from: FROM_ADDRESS,
-        to: [email],
-        subject: latest.subject,
-        html,
-      },
-    });
-    logger.info({ email, subject: latest.subject }, "members: sent latest Wire to new member");
+    if (ageMs > 8 * 24 * 60 * 60 * 1000) return null;
+    return { subject: latest.subject, bodyText: latest.bodyText };
   } catch (err) {
-    logger.error({ err, email }, "members: failed to send latest Wire to new member");
+    logger.error({ err }, "members: failed to load latest Wire for welcome email");
+    return null;
   }
 }
 
@@ -548,6 +542,62 @@ interface CheckoutSessionLineItem {
 }
 
 /**
+ * Send the single unified welcome email (publisher policy, Aug 2026): one
+ * email for EVERY plan containing the welcome copy, the three Special Report
+ * download links (when all PDFs are uploaded), and the latest Wire issue
+ * (when fresh). No plan-conditional wording.
+ *
+ * Report delivery is claimed atomically before sending so the scheduler's
+ * catch-up pass never sends a duplicate reports email; on failure the claim
+ * is held and recovered by the stale-lease TTL (see sendSpecialReportsToMember).
+ * Throws if the send fails (caller releases its welcome claim; the Resend
+ * idempotency key prevents a duplicate welcome within 24 h).
+ */
+async function sendUnifiedWelcome(email: string): Promise<void> {
+  let reports = await loadAllRequiredReports();
+  let reportsClaimId: number | null = null;
+  if (reports) {
+    reportsClaimId = await claimReportDeliveryByEmail(email);
+    if (!reportsClaimId) reports = null; // already delivered — don't repeat links
+  }
+  const latestWire = await loadLatestFreshWire();
+
+  // Deterministic idempotency key: Stripe webhook retries and welcome-claim
+  // releases can re-invoke this — Resend dedupes for 24 h, so the member can
+  // never receive the welcome email twice within that window.
+  const idempotencyKey = createHash("sha256")
+    .update(`welcome-v1:${email.toLowerCase()}`)
+    .digest("hex");
+
+  // On error: do NOT release the reports lease (same policy as the catch-up
+  // sender): the stale-lease TTL (15 min) recovers it and the scheduler then
+  // delivers the reports in a separate email. Worst case on an ambiguous
+  // accepted request, the member gets the permanent links twice — harmless.
+  await resendRequest("/emails", {
+    method: "POST",
+    body: {
+      from: FROM_ADDRESS,
+      to: [email],
+      subject: "Welcome to Hollywood Sales Wire — your membership is active",
+      html: welcomeHtml(email, reports, latestWire),
+    },
+    headers: { "Idempotency-Key": idempotencyKey },
+  });
+
+  if (reportsClaimId) {
+    // Confirm failure is non-fatal: the lease expires, the scheduler re-sends
+    // the reports separately (duplicate permanent links — harmless), and we
+    // must NOT bubble up, which would release the welcome claim and re-send
+    // the whole welcome after the idempotency window.
+    try {
+      await confirmReportDelivery(reportsClaimId);
+    } catch (err) {
+      logger.error({ err, email }, "members: report delivery confirm failed — scheduler will re-send links");
+    }
+  }
+}
+
+/**
  * Create a complimentary (no-Stripe) member from the publisher console.
  * Mirrors the paid-member flow minus billing: upsert the member, send the
  * welcome email once (atomic claim), then Special Reports (founding plans)
@@ -576,15 +626,7 @@ export async function createCompMember(
   }
 
   try {
-    await resendRequest("/emails", {
-      method: "POST",
-      body: {
-        from: FROM_ADDRESS,
-        to: [email],
-        subject: "Welcome to Hollywood Sales Wire — your membership is active",
-        html: welcomeHtml(email),
-      },
-    });
+    await sendUnifiedWelcome(email);
   } catch (err) {
     logger.error({ err, email }, "publisher: failed to send comp-member welcome — releasing claim");
     await db
@@ -593,15 +635,6 @@ export async function createCompMember(
       .where(eq(membersTable.email, email));
     throw err;
   }
-
-  if (isFoundingPlan(plan)) {
-    try {
-      await sendSpecialReportsToMember(email);
-    } catch (err) {
-      logger.error({ err, email }, "publisher: failed to send special reports to comp member");
-    }
-  }
-  await maybeSendLatestWire(email);
   return { created: true, welcomed: true };
 }
 
@@ -725,17 +758,10 @@ export async function handleStripeEvent(event: {
     logger.error({ err, email }, "stripe: failed while canceling founding series");
   }
 
-  // Welcome email. If it fails, release the claim so a Stripe retry resends.
+  // Unified welcome email (includes Special Report links + latest Wire).
+  // If it fails, release the claim so a Stripe retry resends.
   try {
-    await resendRequest("/emails", {
-      method: "POST",
-      body: {
-        from: FROM_ADDRESS,
-        to: [email],
-        subject: "Welcome to Hollywood Sales Wire — your membership is active",
-        html: welcomeHtml(email),
-      },
-    });
+    await sendUnifiedWelcome(email);
   } catch (err) {
     logger.error({ err, email }, "stripe: failed to send member welcome email — releasing claim");
     try {
@@ -749,24 +775,10 @@ export async function handleStripeEvent(event: {
     return;
   }
 
-  // Special Reports for Founding Members — non-fatal; logs if reports not yet uploaded.
-  if (isFoundingPlan(plan)) {
-    try {
-      await sendSpecialReportsToMember(email);
-    } catch (err) {
-      logger.error({ err, email }, "stripe: failed to send special reports to founding member");
-    }
-  }
-
-  // Send the latest weekly Wire to the new member so they're not empty-handed.
-  await maybeSendLatestWire(email);
-
   // Publisher notification.
   try {
-    const isFoundingMember = isFoundingPlan(plan);
-    const reportsNote = isFoundingMember
-      ? " Their Special Reports were sent automatically (if all three are uploaded) or will be sent as soon as you upload the PDFs via your publisher console."
-      : "";
+    const reportsNote =
+      " Their welcome email included the Special Report links (if all three are uploaded) — otherwise the reports go out automatically as soon as you upload the PDFs via your publisher console.";
     await resendRequest("/emails", {
       method: "POST",
       body: {
