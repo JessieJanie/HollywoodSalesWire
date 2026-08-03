@@ -52,3 +52,6 @@ Opt-in e2e test: `RUN_E2E=1 pnpm --filter @workspace/api-server exec vitest run 
 
 ## Permanent links + Shelf (Aug 2026)
 Report download links never expire (publisher decision — no re-issuing admin). v2 sig = HMAC over email+slug only; legacy exp-links still verified against old scheme and honor their expiry. Member "Shelf" page at /shelf?email&sig (HMAC "shelf-v1:email", permanent) shows founding Special Reports + every Wire issue whose frozen recipient snapshot contains their email — that array is what scopes a canceled member's archive to their membership window. Shelf link goes out in the welcome email.
+
+## Final report titles (Aug 3, 2026)
+Slugs are permanent (signed links depend on them) but titles were renamed to match the final PDFs: `spend-map` → "Under the Hood: The WBD AI Buildout", `requisition-read` → "Help-Wanted Pages Are Purchase Orders", `greenlight-window` unchanged. `ensureReportRows` upserts titles on conflict so code is the source of truth for names. All 3 PDFs uploaded to prod Aug 3, 2026 (local copies in attached_assets/special-reports/). Do not "fix" the slug/title mismatch.
