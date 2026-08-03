@@ -28,7 +28,9 @@ function timingSafeMatch(sig: string, expected: string): boolean {
  * The signature covers email + slug so the link cannot be re-targeted. The
  * email is in the URL (not in a session), so a link CAN be forwarded; the
  * founding-member entitlement check on the server means only emails belonging
- * to founding members can download.
+ * to founding members can download. Special Reports are the founding member's
+ * to keep: cancellation does NOT revoke download access (publisher policy —
+ * the offer says "yours to keep").
  */
 export function signMemberSlug(email: string, slug: string): string {
   return hmac(`report-download-v2:${email.toLowerCase()}:${slug}`);
