@@ -24,6 +24,7 @@ import type {
   FoundingOfferParams,
   FoundingOfferStatus,
   HealthStatus,
+  PaidWireSendInput,
   PublisherDraftInput,
   PublisherDraftResult,
   PublisherKeyInput,
@@ -522,6 +523,77 @@ export const usePublisherSend = <TError = ErrorType<ApiMessage>,
         TContext
       > => {
       return useMutation(getPublisherSendMutationOptions(options));
+    }
+
+export const getPublisherPaidSendUrl = () => {
+
+
+
+
+  return `/api/publisher/paid-send`
+}
+
+/**
+ * @summary Send the full paid Wire to all members (once per week)
+ */
+export const publisherPaidSend = async (paidWireSendInput: PaidWireSendInput, options?: Parameters<typeof customFetch>[1]): Promise<PublisherSendResult> => {
+
+  return customFetch<PublisherSendResult>(getPublisherPaidSendUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(paidWireSendInput)
+  }
+);}
+
+
+
+
+
+export const getPublisherPaidSendMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherPaidSend>>, TError,{data: BodyType<PaidWireSendInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publisherPaidSend>>, TError,{data: BodyType<PaidWireSendInput>}, TContext> => {
+
+const mutationKey = ['publisherPaidSend'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherPaidSend>>, {data: BodyType<PaidWireSendInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  publisherPaidSend(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublisherPaidSendMutationResult = NonNullable<Awaited<ReturnType<typeof publisherPaidSend>>>
+    export type PublisherPaidSendMutationBody = BodyType<PaidWireSendInput>
+    export type PublisherPaidSendMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Send the full paid Wire to all members (once per week)
+ */
+export const usePublisherPaidSend = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherPaidSend>>, TError,{data: BodyType<PaidWireSendInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publisherPaidSend>>,
+        TError,
+        {data: BodyType<PaidWireSendInput>},
+        TContext
+      > => {
+      return useMutation(getPublisherPaidSendMutationOptions(options));
     }
 
 export const getPublisherWireLatestUrl = (params: PublisherWireLatestParams,) => {

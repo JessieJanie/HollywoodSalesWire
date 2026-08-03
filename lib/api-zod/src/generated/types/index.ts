@@ -10,6 +10,7 @@ export * from './apiMessage';
 export * from './foundingOfferParams';
 export * from './foundingOfferStatus';
 export * from './healthStatus';
+export * from './paidWireSendInput';
 export * from './publisherDraftInput';
 export * from './publisherDraftResult';
 export * from './publisherKeyInput';

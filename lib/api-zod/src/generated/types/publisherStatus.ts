@@ -10,4 +10,8 @@ export interface PublisherStatus {
   subscriberCount: number;
   lastSentAt?: string;
   lastSubject?: string;
+  memberCount: number;
+  paidSentThisWeek: boolean;
+  lastPaidSentAt?: string;
+  lastPaidSubject?: string;
 }

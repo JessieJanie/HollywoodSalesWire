@@ -6,4 +6,5 @@
 - [HSW copy direction](copy-direction-usp.md) — "hot-lead pros" USP framing for next sales-copy pass; moat = "not worth replicating"; quantified claims stay literally true.
 - [Articles editorial series](articles-editorial.md) — Grok-drafted editorial pieces, copy verbatim/publisher-locked; order = editorial set first, witty images over literal ones.
 - [Hollywood book brainstorm](hollywood-book-brainstorm.md) — taxpayer-money book idea ("pay twice"), seduction not outrage; landed framing, titles, next step. Discussion only.
+- [Paid Wire send guarantees](paid-wire-send.md) — weekly claim + Resend idempotency keys make double-sends impossible; retries resume, never re-claim; inactive Stripe subs excluded.
 - [Evergreen founding funnel](email-sequence.md) — signup → welcome, 1–2 Free Editions first, then weekly founding series days 14–42 to token-gated offer page; pending-row handoff for >28d; copy publisher-locked.

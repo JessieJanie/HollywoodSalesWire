@@ -57,7 +57,11 @@ export const PublisherStatusQueryParams = zod.object({
 export const PublisherStatusResponse = zod.object({
   "subscriberCount": zod.number(),
   "lastSentAt": zod.string().optional(),
-  "lastSubject": zod.string().optional()
+  "lastSubject": zod.string().optional(),
+  "memberCount": zod.number(),
+  "paidSentThisWeek": zod.boolean(),
+  "lastPaidSentAt": zod.string().optional(),
+  "lastPaidSubject": zod.string().optional()
 })
 
 
@@ -95,6 +99,26 @@ export const PublisherSendBody = zod.object({
 })
 
 export const PublisherSendResponse = zod.object({
+  "sent": zod.number()
+})
+
+
+/**
+ * @summary Send the full paid Wire to all members (once per week)
+ */
+export const publisherPaidSendBodySubjectMin = 3;
+
+export const publisherPaidSendBodyBodyTextMin = 100;
+
+
+
+export const PublisherPaidSendBody = zod.object({
+  "key": zod.string(),
+  "subject": zod.string().min(publisherPaidSendBodySubjectMin),
+  "bodyText": zod.string().min(publisherPaidSendBodyBodyTextMin)
+})
+
+export const PublisherPaidSendResponse = zod.object({
   "sent": zod.number()
 })
 

@@ -21,3 +21,4 @@ export * from "./emailSubscribers";
 export * from "./weeklyPreviews";
 export * from "./wireRuns";
 export * from "./members";
+export * from "./paidWireSends";

@@ -36,6 +36,18 @@ export interface PublisherStatus {
   subscriberCount: number;
   lastSentAt?: string;
   lastSubject?: string;
+  memberCount: number;
+  paidSentThisWeek: boolean;
+  lastPaidSentAt?: string;
+  lastPaidSubject?: string;
+}
+
+export interface PaidWireSendInput {
+  key: string;
+  /** @minLength 3 */
+  subject: string;
+  /** @minLength 100 */
+  bodyText: string;
 }
 
 export interface PublisherDraftInput {

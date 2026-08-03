@@ -144,6 +144,36 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMessage"
+  /publisher/paid-send:
+    post:
+      operationId: publisherPaidSend
+      tags: [publisher]
+      summary: Send the full paid Wire to all members (once per week)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PaidWireSendInput"
+      responses:
+        "200":
+          description: Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublisherSendResult"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "409":
+          description: Already sent this week
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
   /publisher/wire/latest:
     get:
       operationId: publisherWireLatest
@@ -250,7 +280,7 @@ components:
             $ref: "#/components/schemas/WireSource"
     PublisherStatus:
       type: object
-      required: [subscriberCount]
+      required: [subscriberCount, memberCount, paidSentThisWeek]
       properties:
         subscriberCount:
           type: number
@@ -258,6 +288,26 @@ components:
           type: string
         lastSubject:
           type: string
+        memberCount:
+          type: number
+        paidSentThisWeek:
+          type: boolean
+        lastPaidSentAt:
+          type: string
+        lastPaidSubject:
+          type: string
+    PaidWireSendInput:
+      type: object
+      required: [key, subject, bodyText]
+      properties:
+        key:
+          type: string
+        subject:
+          type: string
+          minLength: 3
+        bodyText:
+          type: string
+          minLength: 100
     PublisherDraftInput:
       type: object
       required: [key, wireText]
