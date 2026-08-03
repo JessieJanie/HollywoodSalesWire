@@ -135,9 +135,9 @@ export default function SalesPage() {
             <div className="space-y-6 not-prose mb-12">
               {[
                 {
-                  title: "The Spend Map",
+                  title: "Under the Hood: The WBD AI Buildout",
                   value: "$795 value",
-                  desc: "The honest map of where money actually moves. Physical production, sports rights, localization, and the truth about AI spend — real, growing, honestly sized fourth."
+                  desc: "How Warner Bros. Discovery is actually building its AI capability, 8,700 miles from Burbank — who is hired, where, at what cost, and for what work, drawn from job postings, government records, corporate filings, and salary data on two continents. Not a scandal; a map."
                 },
                 {
                   title: "The $6.6 Billion Greenlight Window",
@@ -145,7 +145,7 @@ export default function SalesPage() {
                   desc: "The state tax-credit system decoded. Which states publish lists, on what calendar, and the narrow window between greenlight and spend when a production buys everything."
                 },
                 {
-                  title: "The Requisition Read",
+                  title: "Help-Wanted Pages Are Purchase Orders",
                   value: "$495 value",
                   desc: "Careers pages as disclosure documents. The job-title tells, the posting patterns that reveal a buildout weeks before any purchase order, and a full named walkthrough of a nine-figure streaming-sports buildout."
                 }

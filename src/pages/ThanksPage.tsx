@@ -45,7 +45,7 @@ export default function ThanksPage() {
               <div>
                 <h3 className="font-sans font-bold text-lg mb-2">Check your inbox now</h3>
                 <p className="text-muted-foreground text-base leading-relaxed">
-                  Your three Special Reports — <em>The Spend Map</em>, <em>The $6.6 Billion Greenlight Window</em>, and <em>The Requisition Read</em> — have been dispatched to your email. You can start applying the system this weekend.
+                  Your three Special Reports — <em>Under the Hood: The WBD AI Buildout</em>, <em>The $6.6 Billion Greenlight Window</em>, and <em>Help-Wanted Pages Are Purchase Orders</em> — have been dispatched to your email. You can start applying the system this weekend.
                 </p>
               </div>
             </div>
