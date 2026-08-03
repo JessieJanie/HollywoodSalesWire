@@ -4,7 +4,6 @@ import { and, eq, sql } from "drizzle-orm";
 import { db, specialReportsTable, membersTable } from "@workspace/db";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 import { logger } from "../lib/logger";
-import { INACTIVE_SUB_STATUSES } from "../lib/paidWire";
 
 const router: IRouter = Router();
 const storageService = new ObjectStorageService();
@@ -25,8 +24,8 @@ export const REPORT_LINK_TTL_MS = 365 * 24 * 60 * 60 * 1000;
  * window, and the founding-member entitlement check on the server side means
  * only founding members can actually obtain a valid link in the first place.
  *
- * If a non-founding-member receives a forwarded link and the original member
- * later loses their founding status, the download returns 403.
+ * Special Reports are the founding member's to keep: cancellation does NOT
+ * revoke download access (publisher policy — the offer says "yours to keep").
  */
 export function signMemberSlug(email: string, slug: string, expMs: number): string {
   const secret = process.env.SESSION_SECRET;
@@ -96,17 +95,13 @@ router.get("/reports/download/:slug", async (req, res): Promise<void> => {
     return;
   }
 
-  // 3. Entitlement check: email must belong to a founding member with an
-  //    active Stripe subscription (or a one-time purchase with no subscription).
-  //    One-time founding purchases (stripeSubscriptionId IS NULL) are permanently
-  //    entitled — they paid in full and have no subscription to cancel.
-  //    Subscriptions are cross-checked against stripe.subscriptions (synced by
-  //    stripe-replit-sync) using the same inactive-status set as the paid-Wire path.
+  // 3. Entitlement check: email must belong to a founding member. That's it —
+  //    the Special Reports were sold as "yours to keep even if you cancel",
+  //    so we deliberately do NOT check subscription status here (unlike the
+  //    paid-Wire path). Keeping report access also nudges canceled members
+  //    to resubscribe.
   const [member] = await db
-    .select({
-      plan: membersTable.plan,
-      stripeSubscriptionId: membersTable.stripeSubscriptionId,
-    })
+    .select({ plan: membersTable.plan })
     .from(membersTable)
     .where(
       and(
@@ -118,17 +113,6 @@ router.get("/reports/download/:slug", async (req, res): Promise<void> => {
     res.status(403).json({ error: "Access restricted to Founding Members" });
     return;
   }
-  // If the member has a subscription, verify it is not in an inactive state.
-  if (member.stripeSubscriptionId) {
-    const rows = await db.execute(
-      sql`select id from stripe.subscriptions where id = ${member.stripeSubscriptionId} and status = any(${[...INACTIVE_SUB_STATUSES]})`,
-    );
-    if ((rows.rows as unknown[]).length > 0) {
-      res.status(403).json({ error: "Your Founding Membership is no longer active" });
-      return;
-    }
-  }
-
   // 4. Look up the report file
   const [report] = await db
     .select()

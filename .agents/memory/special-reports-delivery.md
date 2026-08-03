@@ -31,10 +31,10 @@ Ordered precedence (most → least stable):
 - `plink_1TyeTj8TDFH4346hT3eAICwp` → individual
 - `plink_1TyeTj8TDFH4346hYySSS9GB` → team
 
-## Download entitlement check
-- Founding subscription members: cross-check `stripe.subscriptions` for inactive status (`INACTIVE_SUB_STATUSES`)
-- One-time purchase (no `stripeSubscriptionId`): permanently entitled — bypass Stripe check
-- **Why:** `members.plan` set at checkout is never reconciled when a subscription is canceled/unpaid/paused.
+## Download entitlement check — "yours to keep" policy (Aug 2, 2026)
+- Publisher decision: Special Reports remain downloadable FOREVER for founding members, even after cancellation — the offer said "yours to keep", and continued access encourages resubscribing.
+- Route checks only HMAC validity + expiry + founding plan in `members`; NO subscription-status check. The paid-Wire send path still excludes inactive subs (that's different — weekly content, not a keeper).
+- **How to apply:** never add a Stripe status check back to the report download route; a test in specialReports.test.ts guards this.
 
 ## Migration strategy
 - Post-merge script uses `drizzle-kit push` (NOT migrate) — production DB pre-dates Drizzle journal

@@ -9,7 +9,6 @@
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { signMemberSlug, reportDownloadUrl, REPORT_LINK_TTL_MS } from "../routes/reports";
-import { INACTIVE_SUB_STATUSES } from "./paidWire";
 import { planFromSession, PAYMENT_LINK_TO_PLAN, type CheckoutSessionLike } from "./members";
 
 // Provide a test secret so signMemberSlug works without a real env
@@ -140,69 +139,23 @@ describe("download link expiry model", () => {
 });
 
 // ---------------------------------------------------------------------------
-// Stripe subscription entitlement model
+// Entitlement model: reports are "yours to keep"
 // ---------------------------------------------------------------------------
 
 /**
- * These tests document the access-control rules enforced by the download
- * endpoint's Stripe subscription check (see routes/reports.ts).
- *
- * The download route gates access as follows:
- *  1. HMAC is valid and not expired → proceed
- *  2. Email maps to a founding-plan member in DB → proceed
- *  3. If member has a stripeSubscriptionId, it must NOT be in INACTIVE_SUB_STATUSES
- *  4. One-time purchases (no stripeSubscriptionId) are always entitled
+ * Publisher policy (Aug 2026): Special Reports were sold as "yours to keep
+ * even if you cancel". The download route therefore gates access on:
+ *  1. HMAC is valid and not expired
+ *  2. Email maps to a founding-plan member in the DB
+ * ...and deliberately does NOT check Stripe subscription status. A canceled
+ * Founding Member keeps download access (which also encourages resubscribing).
  */
-describe("Stripe subscription entitlement rules", () => {
-  const ACTIVE_STATUSES = ["active", "trialing", "past_due"] as const;
-
-  it("INACTIVE_SUB_STATUSES includes canceled, unpaid, incomplete, incomplete_expired, paused", () => {
-    expect(INACTIVE_SUB_STATUSES).toContain("canceled");
-    expect(INACTIVE_SUB_STATUSES).toContain("unpaid");
-    expect(INACTIVE_SUB_STATUSES).toContain("incomplete");
-    expect(INACTIVE_SUB_STATUSES).toContain("incomplete_expired");
-    expect(INACTIVE_SUB_STATUSES).toContain("paused");
-  });
-
-  it("active subscription status is not in INACTIVE_SUB_STATUSES", () => {
-    for (const status of ACTIVE_STATUSES) {
-      expect(INACTIVE_SUB_STATUSES).not.toContain(status);
-    }
-  });
-
-  // Simulate the entitlement check the download route performs inline:
-  // "is this subscription's status in INACTIVE_SUB_STATUSES?"
-  function isInactiveSubscription(status: string): boolean {
-    return (INACTIVE_SUB_STATUSES as readonly string[]).includes(status);
-  }
-
-  it("canceled subscription is denied", () => {
-    expect(isInactiveSubscription("canceled")).toBe(true);
-  });
-
-  it("unpaid subscription is denied", () => {
-    expect(isInactiveSubscription("unpaid")).toBe(true);
-  });
-
-  it("paused subscription is denied", () => {
-    expect(isInactiveSubscription("paused")).toBe(true);
-  });
-
-  it("active subscription is allowed", () => {
-    expect(isInactiveSubscription("active")).toBe(false);
-  });
-
-  it("trialing subscription is allowed", () => {
-    expect(isInactiveSubscription("trialing")).toBe(false);
-  });
-
-  it("no subscription (one-time purchase) — entitlement check always passes", () => {
-    // The download route only queries stripe.subscriptions when
-    // member.stripeSubscriptionId is non-null. A null id skips the check,
-    // permanently entitling one-time founding purchases.
-    const stripeSubscriptionId: string | null = null;
-    const checksStripe = stripeSubscriptionId !== null;
-    expect(checksStripe).toBe(false); // one-time purchases bypass Stripe check
+describe("report entitlement policy", () => {
+  it("download route source contains no subscription-status check", async () => {
+    const fs = await import("node:fs/promises");
+    const src = await fs.readFile(new URL("../routes/reports.ts", import.meta.url), "utf8");
+    expect(src).not.toContain("INACTIVE_SUB_STATUSES");
+    expect(src).not.toContain("stripe.subscriptions");
   });
 });
 
