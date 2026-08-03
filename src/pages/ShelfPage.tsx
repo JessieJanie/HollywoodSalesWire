@@ -52,7 +52,7 @@ export default function ShelfPage() {
             return null;
           }
           const body = await res.json().catch(() => ({}));
-          throw new Error(body.error ?? "Could not open your Shelf");
+          throw new Error(body.error ?? "Could not open your HSW Shelf");
         }
         // Opened via signed link: the server has set the remember-me cookie,
         // so drop the link parameters from the address bar.
@@ -89,7 +89,7 @@ export default function ShelfPage() {
     <div className="min-h-screen flex flex-col font-sans text-foreground">
       <Header />
       <main className="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <h1 className="text-4xl font-serif font-bold tracking-tight mb-2">Your Shelf</h1>
+        <h1 className="text-4xl font-serif font-bold tracking-tight mb-2">Your HSW Shelf</h1>
         <p className="text-sm text-muted-foreground font-mono-data mb-10">
           EVERY ISSUE AND REPORT WE&apos;VE SENT YOU — YOURS TO KEEP
         </p>
@@ -119,7 +119,7 @@ export default function ShelfPage() {
               </>
             ) : (
               <>
-                <p className="font-serif font-bold text-lg mb-2">Open your Shelf</p>
+                <p className="font-serif font-bold text-lg mb-2">Open your HSW Shelf</p>
                 <p className="text-sm text-muted-foreground mb-4">
                   Enter your membership email and we&apos;ll send you your private link. Once you
                   click it, this browser will remember you — no link needed next time.
@@ -154,7 +154,7 @@ export default function ShelfPage() {
         )}
 
         {!error && !needsSignIn && !data && (
-          <p className="text-muted-foreground">Opening your Shelf…</p>
+          <p className="text-muted-foreground">Opening your HSW Shelf…</p>
         )}
 
         {data && (
@@ -190,7 +190,7 @@ export default function ShelfPage() {
             </section>
 
             <section>
-              <h2 className="text-2xl font-serif font-bold mb-1">The Wire</h2>
+              <h2 className="text-2xl font-serif font-bold mb-1">The HSW Weekly Wire</h2>
               <p className="text-sm text-muted-foreground mb-4">
                 Every weekly issue sent during your membership, newest first.
               </p>

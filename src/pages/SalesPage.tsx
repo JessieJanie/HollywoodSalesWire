@@ -169,7 +169,7 @@ export default function SalesPage() {
 
           <FadeIn>
             <p>
-              That's <strong>$1,985 in Special Reports</strong> — a crash course in producing your own hot leads that the $15,000-a-year databases don't teach. Free with your membership, and yours to keep forever.
+              That's <strong>$1,985 in Special Reports</strong> — a crash course in producing your own hot leads that the $15,000-a-year databases will never reveal. Free with your membership, and yours to keep forever.
             </p>
             <p>
               Plus, once a month, subscribers receive <strong>The Divergence Report</strong> — the strategic layer on top of the weekly wire. It's the deeper monthly read on where the money is moving <em>next quarter</em>, so you're positioned before the crowd shows up. The wire is your calls for the week; the Divergence Report is your plan for the season. Both come with the subscription.

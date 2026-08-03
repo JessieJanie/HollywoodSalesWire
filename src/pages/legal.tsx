@@ -26,7 +26,7 @@ export function TermsPage() {
       <h2>What we sell</h2>
       <p>
         Hollywood Sales Wire is a paid subscription intelligence briefing for people who sell products
-        and services into the entertainment production industry. A membership includes the weekly Wire
+        and services into the entertainment production industry. A membership includes the HSW Weekly Wire
         briefing delivered by email, the monthly Divergence Report, and any bonus materials included
         with your offer at the time of purchase.
       </p>

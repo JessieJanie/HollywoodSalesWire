@@ -57,7 +57,7 @@ export default function ThanksPage() {
               <div>
                 <h3 className="font-sans font-bold text-lg mb-2">Tuesday morning</h3>
                 <p className="text-muted-foreground text-base leading-relaxed">
-                  Your first issue of the weekly Wire will arrive. It contains the week's live buying signals, filtered and translated. Make sure to whitelist our sending address so it doesn't land in promotions.
+                  Your first issue of the HSW Weekly Wire will arrive. It contains the week's live buying signals, filtered and translated. Make sure to whitelist our sending address so it doesn't land in promotions.
                 </p>
               </div>
             </div>
