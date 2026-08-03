@@ -129,7 +129,7 @@ export default function SalesPage() {
           <FadeIn>
             <h2 className="text-3xl mt-16 mb-8">Everything a Member Gets</h2>
             <p className="mb-10">
-              Hollywood Sales Wire is a weekly intelligence briefing. Every Tuesday, you get the week's live buying signals. The system behind it is documented in three Special Reports — <strong>free and immediately</strong> with a Founding Membership, offered exclusively through our email list.
+              Hollywood Sales Wire is a weekly intelligence briefing. Every Tuesday, you get the week's live buying signals. The system behind it is documented in three Special Reports — <strong>free and immediately</strong> with your membership. Founding Memberships, at half the regular rate, are offered exclusively through our email list.
             </p>
 
             <div className="space-y-6 not-prose mb-12">
@@ -169,7 +169,7 @@ export default function SalesPage() {
 
           <FadeIn>
             <p>
-              That's <strong>$1,985 in Special Reports</strong> — a crash course in producing your own hot leads that the $15,000-a-year databases don't teach. Free for Founding Members, and yours to keep forever.
+              That's <strong>$1,985 in Special Reports</strong> — a crash course in producing your own hot leads that the $15,000-a-year databases don't teach. Free with your membership, and yours to keep forever.
             </p>
             <p>
               Plus, once a month, subscribers receive <strong>The Divergence Report</strong> — the strategic layer on top of the weekly wire. It's the deeper monthly read on where the money is moving <em>next quarter</em>, so you're positioned before the crowd shows up. The wire is your calls for the week; the Divergence Report is your plan for the season. Both come with the subscription.
@@ -188,7 +188,7 @@ export default function SalesPage() {
               </p>
             </div>
             <p>
-              Notice the math for Founding Members: the Special Reports alone ($1,985) are worth the Founding Membership fee ($1,995). The fifty-two weekly issues and twelve Divergence Reports are, in effect, thrown in.
+              Notice the math: the Special Reports alone ($1,985) are worth the Founding Membership fee ($1,995). The fifty-two weekly issues and twelve Divergence Reports are, in effect, thrown in.
             </p>
 
             <div className="flex flex-col sm:flex-row items-start gap-6 p-8 border border-border mt-10 bg-card">
