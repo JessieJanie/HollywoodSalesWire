@@ -170,32 +170,47 @@ export function isFoundingPlan(plan: string): boolean {
  * NEW-MEMBER WELCOME EMAIL — transactional copy, flagged for the publisher's
  * review (publisher-locked policy). Deliberately plain and claim-free.
  */
+/** One-line descriptions for the welcome email, keyed by slug. */
+const WELCOME_REPORT_DESCRIPTIONS: Record<string, string> = {
+  "spend-map":
+    "How Warner Bros. Discovery is actually building its AI capability, 8,700 miles from Burbank — who is hired, where, at what cost, and for what work, drawn from job postings, government records, corporate filings, and salary data on two continents. Not a scandal; a map.",
+  "greenlight-window":
+    "The state-by-state award-list calendar and the spend window when a production does nearly all of its buying — so you arrive while the budget is still being spent, not after.",
+  "requisition-read":
+    "Careers pages as disclosure documents: the job-title tells, the posting patterns that reveal a buildout weeks before any purchase order, and a full named walkthrough of a nine-figure streaming-sports buildout.",
+};
+
 function welcomeHtml(
   email: string,
   reports: Array<{ slug: string; title: string }> | null,
   latestWire: { subject: string; bodyText: string } | null,
 ): string {
   const p = (s: string) => `<p>${s}</p>`;
+  const h = (s: string) =>
+    `<p style="font-family:Arial,sans-serif;font-size:12px;letter-spacing:2px;color:#8a8577;text-transform:uppercase;margin:32px 0 12px;">${s}</p>`;
   const shelfLink = shelfUrl(email, SITE_URL);
 
   // Special Reports section — identical for every plan (publisher policy,
   // Aug 2026: all members receive the three Special Reports).
   const reportsSection = reports
-    ? `${p("Your three Special Reports are included with your membership — click any title to download:")}
+    ? `${h("Your three free Special Reports are ready")}
+      ${p("These come free with your membership. They are not for sale separately, and they never will be — they are for members only. Click any title to download:")}
       <ul style="padding-left:20px;margin:24px 0;">
         ${reports
           .map(
             (r) =>
-              `<li style="margin:12px 0;"><a href="${reportDownloadUrl(email, r.slug, SITE_URL)}" style="color:#1d5c3a;font-weight:bold;">${r.title}</a></li>`,
+              `<li style="margin:12px 0;"><a href="${reportDownloadUrl(email, r.slug, SITE_URL)}" style="color:#1d5c3a;font-weight:bold;">${r.title}</a>${
+                WELCOME_REPORT_DESCRIPTIONS[r.slug] ? ` — ${WELCOME_REPORT_DESCRIPTIONS[r.slug]}` : ""
+              }</li>`,
           )
           .join("\n")}
       </ul>
-      ${p("These links never expire — the reports are yours to keep.")}`
-    : p("Your three Special Reports are included with your membership and will follow in a separate email as soon as they're ready.");
+      ${p("Every link above downloads directly — no login needed. The links are personal to your membership and never expire; the reports are yours to keep.")}`
+    : `${h("Your three free Special Reports")}
+      ${p("These come free with your membership. They are not for sale separately, and they never will be — they are for members only. They'll arrive in a separate email as soon as they're ready, and they'll be waiting on your Shelf too.")}`;
 
   const wireSection = latestWire
-    ? `<hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0;" />
-      <p style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;color:#8a8577;text-transform:uppercase;">This Week's Issue</p>
+    ? `${h("Your first issue of the Wire")}
       <p style="font-weight:bold;">${escapeHtml(latestWire.subject)}</p>
       ${latestWire.bodyText
         .split(/\n\s*\n/)
@@ -203,19 +218,25 @@ function welcomeHtml(
         .filter(Boolean)
         .map((s) => `<p>${escapeHtml(s)}</p>`)
         .join("\n")}`
-    : "";
+    : `${h("Your first issue of the Wire")}
+      ${p("This week's issue of the Wire is being prepared now and arrives Tuesday morning — who's spending, who's hiring, and where the door is open this week. It will land in this inbox, and a copy goes straight to your Shelf.")}`;
 
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f6f5f2;">
     <div style="max-width:560px;margin:0 auto;padding:32px 24px;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;font-size:17px;line-height:1.6;background:#ffffff;">
-      ${p("Welcome — your membership is active.")}
-      ${p("Thank you for joining Hollywood Sales Wire. Your subscription is confirmed, and your next issue of the Wire arrives Tuesday morning.")}
+      ${p("Hello,")}
+      ${p("Thank you for choosing Hollywood Sales Wire, and welcome. Your membership is now active, and everything you were promised is below — delivered the way this business usually works. Fast.")}
       ${reportsSection}
-      ${p(`Everything we send you also lives on your <a href="${shelfLink}" style="color:#1d5c3a;font-weight:bold;">Shelf</a> — your personal page with every Wire issue and Special Report. Bookmark it; the link is yours and never expires.`)}
-      ${p("Reply to this email any time — it reaches me directly.")}
-      ${p("Karilyn Colegrove, Publisher<br />Hollywood Sales Wire")}
       ${wireSection}
+      ${h("Your account")}
+      ${p(`Everything above is also stored on your <a href="${shelfLink}" style="color:#1d5c3a;font-weight:bold;">Hollywood Sales Wire Shelf</a> — sign in any time with this email address. Past issues stay there too, so you never have to dig through your inbox for one.`)}
+      ${h("What happens next")}
+      ${p("Every Tuesday morning, your issue of the Wire arrives in this inbox: the week's production spending signals, entity formations, and hiring tells — read, sorted, and turned into calls you can make the same day. Nothing to remember, nothing to log in for — and your Shelf is always there with everything you've received to date, for easy reference.")}
+      ${h("Getting the most from your first hour")}
+      ${p("Start with the Special Reports — they teach the reading method the Wire uses every week, so each Tuesday issue lands with full context. Then, when your first issue arrives, pick the one signal closest to your territory and make that call the same day.")}
+      ${p("One more thing: reply to this email any time — it reaches me directly. If a report raises a question, or an issue points somewhere you'd like more on, tell me. This is a small wire service on purpose; the members shape it.")}
+      ${p("Karilyn Colegrove, Publisher<br />Hollywood Sales Wire")}
       <hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />
       <p style="font-size:12px;color:#8a8577;font-family:Arial,sans-serif;">
         Hollywood Sales Wire &middot; <a href="${SITE_URL}" style="color:#8a8577;">hollywoodsaleswire.com</a><br />
