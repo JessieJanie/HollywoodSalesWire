@@ -26,6 +26,13 @@ export const RESEARCH_BEAT: { url: string; label: string }[] = [
     url: "https://gov.texas.gov/film/page/tmiiip",
     label: "Texas TMIIIP incentive program",
   },
+  {
+    // georgia.org (the official state film office site) bot-blocks all reads,
+    // so we use Georgia Entertainment's news page — it covers Georgia film
+    // office announcements, direct-spend updates, and production news.
+    url: "https://www.georgiaentertainment.com/news/",
+    label: "Georgia Entertainment — Georgia film/production news",
+  },
 ];
 
 const MAX_EXPLORE_URLS = 8;

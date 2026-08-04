@@ -21,5 +21,5 @@ description: How the paid Wire's automated research works — Skim (skim402.com)
 ## Known glitches
 - CA approved-projects page: webFetch/Skim markdown only captures the table's first 10 visible rows. The FULL archive (~900 rows, FY2009-10→present) is embedded in the raw HTML — `curl` the page and parse `<tr>`/`<td>` directly. Free, no paid read needed.
 - `film.ca.gov/tax-credit/` returns a thin staff-bio fragment (JS/tabbed page) — use the approved-projects URL instead.
-- `georgia.org` → upstream 403 (bot-blocked). Need alternate GA source (Georgia Entertainment coverage / press releases).
+- `georgia.org` → upstream 403 (bot-blocked). Working alternate (added to beat Aug 4, 2026): `https://www.georgiaentertainment.com/news/` — covers GA film office announcements/direct-spend updates. `gov.georgia.gov/press-releases` loads but article links aren't in plain HTML.
 - `jobs.netflix.com/search?...` → upstream 404 (SPA). Careers portals likely all need per-studio URL research or a custom Skim Signal.
