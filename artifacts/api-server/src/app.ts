@@ -75,4 +75,13 @@ app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
 
+// Public HTML archive of sent Weekly Briefs (crawler-readable marketing pages).
+// Mounted outside /api on purpose — see routes/briefs.ts. Lazy-imported the
+// same way other heavy modules are.
+app.use("/briefs", (req, res, next) => {
+  import("./routes/briefs")
+    .then((m) => m.default(req, res, next))
+    .catch(next);
+});
+
 export default app;

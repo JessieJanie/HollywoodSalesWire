@@ -44,6 +44,12 @@ export function getPrerenderRoutes(): PrerenderRoute[] {
       description: a.description,
     })),
     {
+      path: '/faq',
+      title: `FAQ — ${SITE_TITLE}`,
+      description:
+        'Frequently asked questions about Hollywood Sales Wire: what it is, what it costs, where the leads come from, and how it compares to lead databases.',
+    },
+    {
       path: '/support',
       title: `Support — ${SITE_TITLE}`,
       description:

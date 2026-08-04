@@ -15,6 +15,7 @@ import SupportPage from '@/pages/SupportPage';
 import ShelfPage from '@/pages/ShelfPage';
 import ArticlesPage from '@/pages/ArticlesPage';
 import ArticlePage from '@/pages/ArticlePage';
+import FaqPage from '@/pages/FaqPage';
 
 const queryClient = new QueryClient();
 
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/shelf" component={ShelfPage} />
       <Route path="/articles" component={ArticlesPage} />
       <Route path="/articles/:slug" component={ArticlePage} />
+      <Route path="/faq" component={FaqPage} />
       <Route component={NotFound} />
     </Switch>
   );

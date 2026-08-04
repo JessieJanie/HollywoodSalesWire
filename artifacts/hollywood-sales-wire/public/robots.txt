@@ -34,3 +34,4 @@ User-agent: Google-Extended
 Allow: /
 
 Sitemap: https://hollywoodsaleswire.com/sitemap.xml
+Sitemap: https://hollywoodsaleswire.com/briefs/sitemap.xml

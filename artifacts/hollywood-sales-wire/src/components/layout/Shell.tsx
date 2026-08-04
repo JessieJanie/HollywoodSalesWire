@@ -16,6 +16,7 @@ export function Header() {
         <div className="flex items-center gap-4 sm:gap-6 text-sm font-medium text-muted-foreground">
           <Link href="/" className="hidden sm:inline hover:text-foreground transition-colors" data-testid="link-nav-briefing">The Briefing</Link>
           <Link href="/articles" className="hover:text-foreground transition-colors" data-testid="link-nav-articles">Articles</Link>
+          <Link href="/faq" className="hidden sm:inline hover:text-foreground transition-colors" data-testid="link-nav-faq">FAQ</Link>
           <Link href="/support" className="hidden sm:inline hover:text-foreground transition-colors">Support</Link>
           <Link
             href="/order"
@@ -50,6 +51,8 @@ export function Footer() {
           <span className="font-medium text-foreground mb-1">Navigation</span>
           <Link href="/" className="hover:text-foreground transition-colors">The Briefing</Link>
           <Link href="/articles" className="hover:text-foreground transition-colors">Articles</Link>
+          <a href="/briefs" className="hover:text-foreground transition-colors">Weekly Brief Archive</a>
+          <Link href="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
           <Link href="/order" className="hover:text-foreground transition-colors">Become a Member</Link>
         </div>
         <div className="flex flex-col gap-2 text-sm text-muted-foreground">

@@ -72,6 +72,10 @@ export default function SalesPage() {
           </FadeIn>
 
           <FadeIn>
+            <PreviewSignup />
+          </FadeIn>
+
+          <FadeIn>
             <h2 className="text-3xl mt-16 mb-6">Here's the part that should bother you.</h2>
             <p>
               The "industry lead lists" your competitors are working from — the $15,000-a-year databases, the festival directories, the scraped LinkedIn exports — were cold before they were ever sold. Six months stale on a good day.
@@ -100,10 +104,6 @@ export default function SalesPage() {
             <p>
               And let me be straight about what it is and isn't. Every subscriber gets the same Tuesday wire. But here's what will never happen: I will never rent this list. Not the leads, and not <em>you</em>. Your prospects aren't being hammered by everyone who paid a list broker, and your inbox isn't being sold to one either. In this business, that alone puts you in rare company.
             </p>
-          </FadeIn>
-
-          <FadeIn>
-            <PreviewSignup />
           </FadeIn>
 
           {/* Method Story */}
