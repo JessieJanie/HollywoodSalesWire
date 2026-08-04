@@ -9,4 +9,5 @@
 - [Paid Wire send guarantees](paid-wire-send.md) — weekly claim + Resend idempotency keys make double-sends impossible; retries resume, never re-claim; inactive Stripe subs excluded.
 - [Evergreen founding funnel](email-sequence.md) — signup → welcome, 1–2 Free Editions first, then weekly founding series days 14–42 to token-gated offer page; pending-row handoff for >28d; copy publisher-locked.
 - [Shelf & publisher access](shelf-access.md) — magic link + 1-yr remember-me cookie, "email me my link" form; canceled members keep access by design; dev/prod share SESSION_SECRET.
+- [Site prerendering for AI crawlers](site-prerender.md) — public pages prerendered to static HTML (GEO); new public pages must join the prerender list + sitemap; prod file-vs-rewrite precedence unverified.
 - [Special Reports delivery](special-reports-delivery.md) — permanent download links + member Shelf page; two-state outbox (sentAt=lease/deliveredAt=confirmed), no lease release on error, stale-lease TTL + Resend 24h idempotency cover retry safety; plan detection uses payment_link ID map + session metadata (all 4 plinks updated); push not migrate for schema deployment.
