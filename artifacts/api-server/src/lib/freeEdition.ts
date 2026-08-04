@@ -2,7 +2,7 @@ import { PublisherDraftResponse } from "@workspace/api-zod";
 
 export const FREE_EDITION_PROMPT = `You are the editor of "Hollywood Sales Wire," a paid weekly sales-intelligence briefing for vendors selling into the entertainment industry. You are given the full text of this week's paid issue.
 
-Write the FREE EDITION: a condensed teaser sent to non-paying prospects. Rules:
+Write the HSW WEEKLY BRIEF: a condensed teaser sent to non-paying warm prospects (formerly called the "Free Edition"). Rules:
 - Match the publisher's voice: plain-spoken, direct, a working salesperson's respect for the reader's time. No hype words, no exclamation marks.
 - Convey the SHAPE of each signal without the sellable specifics. Never include: company names of buyers, contact names, dollar amounts of specific deals, dates of specific windows, or any named lead. Generic public facts (e.g. state program totals already in the news) are fine.
 - For each of 2-4 signals from the issue, write a short paragraph in the pattern: what kind of signal appeared, why it means money is about to move, and a line noting members got the names/timing on Tuesday.

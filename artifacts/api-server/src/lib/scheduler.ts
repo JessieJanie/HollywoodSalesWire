@@ -1,5 +1,13 @@
 import { and, eq, lte, or } from "drizzle-orm";
-import { db, wireRunsTable, emailSubscribersTable, sequenceEmailsTable } from "@workspace/db";
+import {
+  db,
+  wireRunsTable,
+  emailSubscribersTable,
+  sequenceEmailsTable,
+  scheduledSendsTable,
+} from "@workspace/db";
+import { executeBriefSend, executePaidSend } from "./sendWire";
+import { SCHEDULED_SEND_SEEDS } from "./scheduledSeeds";
 import { deliverReportsToPendingMembers, resetStaleReportLeases } from "./members";
 import { runWeeklyResearch, currentWeekKey } from "./wireResearch";
 import { FROM_ADDRESS, SEQUENCE, SITE_URL } from "./emailSequence";
@@ -160,6 +168,153 @@ async function tickReportDeliveries(): Promise<void> {
   await deliverReportsToPendingMembers();
 }
 
+/**
+ * One-shot scheduled sends (paid Wire / Weekly Brief at a publisher-chosen
+ * time). Seeds are inserted in production only — dev servers must never mail
+ * the real lists — and the unique (kind, week_key) index makes seeding
+ * idempotent across autoscale instances. Rows are claimed atomically
+ * (pending → sending) with a stale-lease takeover, and the paid path is
+ * additionally guarded by the paid_wire_sends week-key claim, so even a
+ * botched lease can never double-send members.
+ */
+const SCHEDULED_SEND_LEASE_MS = 15 * 60 * 1000;
+
+async function tickScheduledSends(): Promise<void> {
+  // Production only — a dev server must never mail the real lists, and dev
+  // has no business processing scheduled rows at all.
+  if (process.env.REPLIT_DEPLOYMENT !== "1") return;
+
+  // Seed this week's publisher-approved sends (idempotent via unique index).
+  for (const seed of SCHEDULED_SEND_SEEDS) {
+    await db
+      .insert(scheduledSendsTable)
+      .values({
+        kind: seed.kind,
+        weekKey: seed.weekKey,
+        sendAt: new Date(seed.sendAtIso),
+        subject: seed.subject,
+        bodyText: seed.bodyText,
+      })
+      .onConflictDoNothing({
+        target: [scheduledSendsTable.kind, scheduledSendsTable.weekKey],
+      });
+  }
+
+  const now = new Date();
+  const staleClaim = new Date(now.getTime() - SCHEDULED_SEND_LEASE_MS);
+  const due = await db
+    .select()
+    .from(scheduledSendsTable)
+    .where(
+      and(
+        lte(scheduledSendsTable.sendAt, now),
+        or(
+          eq(scheduledSendsTable.status, "pending"),
+          and(
+            eq(scheduledSendsTable.status, "sending"),
+            lte(scheduledSendsTable.claimedAt, staleClaim),
+          ),
+        ),
+      ),
+    );
+
+  for (const row of due) {
+    // Stale-week guard: if the server first wakes after the row's week has
+    // passed, the copy is out of date — never send it, and never let it claim
+    // a newer week's paid slot.
+    if (row.weekKey !== currentWeekKey()) {
+      await db
+        .update(scheduledSendsTable)
+        .set({ status: "failed", claimedAt: null, error: "Week passed before the send could run — not sent." })
+        .where(and(eq(scheduledSendsTable.id, row.id), or(eq(scheduledSendsTable.status, "pending"), eq(scheduledSendsTable.status, "sending"))));
+      logger.error({ id: row.id, weekKey: row.weekKey }, "scheduler: scheduled send expired unsent");
+      continue;
+    }
+
+    // Atomic claim; completion updates below are fenced on this exact lease
+    // timestamp so a stale worker can never overwrite a takeover's state.
+    const claimTime = new Date();
+    const claimed = await db
+      .update(scheduledSendsTable)
+      .set({ status: "sending", claimedAt: claimTime })
+      .where(
+        and(
+          eq(scheduledSendsTable.id, row.id),
+          or(
+            eq(scheduledSendsTable.status, "pending"),
+            and(
+              eq(scheduledSendsTable.status, "sending"),
+              lte(scheduledSendsTable.claimedAt, staleClaim),
+            ),
+          ),
+        ),
+      )
+      .returning({ id: scheduledSendsTable.id });
+    if (claimed.length === 0) continue;
+
+    const fenced = and(
+      eq(scheduledSendsTable.id, row.id),
+      eq(scheduledSendsTable.status, "sending"),
+      eq(scheduledSendsTable.claimedAt, claimTime),
+    );
+
+    try {
+      if (row.kind === "paid") {
+        // The paid_wire_sends week-key claim (frozen snapshot + per-batch
+        // idempotency keys) is the real double-send guard; this row is only
+        // the trigger. Claim the ROW's week, never currentWeekKey() drift.
+        const result = await executePaidSend(row.subject, row.bodyText, row.weekKey);
+        if (result.ok || result.code === "already-sent") {
+          await db
+            .update(scheduledSendsTable)
+            .set({ status: "sent", sentCount: result.sent, error: null, claimedAt: null })
+            .where(fenced);
+          logger.info({ weekKey: row.weekKey, sent: result.sent }, "scheduler: scheduled paid Wire sent");
+        } else {
+          const retryable = result.code === "send-failed" || result.code === "partial";
+          await db
+            .update(scheduledSendsTable)
+            .set({ status: retryable ? "pending" : "failed", claimedAt: null, sentCount: result.sent, error: result.error })
+            .where(fenced);
+          logger.error({ code: result.code }, "scheduler: scheduled paid Wire send incomplete — " + (retryable ? "will retry" : "needs the publisher"));
+        }
+      } else {
+        // Stable per-batch idempotency keys tied to this row make a retry of
+        // the same scheduled Brief safe at Resend.
+        const result = await executeBriefSend(row.subject, row.bodyText, `scheduled-brief-${row.id}`);
+        if (result.sent === 0 && result.recipientCount > 0) {
+          await db
+            .update(scheduledSendsTable)
+            .set({ status: "pending", claimedAt: null, error: "All batches failed — will retry" })
+            .where(fenced);
+          logger.error({ id: row.id }, "scheduler: scheduled Brief send failed — will retry");
+        } else {
+          await db
+            .update(scheduledSendsTable)
+            .set({
+              status: "sent",
+              sentCount: result.sent,
+              claimedAt: null,
+              error:
+                result.failedCount > 0
+                  ? `${result.failedCount} of ${result.recipientCount} recipients failed — see server logs`
+                  : null,
+            })
+            .where(fenced);
+          logger.info({ weekKey: row.weekKey, sent: result.sent, failed: result.failedCount }, "scheduler: scheduled Weekly Brief sent");
+        }
+      }
+    } catch (err) {
+      logger.error({ err, id: row.id }, "scheduler: scheduled send crashed — will retry");
+      await db
+        .update(scheduledSendsTable)
+        .set({ status: "pending", claimedAt: null, error: String(err) })
+        .where(fenced)
+        .catch(() => undefined);
+    }
+  }
+}
+
 async function tick(): Promise<void> {
   try {
     await tickPendingEmails();
@@ -170,6 +325,11 @@ async function tick(): Promise<void> {
     await tickReportDeliveries();
   } catch (err) {
     logger.error({ err }, "report-delivery tick failed");
+  }
+  try {
+    await tickScheduledSends();
+  } catch (err) {
+    logger.error({ err }, "scheduled-send tick failed");
   }
   try {
     if (!isDue()) return;

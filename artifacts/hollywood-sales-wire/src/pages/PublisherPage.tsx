@@ -421,7 +421,7 @@ export default function PublisherPage() {
                   className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-sm font-serif font-bold"
                   data-testid="button-use-drafts"
                 >
-                  <Sparkles className="w-4 h-4" /> Load the Free Edition draft below
+                  <Sparkles className="w-4 h-4" /> Load the HSW Weekly Brief draft below
                 </button>
                 <button
                   onClick={() => {
@@ -532,7 +532,7 @@ export default function PublisherPage() {
         <div className="bg-card border border-border p-6 mb-6 shadow-sm">
           <h2 className="font-serif font-bold text-lg mb-2">1. Paste this week's full Wire</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            The system drafts a condensed free edition — no buyer names, no contacts, no deal
+            The system drafts a condensed HSW Weekly Brief — no buyer names, no contacts, no deal
             specifics. You review everything before it goes anywhere.
           </p>
           <textarea
@@ -548,7 +548,7 @@ export default function PublisherPage() {
             className="mt-4 inline-flex items-center gap-2 bg-primary text-primary-foreground px-5 py-3 font-serif font-bold disabled:opacity-40"
           >
             {draft.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-            {draft.isPending ? "Drafting…" : "Draft the free edition"}
+            {draft.isPending ? "Drafting…" : "Draft the Weekly Brief"}
           </button>
           {draft.isError && (
             <p className="mt-3 text-sm text-red-700">Drafting failed — please try again.</p>

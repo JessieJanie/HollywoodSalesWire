@@ -15,3 +15,10 @@ description: How the weekly paid Wire + Free Edition auto-drafting works, its sa
 - Draft rules baked into prompts: only claims traceable to fetched pages, every item carries "Source: URL (fetched date)", single-source items tagged **[SINGLE SOURCE — VERIFY]**, diff against last week's stored pages, no padding.
 - Failure + success notifications email hello@hollywoodsaleswire.com from FROM_ADDRESS.
 - Karilyn wants **aggressive source exploration** — Skim is her company, reads are nearly free to her; deep sourcing is HSW's stated edge.
+
+## Scheduled sends (Aug 2026)
+- Free teaser renamed **HSW Weekly Brief** (prompt, console, email header). Both weekly emails now end with an "About HSW" block + "Publisher: Karilyn Colegrove"; Brief's "→ …" line renders as a live order-page button.
+- Paid Wire email = short publisher cover note + per-member signed Shelf link + full issue. Wire body is stored in paid_wire_sends, so the Shelf shows it.
+- `scheduled_sends` table + scheduler tick: one-shot timed sends, prod-only (REPLIT_DEPLOYMENT gate), seeded from `scheduledSeeds.ts` (publisher-approved copy, verbatim), lease-fenced claims, stale-week guard (a row whose week passed is marked failed, never sent, never claims a newer week's paid slot). Paid double-send guard stays the paid_wire_sends week-key claim; Brief retries use per-row Resend idempotency keys.
+- Email paragraphs keep inner newlines as <br/> (registry tables).
+- Seeds only go out after a Republish puts the code in prod; boot tick catches up if autoscale was asleep at send time.
