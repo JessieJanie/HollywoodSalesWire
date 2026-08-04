@@ -152,7 +152,10 @@ export interface EntityFormationItem {
 
 /**
  * New film/TV-adjacent entity formations (LLCs etc.) from official registries.
- * Coverage: NY + TX only (CA/GA/NM are bot-walled — known gaps, not failures,
+ * Coverage: US state registries (NY/TX/NM observed) + UK Companies House as of
+ * Aug 2026. Returns at most the ~100 newest items globally; jurisdiction query
+ * params are ignored (verified) — high UK volume can crowd out US filings.
+ * (CA/GA are bot-walled — known gaps, not failures,
  * so crawl.status stays "ok"; degradedSources means NY or TX itself broke).
  * Keyword-filtered upstream with word boundaries; expect non-film noise —
  * caller must do second-pass relevance judgment. Dedupe is by registry ID.

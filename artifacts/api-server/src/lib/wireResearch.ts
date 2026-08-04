@@ -52,6 +52,7 @@ Write this week's full Tuesday Wire draft in markdown. Non-negotiable rules:
 - Numbers that are a state's own promotional figure are labeled as such.
 - Lead with what is NEW this week versus last week's pages. If a source shows nothing new, skip it — no filler.
 - Structure: a two-sentence dateline opener on the week's money picture; then 4-8 numbered signal items. Each item: WHO (named production/company), WHAT HAPPENED (award, filing, report, announcement — with figures), WHY MONEY MOVES (what they now must buy and roughly when the window is), WHO SHOULD CALL (which vendor categories this is a live prospect for). Then a short "Watch list" of developing signals worth a look next week.
+- The Wire's promise to subscribers is all three signal families every week where the evidence supports them: (a) production SPENDING signals (incentive awards, budgets, buildouts), (b) new ENTITY FORMATIONS (production companies/LLCs just created — early-stage leads), and (c) HIRING tells (job-posting patterns that reveal spend before it is announced). Draw items from each family the pages support; never fabricate one to fill a category.
 - Voice: plain-spoken, direct, a working salesperson's respect for the reader's time. No hype words, no exclamation marks.
 - If the week's fetches are too thin to support a full issue, say so plainly at the top and draft what the evidence supports — never pad.
 
@@ -266,13 +267,17 @@ export async function runWeeklyResearch(
         logger.warn({ err }, "studio-jobs signal unavailable; continuing without it");
       }
       try {
+        // NOTE: the feed returns at most the ~100 newest items globally and
+        // ignores jurisdiction filters (verified Aug 2026) — high UK volume can
+        // crowd US filings out of a crawl. Per-jurisdiction quotas are an
+        // upstream Skim feature request (Karilyn's call).
         const { items, crawlStatus, degradedSources } = await skimEntityFormations(100);
         const cutoff = Date.now() - 10 * 24 * 3600 * 1000;
         const fresh = items.filter((i) => Date.parse(i.payload.publishedAt) > cutoff);
         if (fresh.length > 0) {
           const md =
-            `New business-entity formations from official state registries, keyword-filtered for film/TV terms (Productions/Pictures/Films/Studios/Media/Entertainment/Post/VFX/Television).\n` +
-            `READING RULES: coverage is NY + TX ONLY (CA/GA/NM are known gaps — never claim national coverage). Expect non-film noise ("NOVA WELLNESS STUDIOS") — apply second-pass relevance judgment: keep only names suggesting a production entity or project LLC; drop wellness/photo/generic media. TX filingDate can be future-dated (declared "responsibility beginning" date) — cite publishedAt for freshness. A new production LLC is an early signal a project is spinning up: banking, insurance, payroll, legal, stage/vendor spend follow.` +
+            `New business-entity formations from official registries, keyword-filtered for film/TV terms (Productions/Pictures/Films/Studios/Media/Entertainment/Post/VFX/Television).\n` +
+            `READING RULES: coverage is US state registries (NY, TX, NM observed) + UK Companies House ONLY (CA and GA are known gaps — never claim national coverage). The feed returns only the ~100 newest filings across ALL jurisdictions, and UK volume is high — if a US state shows few or no items, treat that as UNKNOWN (possibly crowded out), never as "no new filings there". Expect heavy non-film noise, especially from the UK feed ("AIMCREATIVE LTD", wellness/photo/generic media) — apply second-pass relevance judgment: keep only names suggesting a production entity, project LLC, or per-series vehicle (e.g. "...S2 LTD", "...PRODUCTION(S) LTD" with a title-like name); drop the rest. The UK is a major production hub — a fresh per-project or per-series company at Companies House is the same early buy-signal as a US production LLC (banking, insurance, payroll, legal, stage/vendor spend follow), and UK filings name incorporation dates and registered offices on the linked official page. TX filingDate can be future-dated (declared "responsibility beginning" date) — cite publishedAt for freshness.` +
             `${degradedSources?.length ? ` DEGRADED SOURCES (live source down this crawl): ${degradedSources.join(", ")}.` : ""} Crawl status: ${crawlStatus ?? "ok"}.\n\n` +
             fresh
               .map(
@@ -282,7 +287,7 @@ export async function runWeeklyResearch(
               .join("\n");
           pages.push({
             url: "https://skim402.com/api/v2/signal/entity-formations/latest",
-            label: "Skim Signal — new film/TV entity formations (NY + TX official registries)",
+            label: "Skim Signal — new film/TV entity formations (US state registries + UK Companies House)",
             markdown: md,
             wordCount: md.split(/\s+/).filter(Boolean).length,
             status: "ok (structured signal)",
