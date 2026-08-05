@@ -28,6 +28,7 @@ export default function PressReleasePage() {
     headline: release.title,
     description: release.description,
     datePublished: release.datePublished,
+    mainEntityOfPage: `https://hollywoodsaleswire.com/press/${release.slug}`,
     author: { "@type": "Organization", name: "Hollywood Sales Wire" },
     publisher: { "@type": "Organization", name: "Hollywood Sales Wire", url: "https://hollywoodsaleswire.com" },
   };
