@@ -52,6 +52,7 @@ export function Footer() {
           <Link href="/" className="hover:text-foreground transition-colors">The Briefing</Link>
           <Link href="/articles" className="hover:text-foreground transition-colors">Articles</Link>
           <a href="/briefs" className="hover:text-foreground transition-colors">Weekly Brief Archive</a>
+          <Link href="/press" className="hover:text-foreground transition-colors">Press Releases</Link>
           <Link href="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
           <Link href="/order" className="hover:text-foreground transition-colors">Become a Member</Link>
         </div>

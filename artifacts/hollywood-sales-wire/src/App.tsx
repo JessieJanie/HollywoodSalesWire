@@ -16,6 +16,8 @@ import ShelfPage from '@/pages/ShelfPage';
 import ArticlesPage from '@/pages/ArticlesPage';
 import ArticlePage from '@/pages/ArticlePage';
 import FaqPage from '@/pages/FaqPage';
+import PressPage from '@/pages/PressPage';
+import PressReleasePage from '@/pages/PressReleasePage';
 
 const queryClient = new QueryClient();
 
@@ -43,6 +45,8 @@ function Router() {
       <Route path="/articles" component={ArticlesPage} />
       <Route path="/articles/:slug" component={ArticlePage} />
       <Route path="/faq" component={FaqPage} />
+      <Route path="/press" component={PressPage} />
+      <Route path="/press/:slug" component={PressReleasePage} />
       <Route component={NotFound} />
     </Switch>
   );

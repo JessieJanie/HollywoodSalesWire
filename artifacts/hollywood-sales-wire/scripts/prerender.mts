@@ -62,6 +62,16 @@ for (const route of getPrerenderRoutes()) {
   const canonical = `${SITE_ORIGIN}${route.path}`;
 
   let html = template;
+  // Drop the homepage-wide Organization/Product/FAQ JSON-LD graph on other
+  // routes: pages emit their own page-appropriate JSON-LD via React (FAQ,
+  // press releases), and homepage schema on unrelated pages is misleading
+  // structured data.
+  html = replaceOnce(
+    html,
+    /[ \t]*<script type="application\/ld\+json">[\s\S]*?<\/script>\n?/,
+    '',
+    'homepage JSON-LD block',
+  );
   html = replaceOnce(html, /<title>[\s\S]*?<\/title>/, `<title>${title}</title>`, '<title>');
   html = replaceOnce(
     html,

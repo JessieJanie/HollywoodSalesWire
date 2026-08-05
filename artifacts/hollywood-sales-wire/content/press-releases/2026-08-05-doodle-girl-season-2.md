@@ -8,8 +8,6 @@ On August 3, 2026, Doodle Girl UK S2 Ltd was incorporated in Bangor, County Down
 
 Neither production company has publicly announced a second season, and the filings themselves are the only public record to date. But per-season production vehicles are rarely formed speculatively: incorporation is typically followed within weeks by crew contracts, studio bookings, payroll enrollment, insurance, and vendor agreements on both sides of the border.
 
-The finding illustrates a pattern Hollywood Sales Wire tracks weekly to discover production news and activity before it reaches the trades. In the same August 1–3 window, the briefing's registry monitoring surfaced three additional UK production entities and four New York production LLCs, none yet publicly announced.
-
 Hollywood Sales Wire is a weekly sales-intelligence briefing for companies that sell to the entertainment industry. A free weekly edition is available at hollywoodsaleswire.com.
 
 **Media contact:** Karilyn Colegrove — karilyn@hollywoodsaleswire.com
