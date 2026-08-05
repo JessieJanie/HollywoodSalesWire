@@ -55,7 +55,8 @@ You are given (1) this week's fetched source pages, each with its URL and fetch 
 
 Write this week's full Tuesday Wire draft in markdown. Non-negotiable rules:
 - ONLY claims traceable to the provided pages. If it is not in the pages, it does not exist. Never invent names, numbers, dates, or contacts.
-- Every item ends with its receipt line: "Source: <URL> (fetched <date>)". A claim supported by only one source gets the tag **[SINGLE SOURCE — VERIFY]** at the start of its receipt line.
+- Every item ends with its receipt line: "Source: <public URL or plain-language description>". Never include fetch dates in receipt lines. Cite only PUBLIC primary sources a reader can open in a browser (official registry pages, state film office pages, court filings, press pages). NEVER cite internal research-feed URLs (anything on skim402.com) — readers cannot open them. When a claim comes from a structured research feed, use that feed's CITE AS line (provided with the source) as the receipt instead of a URL. A claim supported by only one source gets the tag **[SINGLE SOURCE — VERIFY]** at the start of its receipt line.
+- Never reveal the publication's research tooling, vendors, or search parameters (no tool names, no query terms, no feed names). Describe what was reviewed in plain words; the reader should see the receipt, not the method.
 - Numbers that are a state's own promotional figure are labeled as such.
 - Lead with what is NEW this week versus last week's pages. If a source shows nothing new, skip it — no filler.
 - Structure: a two-sentence dateline opener on the week's money picture; then 4-8 numbered signal items. Each item: WHO (named production/company), WHAT HAPPENED (award, filing, report, announcement — with figures), WHY MONEY MOVES (what they now must buy and roughly when the window is), WHO SHOULD CALL (which vendor categories this is a live prospect for). Then a short "Watch list" of developing signals worth a look next week.
@@ -234,12 +235,14 @@ export async function runWeeklyResearch(
         const cutoff = Date.now() - 10 * 24 * 3600 * 1000;
         const fresh = items.filter((i) => Date.parse(i.payload.publishedAt) > cutoff);
         if (fresh.length > 0) {
-          const md = fresh
-            .map(
-              (i) =>
-                `- [${i.payload.state}] ${i.payload.official ? "OFFICIAL (" + i.payload.outlet + ")" : "press (" + i.payload.outlet + ")"} ${i.payload.publishedAt.slice(0, 10)}: ${i.title}\n  ${i.url}\n  ${i.summary}`,
-            )
-            .join("\n");
+          const md =
+            `CITE AS: each item's own public URL (official announcement or outlet page, listed under the item) — never cite this feed's URL.\n` +
+            fresh
+              .map(
+                (i) =>
+                  `- [${i.payload.state}] ${i.payload.official ? "OFFICIAL (" + i.payload.outlet + ")" : "press (" + i.payload.outlet + ")"} ${i.payload.publishedAt.slice(0, 10)}: ${i.title}\n  ${i.url}\n  ${i.summary}`,
+              )
+              .join("\n");
           pages.push({
             url: "https://skim402.com/api/v2/signal/film-incentives/latest",
             label: "Skim Signal — state incentive award rounds (CA/NY/GA/NM/TX)",
@@ -260,6 +263,7 @@ export async function runWeeklyResearch(
         if (items.length > 0) {
           const md =
             `Weekly counts of open AI/content-ops job postings per studio (from each studio's ATS API).\n` +
+            `CITE AS: "Weekly counts of AI and content-ops job postings across the major Hollywood studios (Netflix, Warner Bros. Discovery, Disney, Amazon MGM Studios, NBCUniversal), week of ${new Date().toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", timeZone: "America/Los_Angeles" })}" — never cite this feed's URL.\n` +
             `READING RULES: compare week-over-week PER TERM PER STUDIO — that trend is the signal. Never sum the four terms (postings overlap) and never compare absolute counts across studios (each board matches differently). Crawl status: ${crawlStatus ?? "ok"}.\n\n` +
             JSON.stringify(items, null, 1).slice(0, 20000);
           pages.push({
@@ -284,6 +288,7 @@ export async function runWeeklyResearch(
         if (fresh.length > 0) {
           const md =
             `New business-entity formations from official registries, keyword-filtered for film/TV terms (Productions/Pictures/Films/Studios/Media/Entertainment/Post/VFX/Television).\n` +
+            `CITE AS: each filing's own official registry page (the URL listed under the item) — never cite this feed's URL and never describe the keyword filter in the Wire.\n` +
             `READING RULES: coverage is US state registries (NY, TX, NM observed) + UK Companies House ONLY (CA and GA are known gaps — never claim national coverage). The feed returns only the ~100 newest filings across ALL jurisdictions, and UK volume is high — if a US state shows few or no items, treat that as UNKNOWN (possibly crowded out), never as "no new filings there". Expect heavy non-film noise, especially from the UK feed ("AIMCREATIVE LTD", wellness/photo/generic media) — apply second-pass relevance judgment: keep only names suggesting a production entity, project LLC, or per-series vehicle (e.g. "...S2 LTD", "...PRODUCTION(S) LTD" with a title-like name); drop the rest. The UK is a major production hub — a fresh per-project or per-series company at Companies House is the same early buy-signal as a US production LLC (banking, insurance, payroll, legal, stage/vendor spend follow), and UK filings name incorporation dates and registered offices on the linked official page. TX filingDate can be future-dated (declared "responsibility beginning" date) — cite publishedAt for freshness.` +
             `${degradedSources?.length ? ` DEGRADED SOURCES (live source down this crawl): ${degradedSources.join(", ")}.` : ""} Crawl status: ${crawlStatus ?? "ok"}.\n\n` +
             fresh

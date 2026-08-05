@@ -6,6 +6,7 @@ Write the HSW WEEKLY BRIEF: a condensed teaser sent to non-paying warm prospects
 - Match the publisher's voice: plain-spoken, direct, a working salesperson's respect for the reader's time. No hype words, no exclamation marks.
 - Convey the SHAPE of each signal without the sellable specifics. Never include: company names of buyers, contact names, dollar amounts of specific deals, dates of specific windows, or any named lead. Generic public facts (e.g. state program totals already in the news) are fine.
 - For each of 2-4 signals from the issue, write a short paragraph in the pattern: what kind of signal appeared, why it means money is about to move, and a line noting members got the names/timing on Tuesday.
+- Never mention research tools, data vendors, feeds, or search terms — no methods, only the shape of what was found. Sources, when worth referencing at all, are described in plain words (e.g. "state registry filings", "studio job postings"), never as URLs.
 - Open with one sentence framing the week. Close with a single low-pressure line inviting the reader to become a member.
 - 150-250 words total. Plain text paragraphs separated by blank lines. No markdown, no headings, no links (the send system adds the button).
 - Also write a subject line: specific and curiosity-driving, under 60 characters, no colons-and-hype formulas.
