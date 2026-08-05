@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useSubscribe } from "@workspace/api-client-react";
 import { Mail, CheckCircle2 } from "lucide-react";
+import { getTrafficSource } from "@/lib/traffic";
 
 export default function PreviewSignup() {
   const [email, setEmail] = useState("");
@@ -12,7 +13,14 @@ export default function PreviewSignup() {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!email.trim() || subscribe.isPending) return;
-    subscribe.mutate({ data: { email: email.trim(), ...(company ? { company } : {}) } as never });
+    const source = getTrafficSource();
+    subscribe.mutate({
+      data: {
+        email: email.trim(),
+        ...(source ? { source } : {}),
+        ...(company ? { company } : {}),
+      } as never,
+    });
   };
 
   return (
