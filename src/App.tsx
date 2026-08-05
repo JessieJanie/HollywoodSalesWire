@@ -4,7 +4,6 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Route, Switch, Router as WouterRouter, useLocation } from 'wouter';
 import { useEffect } from 'react';
-import { captureTrafficSource } from '@/lib/traffic';
 
 import SalesPage from '@/pages/SalesPage';
 import OrderPage from '@/pages/OrderPage';
@@ -50,9 +49,6 @@ function Router() {
 }
 
 function App({ ssrPath }: { ssrPath?: string } = {}) {
-  useEffect(() => {
-    captureTrafficSource();
-  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

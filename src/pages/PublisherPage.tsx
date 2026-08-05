@@ -349,27 +349,6 @@ export default function PublisherPage() {
             : "Loading…"}
         </p>
 
-        {/* Where tagged signups came from (utm_source links, e.g. ad tests) */}
-        {status.data?.signupSources && status.data.signupSources.length > 0 && (
-          <div className="bg-card border border-border p-6 mb-6 shadow-sm" data-testid="signup-sources">
-            <h2 className="font-serif font-bold text-lg mb-2">Where signups came from</h2>
-            <p className="text-sm text-muted-foreground mb-4">
-              Visitors who arrived through a tagged link (like an ad) are counted here.
-              Everyone else is organic and isn&rsquo;t listed.
-            </p>
-            <ul className="text-sm space-y-1">
-              {status.data.signupSources.map((s) => (
-                <li key={s.source} className="flex justify-between border-b border-border/60 py-1">
-                  <span className="font-mono-data tracking-wide">{s.source}</span>
-                  <span>
-                    {s.subscribers} free signup{s.subscribers === 1 ? "" : "s"} &middot; {s.members} paid member{s.members === 1 ? "" : "s"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-
         {/* Monday auto-draft */}
         <div className="bg-card border border-border p-6 mb-6 shadow-sm">
           <div className="flex items-center justify-between gap-4 mb-2">

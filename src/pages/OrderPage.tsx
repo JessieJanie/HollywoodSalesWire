@@ -9,7 +9,6 @@ import {
   TEAM_REGULAR_RATE_YR
 } from "@/lib/constants";
 import { motion } from "framer-motion";
-import { withClientReference } from "@/lib/traffic";
 import { ArrowRight, CheckCircle2, Lock, ShieldCheck, Users, User } from "lucide-react";
 
 /**
@@ -33,14 +32,8 @@ export function PricingContent({
   // subscriber's deadline before redirecting to Stripe.
   const foundingCheckout = (plan: string) =>
     `${import.meta.env.BASE_URL}api/founding-checkout?token=${encodeURIComponent(token ?? "")}&plan=${plan}`;
-  // withClientReference tags the Stripe checkout with the visitor's ad source
-  // (utm_source captured on landing) so paid conversions are attributable.
-  const indLink = founding
-    ? foundingCheckout("individual")
-    : withClientReference(CHECKOUT_LINKS.INDIVIDUAL_REGULAR);
-  const teamLink = founding
-    ? foundingCheckout("team")
-    : withClientReference(CHECKOUT_LINKS.TEAM_REGULAR);
+  const indLink = founding ? foundingCheckout("individual") : CHECKOUT_LINKS.INDIVIDUAL_REGULAR;
+  const teamLink = founding ? foundingCheckout("team") : CHECKOUT_LINKS.TEAM_REGULAR;
 
   const individualFeatures = founding
     ? [
