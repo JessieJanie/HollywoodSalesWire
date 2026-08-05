@@ -9,6 +9,7 @@ import { renderToString } from 'react-dom/server';
 
 import App from './App';
 import { ARTICLES } from './lib/articles';
+import { PRESS_RELEASES } from './lib/pressReleases';
 
 export function render(url: string): string {
   return renderToString(<App ssrPath={url} />);
@@ -42,6 +43,17 @@ export function getPrerenderRoutes(): PrerenderRoute[] {
       path: `/articles/${a.slug}`,
       title: `${a.title} — ${SITE_TITLE}`,
       description: a.description,
+    })),
+    {
+      path: '/press',
+      title: `Press Releases — ${SITE_TITLE}`,
+      description:
+        'News uncovered by Hollywood Sales Wire before it reaches the trades: production-company filings, tax-credit awards, and hiring signals.',
+    },
+    ...PRESS_RELEASES.map((r) => ({
+      path: `/press/${r.slug}`,
+      title: `${r.title} — ${SITE_TITLE}`,
+      description: r.description,
     })),
     {
       path: '/faq',
