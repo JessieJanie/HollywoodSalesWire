@@ -7,7 +7,9 @@ export const emailSubscribersTable = pgTable("email_subscribers", {
   email: text("email").notNull().unique(),
   status: text("status").notNull().default("active"), // active | unsubscribed
   unsubscribeToken: text("unsubscribe_token").notNull().unique(),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true })
     .notNull()
     .defaultNow()
@@ -27,10 +29,14 @@ export const sequenceEmailsTable = pgTable("sequence_emails", {
   // scheduler tick (claimedAt set; stale claims are recovered after 15 min).
   status: text("status").notNull().default("scheduled"), // pending | scheduling | scheduled | sent | canceled | failed
   claimedAt: timestamp("claimed_at", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
 
-export const insertEmailSubscriberSchema = createInsertSchema(emailSubscribersTable).omit({
+export const insertEmailSubscriberSchema = createInsertSchema(
+  emailSubscribersTable,
+).omit({
   id: true,
   createdAt: true,
   updatedAt: true,
