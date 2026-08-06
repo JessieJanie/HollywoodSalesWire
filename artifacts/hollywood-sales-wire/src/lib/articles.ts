@@ -146,7 +146,7 @@ export const ARTICLES: Article[] = [
       },
       {
         type: "p",
-        text: "Vendors who wait for the glamorous version of events often arrive after these first practical decisions have already been made. The advantage sits with whoever noticed the earlier and less elegant paperwork.",
+        text: "Vendors who wait for the glamorous version of events often show up once these first practical decisions are already settled. The edge belongs to whoever noticed the earlier, less elegant paperwork.",
       },
       { type: "h2", text: "The Curtain Is the Entertaining Part" },
       {
@@ -155,11 +155,11 @@ export const ARTICLES: Article[] = [
       },
       {
         type: "p",
-        text: "The trades will continue to report the finished narrative. That is their function. A salesperson has a narrower interest: determine when the spending mechanism has been switched on, and arrive while the people switching it on are still reachable.",
+        text: "The trades will go on printing the finished narrative; that is what they are built for. A salesperson needs something else entirely: to know when the spending mechanism has been switched on, and to reach the people switching it on while they are still reachable.",
       },
       {
         type: "p",
-        text: "Most of the market remains hypnotized by the show. A smaller group watches the quieter documents — the help-wanted page among them — where the show is first staffed and the money first becomes real.",
+        text: "The market at large stays hypnotized by the show. The quieter documents — the help-wanted page among them — are where the show is first staffed and the money first becomes real.",
       },
       {
         type: "p",
@@ -210,7 +210,7 @@ export const ARTICLES: Article[] = [
       { type: "h2", text: "Romance Prefers the Curtain. Money Prefers the File." },
       {
         type: "p",
-        text: "Hollywood is superb at directing attention toward the finished surface. The cast. The tone. The official explanation of why this project matters. Useful, in its way. Late, for anyone trying to sell into the production itself.",
+        text: "Hollywood knows how to keep every eye on the finished surface. The cast. The tone. The official explanation of why this project matters. Useful, in its way. Late, for anyone trying to sell into the production itself.",
       },
       {
         type: "p",
@@ -248,13 +248,13 @@ export const ARTICLES: Article[] = [
       },
       {
         type: "p",
-        text: "Most of the market will keep watching the show. A smaller group will keep reading the evidence of the affairs — and getting there while the money is still in motion.",
+        text: "The show will always have its audience. The evidence of the affairs rewards a different kind of reader — the one who gets there while the money is still in motion.",
       },
     ],
   },
   {
-    slug: "some-would-call-this-self-abuse",
-    title: "Some Would Call This Self Abuse",
+    slug: "some-would-call-this-crazy",
+    title: "Some Would Call This Crazy",
     description:
       "All the useful early signals are public. That does not make them free — reading them properly is a discipline, and the DIY detour behaves like full-time labor in a part-time costume.",
     datePublished: "2026-07-31",
@@ -316,7 +316,7 @@ export const ARTICLES: Article[] = [
       },
       {
         type: "p",
-        text: "Salespeople are paid to be out, talking, moving. They are not paid to spend their best hours waist-deep in PDFs and uncooperative websites, rebuilding the same process because last week\u2019s version has already begun to rot. Some people would love this labor. They are not salespeople. They are a different animal — calmer among broken forms, less offended by institutional mismanagement, happier in the cubicle. The rest become grumpy, then resentful, then interested in chemical solutions or a new line of work.",
+        text: "Salespeople are paid to be out, talking, moving. They are not paid to spend their best hours waist-deep in PDFs and uncooperative websites, rebuilding the same process because last week\u2019s version has already begun to rot. Some people would love this labor. They are not salespeople. They are a different breed — calmer among broken forms, less offended by institutional mismanagement, happier in the cubicle. The rest become grumpy, then resentful, then interested in chemical solutions or a new line of work.",
       },
       { type: "h2", text: "Hollywood Encourages the Fantasy" },
       {
@@ -342,7 +342,7 @@ export const ARTICLES: Article[] = [
       },
       {
         type: "p",
-        text: "Most salespeople will keep meaning to get to it. A smaller group will notice that the detective work is the job before the job — and that the DIY detour, taken week after week, is less a strategy than self-abuse with a professional explanation.",
+        text: "Plenty of salespeople will keep meaning to get to it. The ones who look honestly at the detective work will recognize it for what it is: the job before the job. And the DIY detour, taken week after week, is something a kind observer would call dedication — and a candid one would call crazy.",
       },
     ],
   },
@@ -393,7 +393,7 @@ export const ARTICLES: Article[] = [
       },
       {
         type: "p",
-        text: "Financing firms up. Incentive awards appear. Early requisitions post — the people who will control below-the-line spending and stand up the purchase-order systems. Entities take shape. Infrastructure moves. None of this is designed for storytelling. All of it is designed to get the work paid for and underway.",
+        text: "Financing firms up. Incentive awards appear. Early requisitions post — the people who will control below-the-line spending and stand up the purchase-order systems. Entities take shape. Infrastructure moves. None of it is meant to be read as news. It exists to get the work paid for and moving.",
       },
       {
         type: "p",
@@ -621,7 +621,7 @@ export const ARTICLES: Article[] = [
       },
       {
         type: "p",
-        text: "Hollywood Sales Wire's weekly briefing is, at heart, a window calendar maintained for you: who just got funded, what they're about to buy, and when the window closes. But the principle costs nothing to adopt. In this industry, when you call matters more than who you call.",
+        text: "Hollywood Sales Wire's weekly briefing is, at heart, a window calendar maintained for you: who just got funded, what they're about to buy, and when the window closes. But the principle costs nothing to adopt. In this industry, the calendar is the real prospect list.",
       },
     ],
   },
