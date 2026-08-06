@@ -3,6 +3,7 @@
 - [Stripe live connection status](stripe-live-connection.md) — live account connected; live payment links created and swapped into CHECKOUT_LINKS July 29, 2026. Use the sk_live connection, not the sandbox one.
 - [Monday Wire pipeline](wire-pipeline.md) — auto-drafts paid Wire + Free Edition Mondays 5pm PT into publisher console; she reviews/sends; safety rails are deliberate.
 - [Skim research setup](skim-research.md) — pay-per-read research wallet on Base, pin x402-axios@1.2.0, verified source URLs + known bot-blocked sites.
+- [Agora style guidelines](agora-style.md) — all sets live in docs/agora-style-guidelines.md; paid-delivery set added Aug 6 2026; prompts must stay consistent with that doc.
 - [HSW copy direction](copy-direction-usp.md) — "hot-lead pros" USP framing for next sales-copy pass; moat = "not worth replicating"; quantified claims stay literally true.
 - [Articles editorial series](articles-editorial.md) — Grok-drafted editorial pieces, copy verbatim/publisher-locked; order = editorial set first, witty images over literal ones.
 - [Hollywood book brainstorm](hollywood-book-brainstorm.md) — taxpayer-money book idea ("pay twice"), seduction not outrage; landed framing, titles, next step. Discussion only.

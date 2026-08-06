@@ -1,0 +1,84 @@
+Here are Agora-style guidelines for the monthly paid-subscriber delivery email — the one that carries the actual RIA Wire files.This is a different job from the free brief. The free brief converts strangers. This email keeps buyers by making the product feel valuable, usable, and worth renewing.1. Fulfillment first, personality secondAgora paid letters still had voice, but they did not make the customer hunt for what they paid for.Lead with the delivery:Your files are ready
+What month / what release
+What is included
+Clear download links
+
+Then add interpretation, texture, and tips.Rule: A subscriber should be able to get the files in under 20 seconds, even if they skip the prose.2. Make the subscriber feel smart for having boughtThe email should quietly reinforce:You are working from the current SEC release.
+Most list vendors are not.
+That is why this subscription exists.
+Do this with facts and framing — not with “Thank you for being a valued customer.”Agora rarely flattered. It confirmed the reader’s judgment.3. One useful idea, not a second newsletterThe delivery email can include a short intelligence layer:What moved this month
+What to call first
+One practical sort / filter
+One retention or team-seat mention if natural
+
+It should not become another long essay. They already bought the files. Help them use the files.Ideal shape:Files ready + links  
+This month in the data (compact)  
+Optional “longer view” (2–4 bullets)  
+How to use this month’s file (actionable)  
+Soft secondary offer only if relevant (Team seat)  
+Sign-off + one practical P.S.
+
+4. Voice: still Bonner, slightly more directFor paid delivery:Keep the dry, specific voice
+Slightly less philosophical than the free brief
+More “here’s the map; here’s where to start”
+No hard sell; no urgency theater
+No corporate onboarding language
+
+Tone target:
+A competent publisher handing over the month’s instrument — not a customer-success sequence.5. Data presentation rulesLead with the numbers that change behavior: new registrants, threshold crossings, exits, state shifts
+Name one or two vivid examples if useful
+Keep full ranked lists only if they are part of the paid value and readable in email
+Always separate commentary from files
+Remind them the files are personal / not for forwarding if that matters operationally
+
+6. Teach usage every monthAgora retained by making the product habitual.Include a short recurring section such as:Getting the most from this month’s fileStart with the national CSV
+Use state cuts when territory-bound
+Sort first by $100M-crossing flag, then AUM, then latest filing date
+One play to run today
+
+This does more for renewal than a paragraph of appreciation.7. Commercial rules for an already-paid listElement
+Guideline
+Primary job
+Deliver files + make them usable
+Secondary job
+Reinforce why the subscription is worth keeping
+Upsell
+Soft, rare, relevant — e.g. Team seat for colleagues
+CTA count
+Downloads first; one optional secondary CTA max
+Scarcity
+Almost never. Paid users dislike fake pressure
+Length
+Long enough to orient; short enough to scan on a phone
+
+8. What not to doDon’t bury the download links under a long essay
+Don’t rewrite the free brief and paste it into the paid email
+Don’t over-explain the SEC process every month
+Don’t sound grateful in a needy way
+Don’t introduce new offers that distract from this month’s files
+Don’t change voice from the free brief so sharply that it feels like two different companies
+
+9. Reliable monthly templateSubject:
+Specific + useful
+Examples:  34 firms crossed $100M — your 2026-08 files are ready  
+Your 2026-08 US RIAs $100M–$500M files are ready
+
+Body:Hello + files ready (1–2 lines)  
+One-sentence positioning (“Built from the SEC’s newest Form ADV release…”)  
+This month in the data (bullets)  
+Optional longer view (only if it adds direction)  
+Your files (named links, clean)  
+Top gainers / declines only if part of the paid package and scannable  
+Getting the most from this month’s file (3–5 practical lines)  
+Soft Team note only when natural  
+Sign-off  
+P.S. one practical tip (CRD matching, sort order, etc.)
+
+10. The Agora retention logic in one lineFree brief: “See the world the way we see it.”
+Paid delivery email: “Here is this month’s instrument — and how to put it to work before the window closes.”For RIA Wire, that means the subscriber email should feel like:The release landed.
+We cleaned it.
+Here are your files.
+Here is what moved.
+Here is who to call first.
+That is how Agora kept people: not by entertaining them after the sale, but by making the paid product feel indispensable in use.
+

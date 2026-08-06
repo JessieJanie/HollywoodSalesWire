@@ -1,0 +1,73 @@
+Here are Agora-style guidelines for your free RIA Wire monthly brief — tuned to convert prospects into paid subscribers without turning the free issue into a hard-sell flyer.Agora’s model (Daily Reckoning, and the broader family of free letters) worked because the free letter felt like a real publication, not a lead magnet. Readers stayed for the voice and insight; the paid offer felt like the natural next step.1. Treat the free brief as a real productGive real value every issue. If the free brief is thin or purely promotional, people unsubscribe and never buy.
+The free brief should prove: “These people read the public record the way a salesperson needs it read.”
+Do not give away the full paid method (named buying centers, weekly requisition sweeps, full prospect lists). Give the frame, a few concrete examples, and the feeling that more exists behind the wall.
+
+Agora rule: The free letter makes the reader smarter. The paid product makes them dangerous.2. Lead with the world, not with your offerOpen like a letter from someone who watches the industry, not like a SaaS onboarding email.Good openers (Bonner / Agora energy):A specific SEC filing or pattern you noticed
+A quiet absurdity in how RIA data is sold or used
+A small story that implies a larger sales truth
+
+Weak openers:“This month’s top RIA trends…”
+“Don’t miss our special offer…”
+“As a valued subscriber…”
+
+The reader should feel they’re reading intelligence, not being processed.3. One clear idea per issueAgora free letters rarely try to cover everything. They drive one insight hard.For RIA Wire free briefs, pick one:Why most RIA lists are already decaying
+Why timing beats a bigger list
+Why public filings are fresher than vendor directories
+Why the “easy” data is the late data
+
+Then illustrate it with 2–4 concrete, filing-based examples. Specificity sells. General “industry overview” does not.4. Use the free brief to teach the category, not the full systemYour paid product is sales intelligence from public filings and related signals. The free brief should repeatedly install this belief:The useful information is public.
+Most people don’t read it the right way.
+Reading it late is almost the same as not reading it.
+Once that belief is in place, the paid subscription becomes the tool that keeps the reading current.5. Soft sell structure (classic Agora rhythm)A reliable free-issue shape:Observation / story (the hook)
+What it actually means for someone selling into RIAs
+A few concrete examples (filings, patterns, timing)
+The implication (why the casual approach fails)
+Quiet commercial turn (one short paragraph)
+Clean close + single CTA
+
+The pitch should feel like a logical conclusion, not an interruption.Example soft turn:The filings keep coming. The useful window stays short. The free brief can show you the shape of the thing. The wire is how you stay inside the window every month.
+One CTA. Not four.6. Voice rules (especially for your Bonner lane)Sound like a person, not a brand committee
+Prefer concrete over abstract
+A little skepticism toward conventional RIA “lists” and “databases”
+No hype adjectives (“revolutionary,” “game-changing,” “unlock”)
+Occasional dry humor is an asset; forced jokes are not
+Short paragraphs. Readable on a phone.
+
+Your earlier RIA Wire articles already have the right register. The free brief should feel like a lighter cousin of those pieces, not a corporate digest.7. Conversion mechanics that fit Agora (and your model)Element
+Guideline
+Cadence
+Monthly is fine if it’s reliably good. Missed months kill trust.
+CTA frequency
+One primary CTA near the end. Optional second soft mention mid-issue if natural.
+CTA style
+Invitation, not urgency theater. “If you want the ongoing read…” beats “LAST CHANCE.”
+Proof
+Use public-record specificity as proof. Agora sold with stories and examples more than with feature grids.
+Segment lightly
+If someone only opens and never clicks, keep educating. If they click the paid link twice, they’re warm — your sales page should do the rest.
+No fake scarcity
+Agora could be aggressive; your category (B2B sales intel) usually converts better with credibility than countdown timers.
+
+8. What not to doDon’t turn every free issue into a brochure for the paid wire
+Don’t dump raw filing tables with no interpretation
+Don’t promise “leads” in the free letter if the paid product is intelligence (sell the map, not a fantasy of easy names)
+Don’t change voice between free and paid — the paid offer should feel like more of the same mind
+Don’t hide the pitch completely either; Agora always made the commercial path visible
+
+9. Simple monthly template you can reuseSubject line: Curiosity + specificity
+Examples:  “The Quiet Fiction About RIA Lists”  
+“What the May ADV Amendments Actually Moved”  
+“Why Most Salespeople Arrive Late”
+
+Body:2–4 paragraph opener (scene or filing-based observation)
+One core insight
+2–4 short examples from public record
+“What this means if you sell into RIAs”
+One soft paragraph on the paid wire
+Sign-off as publisher (Karilyn Colegrove / RIA Wire)
+Single link: subscribe / see sample / learn more
+
+10. The Agora conversion logic in one lineFree letter: “See the world the way we see it.”
+Paid product: “Get the ongoing instrument that makes that view useful every week/month.”For RIA Wire, that means:Free brief = pattern recognition from SEC filings + sales implication  
+Paid wire = continuous, working version of that same method
+
