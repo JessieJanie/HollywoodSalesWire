@@ -1,3 +1,4 @@
+- [Cloudflare DNS access](cloudflare-dns-access.md) — CLOUDFLARE_API_TOKEN edits DNS on all her zones; DNS records only, not redirect rules.
 - [GitHub sync contract](github-sync.md) — site content is mirrored to an external GitHub repo; push after every site change, copy is publisher-locked.
 - [Stripe member automation](stripe-member-automation.md) — webhook → member record → welcome + series-cancel + notify; keep stripe-replit-sync externalized; live in prod only after Republish.
 - [Stripe live connection status](stripe-live-connection.md) — live account connected; live payment links created and swapped into CHECKOUT_LINKS July 29, 2026. Use the sk_live connection, not the sandbox one.
