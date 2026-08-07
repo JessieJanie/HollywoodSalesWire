@@ -368,6 +368,9 @@ components:
           type: number
         status:
           type: string
+        fetchedAt:
+          type: string
+          description: ISO timestamp of when this source was pulled (absent on runs before Aug 2026)
     WireRunStatus:
       type: object
       required: [status]

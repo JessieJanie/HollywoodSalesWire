@@ -13,7 +13,9 @@ description: How the weekly paid Wire + Free Edition auto-drafting works, its sa
   - Exploration URLs proposed by the model are fetched (paid) only if https, public host, and host is a beat domain or appeared in this week's fetched pages — fetched web content is untrusted model input.
   - research_pages pruned after 35 days, page markdown capped at 200k chars.
 - Draft rules baked into prompts: only claims traceable to fetched pages, every item carries "Source: URL (fetched date)", single-source items tagged **[SINGLE SOURCE — VERIFY]**, diff against last week's stored pages, no padding.
-- Failure + success notifications email hello@hollywoodsaleswire.com from FROM_ADDRESS.
+- Failure + success notifications email hello@hollywoodsaleswire.com from FROM_ADDRESS. Since Aug 7 2026 the "ready" email is a structured pre-flight report (her checklist): per-source OK/thin/failed counts, structured-feed health (ok/empty/failed with fresh-item counts), anomaly list ("NEEDS YOUR EYE"), a 10-item spot-audit suggestion, and "Ready to send: PENDING YOUR REVIEW". Empty feeds are reported as UNKNOWN, never "quiet".
+- Claim-discipline rules baked into the Wire prompt (Aug 7 2026, from her research notes): signals ≠ guaranteed budgets; job posts ≠ "buying this week"; award listings ≠ "spending started"; entity formations ≠ active productions; repeats from last week never re-presented as new (must be skipped or marked "carried from last week"); uncertainty stated in the item, never smoothed away. Her principle: honesty > completeness — fewer verified items over more shaky ones.
+- The spot audit (verify 10 items back to live sources) is deliberately HER manual step, prompted in the ready email — not automated.
 - Karilyn wants **aggressive source exploration** — Skim is her company, reads are nearly free to her; deep sourcing is HSW's stated edge.
 
 ## Scheduled sends (Aug 2026)

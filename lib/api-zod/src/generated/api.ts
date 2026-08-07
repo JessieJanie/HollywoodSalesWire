@@ -162,7 +162,8 @@ export const PublisherWireLatestResponse = zod.object({
   "url": zod.string(),
   "label": zod.string(),
   "wordCount": zod.number(),
-  "status": zod.string()
+  "status": zod.string(),
+  "fetchedAt": zod.string().optional().describe('ISO timestamp of when this source was pulled (absent on runs before Aug 2026)')
 })).optional()
 })
 

@@ -58,7 +58,9 @@ Write this week's full Tuesday Wire draft in markdown. Non-negotiable rules:
 - Every item ends with its receipt line: "Source: <public URL or plain-language description>". Never include fetch dates in receipt lines. Cite only PUBLIC primary sources a reader can open in a browser (official registry pages, state film office pages, court filings, press pages). NEVER cite internal research-feed URLs (anything on skim402.com) — readers cannot open them. When a claim comes from a structured research feed, use that feed's CITE AS line (provided with the source) as the receipt instead of a URL. A claim supported by only one source gets the tag **[SINGLE SOURCE — VERIFY]** at the start of its receipt line.
 - Never reveal the publication's research tooling, vendors, or search parameters (no tool names, no query terms, no feed names). Describe what was reviewed in plain words; the reader should see the receipt, not the method.
 - Numbers that are a state's own promotional figure are labeled as such.
-- Lead with what is NEW this week versus last week's pages. If a source shows nothing new, skip it — no filler.
+- CLAIM DISCIPLINE — signals are signals, never guaranteed open budgets. Specifically: a job posting is never described as "the production is buying this week" unless a page explicitly supports it; an incentive-award listing is never described as "spending has started" unless a page says production is underway; a new entity formation is never described as an active production without corroboration — call it what it is (a newly formed company, an early-stage lead). Honesty beats completeness: ship fewer verified items rather than more shaky ones.
+- Lead with what is NEW this week versus last week's pages. Diff against last week BEFORE calling anything "new" — if the same production/company/filing appeared last week, either skip it or say "(carried from last week: <what changed>)"; never re-present a repeat as new. If a source shows nothing new, skip it — no filler.
+- When the evidence is uncertain, say so in the item ("unconfirmed", "single filing, no corroboration") — never smooth uncertainty away in confident prose.
 - Structure: a two-sentence dateline opener on the week's money picture; then 4-8 numbered signal items. Each item: WHO (named production/company), WHAT HAPPENED (award, filing, report, announcement — with figures), WHY MONEY MOVES (what they now must buy and roughly when the window is), WHO SHOULD CALL (which vendor categories this is a live prospect for). Then a short "Watch list" of developing signals worth a look next week.
 - The Wire's promise to subscribers is all three signal families every week where the evidence supports them: (a) production SPENDING signals (incentive awards, budgets, buildouts), (b) new ENTITY FORMATIONS (production companies/LLCs just created — early-stage leads), and (c) HIRING tells (job-posting patterns that reveal spend before it is announced). Draw items from each family the pages support; never fabricate one to fill a category.
 - Voice: plain-spoken, direct, a working salesperson's respect for the reader's time. No hype words, no exclamation marks.
@@ -72,6 +74,22 @@ interface FetchedPage {
   markdown: string;
   wordCount: number;
   status: string; // "ok" | error text
+  fetchedAt: string; // ISO timestamp of this pull
+}
+
+/** Health of a structured Skim Signal feed for the pre-flight report. */
+interface FeedHealth {
+  name: string;
+  status: "ok" | "empty" | "failed";
+  itemCount: number;
+  detail?: string;
+}
+
+/** Record a feed's health exactly once — a later entry for the same feed replaces the earlier one. */
+function recordFeed(feedHealth: FeedHealth[], entry: FeedHealth): void {
+  const idx = feedHealth.findIndex((f) => f.name === entry.name);
+  if (idx >= 0) feedHealth[idx] = entry;
+  else feedHealth.push(entry);
 }
 
 async function fetchPage(url: string, label: string): Promise<FetchedPage> {
@@ -99,13 +117,14 @@ async function fetchPage(url: string, label: string): Promise<FetchedPage> {
       markdown,
       wordCount,
       status: thin ? "ok-but-thin (possible JS page — treat with suspicion)" : `ok${via}`,
+      fetchedAt: new Date().toISOString(),
     };
   } catch (err) {
     const e = err as { response?: { status?: number; data?: unknown }; message?: string };
     const detail = e.response?.status
       ? `HTTP ${e.response.status} ${JSON.stringify(e.response.data ?? "").slice(0, 120)}`
       : (e.message ?? "unknown error");
-    return { url, label, markdown: "", wordCount: 0, status: `error: ${detail}` };
+    return { url, label, markdown: "", wordCount: 0, status: `error: ${detail}`, fetchedAt: new Date().toISOString() };
   }
 }
 
@@ -126,7 +145,7 @@ function pagesToPrompt(pages: FetchedPage[], cap: number): string {
     .filter((p) => p.markdown.length > 0)
     .map(
       (p) =>
-        `=== SOURCE: ${p.label}\nURL: ${p.url}\nFETCHED: ${new Date().toISOString().slice(0, 10)}\nSTATUS: ${p.status}\n---\n${p.markdown.slice(0, cap)}`,
+        `=== SOURCE: ${p.label}\nURL: ${p.url}\nFETCHED: ${p.fetchedAt.slice(0, 10)}\nSTATUS: ${p.status}\n---\n${p.markdown.slice(0, cap)}`,
     )
     .join("\n\n");
 }
@@ -229,11 +248,18 @@ export async function runWeeklyResearch(
       // 0. Custom Skim Signals (structured feeds). Both skip gracefully if
       // unavailable — the raw beat below still carries the issue.
       const pages: FetchedPage[] = [];
+      const feedHealth: FeedHealth[] = [];
       const officialIncentiveUrls: string[] = [];
       try {
         const items = await skimFilmIncentives(50);
         const cutoff = Date.now() - 10 * 24 * 3600 * 1000;
         const fresh = items.filter((i) => Date.parse(i.payload.publishedAt) > cutoff);
+        recordFeed(feedHealth, {
+          name: "Incentive awards feed",
+          status: fresh.length > 0 ? "ok" : "empty",
+          itemCount: fresh.length,
+          detail: fresh.length === 0 ? `${items.length} total items, none fresh within 10 days` : undefined,
+        });
         if (fresh.length > 0) {
           const md =
             `CITE AS: each item's own public URL (official announcement or outlet page, listed under the item) — never cite this feed's URL.\n` +
@@ -249,6 +275,7 @@ export async function runWeeklyResearch(
             markdown: md,
             wordCount: md.split(/\s+/).filter(Boolean).length,
             status: "ok (structured signal)",
+            fetchedAt: new Date().toISOString(),
           });
           // Official items are award rounds by definition — deep-read them.
           for (const i of fresh.filter((f) => f.payload.official).slice(0, 5)) {
@@ -256,10 +283,22 @@ export async function runWeeklyResearch(
           }
         }
       } catch (err) {
+        recordFeed(feedHealth, {
+          name: "Incentive awards feed",
+          status: "failed",
+          itemCount: 0,
+          detail: err instanceof Error ? err.message.slice(0, 120) : "unknown error",
+        });
         logger.warn({ err }, "film-incentives signal unavailable; continuing without it");
       }
       try {
         const { items, crawlStatus } = await skimStudioJobs(100);
+        recordFeed(feedHealth, {
+          name: "Studio job-posting counts feed",
+          status: items.length > 0 ? "ok" : "empty",
+          itemCount: items.length,
+          detail: crawlStatus && crawlStatus !== "ok" ? `crawl status: ${crawlStatus}` : undefined,
+        });
         if (items.length > 0) {
           const md =
             `Weekly counts of open AI/content-ops job postings per studio (from each studio's ATS API).\n` +
@@ -272,9 +311,16 @@ export async function runWeeklyResearch(
             markdown: md,
             wordCount: md.split(/\s+/).filter(Boolean).length,
             status: "ok (structured signal)",
+            fetchedAt: new Date().toISOString(),
           });
         }
       } catch (err) {
+        recordFeed(feedHealth, {
+          name: "Studio job-posting counts feed",
+          status: "failed",
+          itemCount: 0,
+          detail: err instanceof Error ? err.message.slice(0, 120) : "unknown error",
+        });
         logger.warn({ err }, "studio-jobs signal unavailable; continuing without it");
       }
       try {
@@ -285,6 +331,19 @@ export async function runWeeklyResearch(
         const { items, crawlStatus, degradedSources } = await skimEntityFormations(100);
         const cutoff = Date.now() - 10 * 24 * 3600 * 1000;
         const fresh = items.filter((i) => Date.parse(i.payload.publishedAt) > cutoff);
+        recordFeed(feedHealth, {
+          name: "Entity formations feed",
+          status: fresh.length > 0 ? "ok" : "empty",
+          itemCount: fresh.length,
+          detail:
+            [
+              degradedSources?.length ? `degraded sources: ${degradedSources.join(", ")}` : "",
+              crawlStatus && crawlStatus !== "ok" ? `crawl status: ${crawlStatus}` : "",
+              fresh.length === 0 ? `${items.length} total items, none fresh within 10 days` : "",
+            ]
+              .filter(Boolean)
+              .join("; ") || undefined,
+        });
         if (fresh.length > 0) {
           const md =
             `New business-entity formations from official registries, keyword-filtered for film/TV terms (Productions/Pictures/Films/Studios/Media/Entertainment/Post/VFX/Television).\n` +
@@ -303,9 +362,16 @@ export async function runWeeklyResearch(
             markdown: md,
             wordCount: md.split(/\s+/).filter(Boolean).length,
             status: "ok (structured signal)",
+            fetchedAt: new Date().toISOString(),
           });
         }
       } catch (err) {
+        recordFeed(feedHealth, {
+          name: "Entity formations feed",
+          status: "failed",
+          itemCount: 0,
+          detail: err instanceof Error ? err.message.slice(0, 120) : "unknown error",
+        });
         logger.warn({ err }, "entity-formations signal unavailable; continuing without it");
       }
 
@@ -388,13 +454,48 @@ export async function runWeeklyResearch(
           wireMarkdown,
           freeSubject: free.subject,
           freeBody: free.bodyText,
-          sources: pages.map((p) => ({ url: p.url, label: p.label, wordCount: p.wordCount, status: p.status })),
+          sources: pages.map((p) => ({
+            url: p.url,
+            label: p.label,
+            wordCount: p.wordCount,
+            status: p.status,
+            fetchedAt: p.fetchedAt,
+          })),
         })
         .where(eq(wireRunsTable.id, run.id));
 
+      // Pre-flight report to the publisher (sources, feed health, anomalies).
+      const failedPages = pages.filter((p) => p.status.startsWith("error"));
+      const thinPages = pages.filter((p) => p.status.startsWith("ok-but-thin"));
+      const anomalies: string[] = [];
+      for (const f of feedHealth) {
+        if (f.status === "failed") anomalies.push(`${f.name} FAILED (${f.detail ?? "no detail"}) — its signal family may be missing this week.`);
+        else if (f.status === "empty") anomalies.push(`${f.name} returned 0 fresh items (${f.detail ?? ""}) — unusual; treat that family as UNKNOWN, not "quiet".`);
+        else if (f.detail) anomalies.push(`${f.name}: ${f.detail}`);
+      }
+      if (failedPages.length > 0)
+        anomalies.push(`${failedPages.length} page fetch(es) failed: ${failedPages.map((p) => p.label).join("; ")}`);
+      if (thinPages.length > 0)
+        anomalies.push(`${thinPages.length} page(s) came back thin (possible JS/blocked page): ${thinPages.map((p) => p.label).join("; ")}`);
+
+      const report = [
+        `PRE-FLIGHT REPORT — week of ${weekKey}`,
+        ``,
+        `Sources: ${okPages.length - thinPages.length} read OK, ${thinPages.length} thin, ${failedPages.length} failed (${pages.length} attempted).`,
+        `Signal feeds: ${feedHealth.map((f) => `${f.name} — ${f.status}${f.itemCount ? ` (${f.itemCount} fresh items)` : ""}`).join("; ") || "none polled"}.`,
+        ``,
+        anomalies.length > 0
+          ? `NEEDS YOUR EYE BEFORE SEND:\n${anomalies.map((a) => `- ${a}`).join("\n")}`
+          : `No source anomalies this run.`,
+        ``,
+        `Spot-audit suggestion: open the receipt links on any 10 items and confirm the live page still supports the wording. Anything tagged SINGLE SOURCE — VERIFY deserves that check first. If more than one hard miss, hold the send and rerun.`,
+        ``,
+        `Ready to send: PENDING YOUR REVIEW — nothing goes out until you send it.`,
+      ].join("\n");
+
       await notify(
         "Your Tuesday Wire draft is ready",
-        `Karilyn,\n\nThe Monday research run finished. This week's paid Wire draft and the Free Edition draft are waiting in your publisher console for review.\n\n${okPages.length} sources read; every item carries its receipt. Anything tagged SINGLE SOURCE — VERIFY deserves your eye before it ships.\n\nOpen your bookmarked publisher console link to review.\n\n— Hollywood Sales Wire research desk`,
+        `Karilyn,\n\nThe Monday research run finished. This week's paid Wire draft and the Free Edition draft are waiting in your publisher console for review.\n\n${report}\n\nOpen your bookmarked publisher console link to review.\n\n— Hollywood Sales Wire research desk`,
       );
       logger.info({ runId: run.id }, "weekly research: ready");
     } catch (err) {

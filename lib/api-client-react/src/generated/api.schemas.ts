@@ -18,6 +18,8 @@ export interface WireSource {
   label: string;
   wordCount: number;
   status: string;
+  /** ISO timestamp of when this source was pulled (absent on runs before Aug 2026) */
+  fetchedAt?: string;
 }
 
 export interface WireRunStatus {
