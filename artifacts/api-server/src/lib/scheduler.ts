@@ -5,7 +5,10 @@ import {
   emailSubscribersTable,
   sequenceEmailsTable,
   scheduledSendsTable,
+  socialDraftsTable,
 } from "@workspace/db";
+import { pushHighlightToTypefully } from "./typefully";
+import { claimSocialDraft } from "./socialDrafts";
 import { executeBriefSend, executePaidSend } from "./sendWire";
 import { SCHEDULED_SEND_SEEDS } from "./scheduledSeeds";
 import { deliverReportsToPendingMembers, resetStaleReportLeases } from "./members";
@@ -315,6 +318,99 @@ async function tickScheduledSends(): Promise<void> {
   }
 }
 
+/**
+ * Wednesday/Friday mid-week social highlight drafts: pick the week's ready
+ * run and push a short one-signal Typefully draft (LinkedIn + X, unscheduled)
+ * around 8 AM Pacific, with catch-up on later ticks the same day or the next.
+ * Production only — a dev workspace open on a Wednesday must not push
+ * duplicate drafts into the publisher's real Typefully account.
+ *
+ * The unique (kind, week_key) row in social_drafts is the claim: each slot is
+ * attempted exactly once per week. A failed push is recorded and NOT retried
+ * automatically — she can always post manually.
+ */
+function dueHighlightSlot(now = new Date()): "wed" | "fri" | null {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles",
+    weekday: "short",
+    hour: "2-digit",
+    hour12: false,
+  }).formatToParts(now);
+  const dow = parts.find((p) => p.type === "weekday")?.value ?? "";
+  const hour = Number(parts.find((p) => p.type === "hour")?.value ?? "0");
+  if (dow === "Wed" && hour >= 8) return "wed";
+  // Thursday catches up a missed Wednesday (autoscale may have slept).
+  if (dow === "Thu") return "wed";
+  if (dow === "Fri" && hour >= 8) return "fri";
+  if (dow === "Sat") return "fri";
+  return null;
+}
+
+async function tickSocialHighlights(): Promise<void> {
+  if (process.env.REPLIT_DEPLOYMENT !== "1") return;
+  if (!process.env.TYPEFULLY_API_KEY) return;
+  const slot = dueHighlightSlot();
+  if (!slot) return;
+  const weekKey = currentWeekKey();
+
+  // Only act on a ready run for THIS week — never resurface a stale week.
+  const [run] = await db
+    .select()
+    .from(wireRunsTable)
+    .where(and(eq(wireRunsTable.weekKey, weekKey), eq(wireRunsTable.status, "ready")))
+    .limit(1);
+  if (!run?.freeBody) return;
+
+  // Atomic once-per-week claim with stale-pending takeover (crash recovery).
+  const claim = await claimSocialDraft(slot, weekKey);
+  if (!claim) return;
+
+  // Friday avoids repeating the angle already posted this week (Wednesday's
+  // highlight if it exists, else Monday's Brief post).
+  let avoidAngle: string | null = null;
+  if (slot === "fri") {
+    const earlier = await db
+      .select({ kind: socialDraftsTable.kind, postText: socialDraftsTable.postText })
+      .from(socialDraftsTable)
+      .where(and(eq(socialDraftsTable.weekKey, weekKey), eq(socialDraftsTable.status, "pushed")));
+    avoidAngle = earlier.find((d) => d.kind === "wed")?.postText ?? earlier.find((d) => d.kind === "brief")?.postText ?? null;
+  }
+
+  const slotName = slot === "wed" ? "Wednesday" : "Friday";
+  const push = await pushHighlightToTypefully(slotName, weekKey, run.freeBody, avoidAngle);
+  await db
+    .update(socialDraftsTable)
+    .set({
+      status: push.ok ? "pushed" : "failed",
+      typefullyDraftId: push.draftId ?? null,
+      postText: push.linkedinText ?? null,
+      error: push.ok ? null : push.status,
+    })
+    .where(eq(socialDraftsTable.id, claim.id));
+  if (push.ok) {
+    logger.info({ weekKey, slot }, "scheduler: mid-week social highlight pushed to Typefully");
+  } else {
+    logger.error({ weekKey, slot, reason: push.status }, "scheduler: mid-week social highlight failed");
+    await notifySocialFailure(slotName, push.status);
+  }
+}
+
+async function notifySocialFailure(slotName: string, reason: string): Promise<void> {
+  try {
+    await resendRequest("/emails", {
+      method: "POST",
+      body: {
+        from: FROM_ADDRESS,
+        to: ["hello@hollywoodsaleswire.com"],
+        subject: `${slotName} LinkedIn/X draft did not reach Typefully`,
+        text: `Karilyn,\n\nThis week's ${slotName} social highlight could not be pushed to Typefully (${reason}).\n\nNo action needed for the Wire — this only affects the social draft. You can post manually this week, or ask your agent to look into it.\n\n— Hollywood Sales Wire research desk`,
+      },
+    });
+  } catch (err) {
+    logger.error({ err }, "scheduler: failed to send social-failure notice");
+  }
+}
+
 async function tick(): Promise<void> {
   try {
     await tickPendingEmails();
@@ -330,6 +426,11 @@ async function tick(): Promise<void> {
     await tickScheduledSends();
   } catch (err) {
     logger.error({ err }, "scheduled-send tick failed");
+  }
+  try {
+    await tickSocialHighlights();
+  } catch (err) {
+    logger.error({ err }, "social-highlight tick failed");
   }
   try {
     if (!isDue()) return;

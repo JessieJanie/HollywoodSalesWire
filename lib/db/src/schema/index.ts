@@ -24,3 +24,4 @@ export * from "./members";
 export * from "./paidWireSends";
 export * from "./specialReports";
 export * from "./scheduledSends";
+export * from "./socialDrafts";

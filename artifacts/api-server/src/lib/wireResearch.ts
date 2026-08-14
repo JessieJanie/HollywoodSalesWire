@@ -1,8 +1,9 @@
 import { desc, eq, and, ne, sql } from "drizzle-orm";
-import { db, wireRunsTable, researchPagesTable } from "@workspace/db";
+import { db, wireRunsTable, researchPagesTable, socialDraftsTable } from "@workspace/db";
 import { skimRead, skimReadJs, skimFilmIncentives, skimStudioJobs, skimEntityFormations } from "./skim";
 import { draftFreeEdition } from "./freeEdition";
 import { pushBriefToTypefully } from "./typefully";
+import { claimSocialDraft } from "./socialDrafts";
 import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
 import { logger } from "./logger";
@@ -465,9 +466,31 @@ export async function runWeeklyResearch(
         })
         .where(eq(wireRunsTable.id, run.id));
 
-      // Best-effort: push a LinkedIn version of the Brief into Typefully as an
-      // unscheduled draft. Never blocks or fails the run.
-      const typefullyStatus = await pushBriefToTypefully(weekKey, free.bodyText);
+      // Best-effort: push a LinkedIn + X version of the Brief into Typefully
+      // as an unscheduled draft. Never blocks or fails the run. The
+      // social_drafts row is the idempotency claim across instances.
+      // The whole social block is fenced off in its own try/catch: no DB or
+      // network failure here may ever change the run's status to failed.
+      let typefullyStatus = "Social drafts: skipped (already pushed for this week).";
+      try {
+        const briefClaim = await claimSocialDraft("brief", weekKey);
+        if (briefClaim) {
+          const push = await pushBriefToTypefully(weekKey, free.bodyText);
+          typefullyStatus = push.status;
+          await db
+            .update(socialDraftsTable)
+            .set({
+              status: push.ok ? "pushed" : "failed",
+              typefullyDraftId: push.draftId ?? null,
+              postText: push.linkedinText ?? null,
+              error: push.ok ? null : push.status,
+            })
+            .where(eq(socialDraftsTable.id, briefClaim.id));
+        }
+      } catch (socialErr) {
+        logger.warn({ err: socialErr, weekKey }, "weekly research: social draft step failed (run unaffected)");
+        typefullyStatus = "Social drafts: could not be pushed this week (internal error). The Wire and Brief are unaffected.";
+      }
 
       // Pre-flight report to the publisher (sources, feed health, anomalies).
       const failedPages = pages.filter((p) => p.status.startsWith("error"));
