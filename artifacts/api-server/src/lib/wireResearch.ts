@@ -2,6 +2,7 @@ import { desc, eq, and, ne, sql } from "drizzle-orm";
 import { db, wireRunsTable, researchPagesTable } from "@workspace/db";
 import { skimRead, skimReadJs, skimFilmIncentives, skimStudioJobs, skimEntityFormations } from "./skim";
 import { draftFreeEdition } from "./freeEdition";
+import { pushBriefToTypefully } from "./typefully";
 import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
 import { logger } from "./logger";
@@ -464,6 +465,10 @@ export async function runWeeklyResearch(
         })
         .where(eq(wireRunsTable.id, run.id));
 
+      // Best-effort: push a LinkedIn version of the Brief into Typefully as an
+      // unscheduled draft. Never blocks or fails the run.
+      const typefullyStatus = await pushBriefToTypefully(weekKey, free.bodyText);
+
       // Pre-flight report to the publisher (sources, feed health, anomalies).
       const failedPages = pages.filter((p) => p.status.startsWith("error"));
       const thinPages = pages.filter((p) => p.status.startsWith("ok-but-thin"));
@@ -487,6 +492,8 @@ export async function runWeeklyResearch(
         anomalies.length > 0
           ? `NEEDS YOUR EYE BEFORE SEND:\n${anomalies.map((a) => `- ${a}`).join("\n")}`
           : `No source anomalies this run.`,
+        ``,
+        typefullyStatus,
         ``,
         `Spot-audit suggestion: open the receipt links on any 10 items and confirm the live page still supports the wording. Anything tagged SINGLE SOURCE — VERIFY deserves that check first. If more than one hard miss, hold the send and rerun.`,
         ``,
