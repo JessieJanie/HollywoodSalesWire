@@ -29,7 +29,7 @@ const BRIEF_POSTS_PROMPT = `You are the editor of "Hollywood Sales Wire," a paid
 Write TWO social posts from the publisher's personal accounts:
 
 1. "linkedin": the Brief as a LinkedIn post. A first line that earns the "see more" click (under 200 characters, specific and curiosity-driving); short paragraphs of 1-2 sentences with white space between them; 120-200 words; close with one low-pressure line pointing readers to ${SITE_URL} for the full weekly briefing.
-2. "x": the same week compressed for X. STRICTLY under 260 characters total. One sharp observation from the week plus ${SITE_URL}. No thread, one post.
+2. "x": the same week as a full-length X post (the account has X Premium, so long posts are fine — readers tap "Show more"). Same substance and length as the LinkedIn version, but no hashtags. Make the FIRST sentence the sharpest hook, since only the first ~3 lines show before the fold. One post, no thread. Include ${SITE_URL}.
 
 ${VOICE_RULES}
 
@@ -41,7 +41,7 @@ Write a SHORT ${slot} follow-up for the publisher's personal accounts: pick the 
 
 Write TWO versions:
 1. "linkedin": 60-110 words. Strong first line under 150 characters. Short paragraphs. End with one low-pressure line pointing to ${SITE_URL}.
-2. "x": STRICTLY under 260 characters total, one post, includes ${SITE_URL}.
+2. "x": the same write-up as a full-length X post (the account has X Premium, so long posts are fine). Same substance as the LinkedIn version, no hashtags, sharpest sentence first (only the first ~3 lines show before the fold). One post, no thread. Include ${SITE_URL}.
 
 ${VOICE_RULES}
 
@@ -117,8 +117,9 @@ async function draftPosts(systemPrompt: string, briefBody: string, signal?: Abor
   const linkedin = typeof parsed.linkedin === "string" ? parsed.linkedin.trim() : "";
   let x = typeof parsed.x === "string" ? parsed.x.trim() : "";
   if (linkedin.length < 60) throw new Error("LinkedIn rewrite came back too short to be usable");
-  // X hard limit is 280; drop the X version rather than push a truncated post.
-  if (x.length > 280) x = "";
+  // Full-length X posts are allowed (X Premium). If the X version is missing
+  // or unusably short, fall back to the LinkedIn text rather than dropping X.
+  if (x.length < 60) x = linkedin;
   return { linkedin, x };
 }
 
