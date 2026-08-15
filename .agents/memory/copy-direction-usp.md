@@ -36,3 +36,8 @@ Karilyn built the search tool HSW uses, purpose-built for exactly this ultra-pre
 - All existing pricing and offer locks remain exactly as agreed.
 
 **How to apply:** On the next copy pass, draft with this framing (a consideration, not a mandate — Karilyn expects more angles to accumulate and be used IN ADDITION before the pass runs), then run the 9.5-or-better rewrite procedure: rate the draft 1–10 with a summary of strengths and weaknesses, rewrite using that summary, repeat until it rates 9.5+. Copy remains publisher-locked — no edits without explicit request.
+
+## Industry-contraction framing (Aug 15, 2026, from Karilyn)
+She shared an essay arguing Hollywood's human production class is being hollowed out (AI + production flight from LA) while the film business itself grows. Her stance: "HSW just keeps following the money for those still in and newcomers coming into the industry."
+**Why:** durable editorial/copy angle — contraction makes buying signals MORE valuable (fewer, faster windows; can't afford cold leads). HSW sells navigation of the emerging industry, not nostalgia for the old one.
+**How to apply:** future sales copy and Wire/social framing may lean on this; never doom-tone — Karilyn's brand is opportunity-for-those-still-selling.
