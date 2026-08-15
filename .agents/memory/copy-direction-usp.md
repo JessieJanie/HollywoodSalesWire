@@ -41,3 +41,5 @@ Karilyn built the search tool HSW uses, purpose-built for exactly this ultra-pre
 She shared an essay arguing Hollywood's human production class is being hollowed out (AI + production flight from LA) while the film business itself grows. Her stance: "HSW just keeps following the money for those still in and newcomers coming into the industry."
 **Why:** durable editorial/copy angle — contraction makes buying signals MORE valuable (fewer, faster windows; can't afford cold leads). HSW sells navigation of the emerging industry, not nostalgia for the old one.
 **How to apply:** future sales copy and Wire/social framing may lean on this; never doom-tone — Karilyn's brand is opportunity-for-those-still-selling.
+
+Related fodder (Aug 2026): chatter about a possible 25% FEDERAL film tax credit to repatriate US production (vs. runaway production to Hungary/UK/Canada). Unconfirmed policy — never state it as fact in copy; the usable angle is that incentive swings relocate production, and every relocation reshuffles vendor contracts (same "windows open fast" thesis).
