@@ -31,3 +31,10 @@ uri = "file://docs/film-incentive-pattern-test-memo.md"
 type = "text"
 title = "Book test findings memo"
 description = "Three pattern questions run against California's full film-incentive archive (907 projects, 2009–2026) — what surprised, what didn't, and a go recommendation."
+
+[[outputs]]
+id = "S3gqwMeXV0Enj2msbf5yF"
+uri = "file://artifacts/hollywood-sales-wire/public/og-card.png"
+type = "image"
+title = "New social card — Hollywood Sales Wire"
+description = "The 1200×630 card X and LinkedIn will show under your links: cinematic backlot at golden hour with the wordmark and tagline in cream and gold."
