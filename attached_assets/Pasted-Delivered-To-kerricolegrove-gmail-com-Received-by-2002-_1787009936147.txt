@@ -1,0 +1,38 @@
+Delivered-To: kerricolegrove@gmail.com
+Received: by 2002:a05:7022:d87:b0:141:3b24:9de1 with SMTP id ec7csp3263912dlb; Mon, 17 Aug 2026 16:30:25 -0700 (PDT)
+X-Received: by 2002:a2e:b8cb:0:b0:396:92eb:36a0 with SMTP id 38308e7fff4ca-3a179efdcdbmr619511fa.0.1787009425196; Mon, 17 Aug 2026 16:30:25 -0700 (PDT)
+ARC-Seal: i=2; a=rsa-sha256; t=1787009425; cv=pass; d=google.com; s=arc-20260327; b=UVIt5KxezdDofYN7QjvxY9D2hwqO1fsaPD5IdcE3Fxn7E6+VcMyaIGGZvhI0IrnZGn W81bFO8l/Bdh50+WXoluYN6Q6zERcrxKOrUpLxsgt+oQaCdpBg9ghWWLYDr1KeJ9anSr IeZ2jOBubdRhg7/WO2PRJeAkwlMnyzqdVtd+iuhiTQQnP2HCInmzNvq5r3SHGyX1hd+Z bZpK526RPsEYVLae+C0MVgdURkRg0zjqadthjpZ5zDqkgVJqVu8kZ7/HxhyCS11NIvGp 1WUt/nTmJKJjWkDZoMYGyaTCKMqnDb2+2+CEOz3ndb79Q3y2idyZCqDDNACiREm8lk5L 27zw==
+ARC-Message-Signature: i=2; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327; h=to:subject:message-id:date:from:mime-version:dkim-signature; bh=7hFGdJyjHXrphZCzKbqLAiVsSIWIuzquzh5JsEnoHNI=; fh=DnLQX63a+htq0EGj2bAn8HMjqbdaBUYV9CQfhaEDI9M=; b=AeV3Vhz+857Tgh6iXT1vG97dGIrLQJpLCw4eA75fw8d9bPBWRZzVg09L82T/9zbPxR BkQRCeiXDnBBz3xnw2jMZrN+6aXpEdoEmagQ2mfcQMqJKPpPrtPINZ+KbuvvL5x+Y0Me jVsB4j3WDNQ8PqaALFCD+2QTOurotJqQ86TaDeaGleefuV6a0VpXEcAxjXaDWO0wbCfd ir7M1gIDogcoFQpDwD109RiHPcMgE0sH+s/G627CGkQvVM/J+500z12/2CJZPp+xdMJ7 mJGVbz9qwVmOe+Efh3b1GWUbPVRTcdXFSKLwfycTMzBdxfPxBYA+LvbMKM34DnADPtLM QP8A==; dara=google.com
+ARC-Authentication-Results: i=2; mx.google.com; dkim=pass header.i=@hollywoodsaleswires.com header.s=google header.b=VaFDBYUK; arc=pass (i=1); spf=pass (google.com: domain of karilyn@hollywoodsaleswires.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=karilyn@hollywoodsaleswires.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=hollywoodsaleswires.com; dara=pass header.i=@gmail.com
+Return-Path: <karilyn@hollywoodsaleswires.com>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41]) by mx.google.com with SMTPS id 2adb3069b0e04-5b46cf9e05dsor646658e87.5.2026.08.17.16.30.24 for <kerricolegrove@gmail.com> (Google Transport Security); Mon, 17 Aug 2026 16:30:24 -0700 (PDT)
+Received-SPF: pass (google.com: domain of karilyn@hollywoodsaleswires.com designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com; dkim=pass header.i=@hollywoodsaleswires.com header.s=google header.b=VaFDBYUK; arc=pass (i=1); spf=pass (google.com: domain of karilyn@hollywoodsaleswires.com designates 209.85.220.41 as permitted sender) smtp.mailfrom=karilyn@hollywoodsaleswires.com; dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=hollywoodsaleswires.com; dara=pass header.i=@gmail.com
+ARC-Seal: i=1; a=rsa-sha256; t=1787009424; cv=none; d=google.com; s=arc-20260327; b=qg72PDO4oimSuncpDfbt2Z+BGkYD4yBInGiTxYhXBnYXFgIMCqQozi+gbwkghrT4XU kG+EkeOFgRaNMGP+1Ao7c0896OlVbEwcPKsqJ0drFGnXXoqFxqYXIwIMHP4v3+ZfaLeG hyaA13GamD6PItbQ9X6eejCqjB6qT4jl7H0RNVkCxWvNrocPdb32c4jEphbpma5YKGx2 Udo5sNdXOj43lgzfgp46sIrwydmp7My9Qi1diFqD0Dhe3bJiCBtvlT3xRcHWZsne6AT6 xzqgqqSK6egdnEyXbS9AgrQ596Twz5q1g8VKIKAHD+i8vcl1cfp7oyHQcNiPGsAA7ff0 nJnQ==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20260327; h=to:subject:message-id:date:from:mime-version:dkim-signature; bh=7hFGdJyjHXrphZCzKbqLAiVsSIWIuzquzh5JsEnoHNI=; fh=DnLQX63a+htq0EGj2bAn8HMjqbdaBUYV9CQfhaEDI9M=; b=ZbVjvV0RbiqLNxGY6eCaRybschhqDGTJgGC9SnLcNJHwc7vz+dXopBB+fgTEJdzcBo +Syzw0C7ike6KtpGOwc20Mlpa+3qsI7IpQ/i3ApTPlUJfcPeghV/c7fP8yRa1YHmYkZQ FMdT+IWR5SDtZQylWUV/xPZ4o3W03rw+l6jDc5CEVaGDhUUo7UYeIvTHXrRpe80+Edzb ouD+9M9KbGiHL2bfhP9XnA/m3js/FPcnRNc40FHq/OPE45csHbm1ikls7EQ4KwS+bibp ITF84dtRrIsRgkcL5ZGtXt4zdLb7wDD9JrI0QO6DWemi6pj6yRGJghyzjt6uCO1fILm5 GVLA==; dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com; arc=none
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=hollywoodsaleswires.com; s=google; t=1787009424; x=1787614224; dara=google.com; h=content-type:to:subject:message-id:date:from:mime-version:from:to :cc:subject:date:message-id:reply-to:content-type; bh=7hFGdJyjHXrphZCzKbqLAiVsSIWIuzquzh5JsEnoHNI=; b=VaFDBYUKOPZGo7zf1XFXu7xrPmqX70S73+ET83ReCUnA92QObsBBX4bYmKx01mH6xS ZxRXD+JavSd6Rq6pQw2nKpVibtxoy3fEt9kjf94DRa8eQQ2ABuJGWnjSVI9kzOWXmtGj xFXArg4HYk6ayGGgH09375SveqIAqVYkScbrUzi5pghZLkUxQPrzPjWkUcagaYvTXgDx psv4uwL6OO2M61riYo9Oexy0B7udJpQAr38DaSrDk9eFtAxGS3qwkEA1Mb598qe1Gyxd EwOo6SU902zftjSUvL2mJOJChnqewfGRm/Sh3HTNmuRhpRBENgQ/2e4QCN2FBskGpGYt AI3Q==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=1e100.net; s=20251104; t=1787009424; x=1787614224; h=content-type:to:subject:message-id:date:from:mime-version:x-gm-gg :x-gm-message-state:from:to:cc:subject:date:message-id:reply-to :content-type; bh=7hFGdJyjHXrphZCzKbqLAiVsSIWIuzquzh5JsEnoHNI=; b=LxcXTU7Oxn2kFoU5NJ1dHiM+CsMjb4IY9nXL7GkAJWksfzGVDrdCjp3XpjaDWbGByM 60CdtlYWXMcjzJffvXa4AtfzbBeRWeTXRpkA7oYfcVECzFAC+/rk37tFfEMdNdIzrPhq ta4FqUCDJ906tiZCQO2v6xpLXS/cEG9zqcEZJ1wLZr+f8Yp/04f8Y1xeAih2R68nTynB T/FLCRlp17tpItiTYSwCzwL0Fj2AbrzGccNHavmLh+lnkoTqN1UIcyUWiF0yQKembcym 3g3tHF7NsDA4TDPtmwQ5wkxYXPkNCnmg+pXmR9/aXfiPoWp0e/6wNnyuSE1lB0VhlRC5 OLhg==
+X-Gm-Message-State: AOJu0YySvT+nmQSbE8VeZO8QfyfAd0kscy3P5mqLucxRHHDsdUSOIus1 /ZwY8D/kP9+WRdLzO+HQJywoiCVojCP4HHyWjIKWU1rYgdMcPohWeqssHIX7w+01NBpapqXxLAs 2do15GG8oCOFNyA8NzltYOnHyv8NLruXPIdHfdwWAKiVhL6m4GSEBTBOphhg=
+X-Gm-Gg: AR+sD12G7B8lmuS19yUHaiPXzWfJEDleMrqkldj9LhAPdp5lGnnUZLSXNpCy+OpESWF TzNldrlwBJFBvRvTbu4c9RBKxbq27cVTRZZgNPEWqvWQfj9aNuT8LngxOC/e7eI2h19v1lueA3o cCqaIEhhk38E7EkfUIvjdQ3hESMpia9AMQE7ijpq+DnjKdONgNgqPbxe0/oAgT5Vd0kdtvJWdzI 11ZfuXpslxyGyYQpRrDwoJmty2ww/9Vz4cp4J8o+dFbJU/RsOL8bwXUil95h6vS/zHhj0kxcv0Z oQTNWvdwMAIu3Vv0N/RDqnfBOnyxGmYOv/hKK6v+5K35QOeF+/3eXDM=
+X-Received: by 2002:a05:6512:1092:b0:5b4:5838:30ee with SMTP id 2adb3069b0e04-5b47066de40mr657100e87.7.1787009424163; Mon, 17 Aug 2026 16:30:24 -0700 (PDT)
+MIME-Version: 1.0
+From: Karilyn Colegrove <karilyn@hollywoodsaleswires.com>
+Date: Mon, 17 Aug 2026 16:30:12 -0700
+X-Gm-Features: AcwNN1WF8IlgExsVLRlVIN6Ga41369Jj2WXAbzO2dszPbxDQ_0dtHsJPtKoVkwM
+Message-ID: <CAFutFD+Re9RZwiE2YwSeuEQDu3H9cfPuujj9LT+3oqpgtwHjjA@mail.gmail.com>
+Subject: hsw test
+To: kerricolegrove@gmail.com
+Content-Type: multipart/alternative; boundary="000000000000f00ef10659468dd1"
+
+--000000000000f00ef10659468dd1
+Content-Type: text/plain; charset="UTF-8"
+
+hi
+
+--000000000000f00ef10659468dd1
+Content-Type: text/html; charset="UTF-8"
+
+<div dir="ltr">hi</div>
+
+--000000000000f00ef10659468dd1--
