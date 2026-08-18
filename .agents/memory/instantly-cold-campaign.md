@@ -44,9 +44,10 @@ When creating a new batch: replace [DATE TOKEN] in all 5 emails with the actual 
 - `prioritize_new_leads: true`
 - Schedule: weekdays only, 08:00–18:00
 
-## Daily limit auto-ramp
-- Ramp array (0-indexed by past batch count): [2, 5, 10, 20, 30]. Batch 1 → 2/day, batch 2 → 5/day, etc.
-- `daily_limit` is set at campaign creation via the POST /campaigns payload.
+## Daily sending ramp
+- DO NOT set `daily_limit` on campaigns. Instantly slow-ramp is enabled at the account level on karilyn@hollywoodsaleswires.com — it handles ramping automatically up to 50/day. A campaign-level cap overrides and starves it.
+- Mailbox settings: 50/day limit, slow ramp on, warmup running (1/day increase, 10/day cap, 30% reply rate). Same on karilyn@ria-wires.com.
+- `dailyLimit` column in cold_campaigns DB stores 50 (mailbox ceiling) for reference only — not sent to Instantly.
 - Plan cap: 40 prospect leads max per batch (Growth plan, shared with RIA Wire; ~49 slots remain as of Aug 2026).
 
 ## Programmatic lead upload
