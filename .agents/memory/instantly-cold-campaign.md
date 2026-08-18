@@ -44,16 +44,27 @@ When creating a new batch: replace [DATE TOKEN] in all 5 emails with the actual 
 - `prioritize_new_leads: true`
 - Schedule: weekdays only, 08:00–18:00
 
+## Daily limit auto-ramp
+- Ramp array (0-indexed by past batch count): [2, 5, 10, 20, 30]. Batch 1 → 2/day, batch 2 → 5/day, etc.
+- `daily_limit` is set at campaign creation via the POST /campaigns payload.
+- Plan cap: 40 prospect leads max per batch (Growth plan, shared with RIA Wire; ~49 slots remain as of Aug 2026).
+
+## Programmatic lead upload
+- `cold_campaigns` DB table tracks: campaign_id, batch_tag, deadline, daily_limit, leads_uploaded, created_at.
+- `createColdBatch()` now queries batch count for ramp, adds `daily_limit` to POST, stores row in DB.
+- `uploadColdLeads(leads: ColdLead[])` in `coldCampaigns.ts` — uploads array to Instantly, enforces cap, updates DB.
+- `POST /publisher/cold-leads` (key-auth) — accepts `{leads: [{email, first_name?, last_name?, company?}]}`.
+- `GET /publisher/cold-campaign` (key-auth, query param) — returns current campaign status and remaining slots.
+- Lead upload: one POST /leads call per lead (known-working); Instantly bulk endpoint untested.
+- lib/db requires `npx tsc --build` in lib/db/ after any schema change (project references, emitDeclarationOnly).
+
 ## Prospect list
 - Not yet built. Plan: use Skim research to build targeting vendors selling into entertainment production (catering, AV, security, equipment, stage services, production tech).
-- Add leads via POST `/api/v2/leads` with `campaign_id` to enroll them.
 - UTM tags: `utm_source=cold&utm_medium=email&utm_campaign=hsw-cold-1&utm_content=e1` (increment campaign number per batch).
 
-## How to apply (new campaign batch)
-1. Calculate E5 date = lead-add date + 7 days. Format as "Day, Month DD" (e.g. "Tuesday, August 25").
-2. Copy `marketing/cold-campaign-draft1.txt`, replace all [DATE TOKEN] with the real date.
-3. POST new campaign to Instantly (copy structure from create-campaign3.mjs in /tmp — or rebuild from memory above).
-4. PATCH immediately with HTML-converted bodies (use the toHtml() helper: \n\n → </p><p>, \n → <br>).
-5. Verify step body char counts > 100 via GET.
-6. Add leads via `/api/v2/leads` bulk endpoint.
-7. Set campaign active (status 1) when ready to launch.
+## How new campaign batches work (fully automated now)
+1. Scheduler fires Tue/Wed/Thu 8am PT → calls createColdBatch().
+2. Batch count queried from cold_campaigns → daily_limit selected from ramp array.
+3. Campaign POSTed with daily_limit, PATCHed with bodies, activated, monitor lead enrolled, DB row inserted.
+4. To add prospect leads: POST /publisher/cold-leads with key + leads array (no Instantly UI needed).
+5. RIA Wire agent or Karilyn can call /publisher/cold-leads to upload the prospect list.
