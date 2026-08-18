@@ -56,7 +56,7 @@ export function WireRenderer({ markdown }: { markdown: string }) {
     // ### 1. Numbered lead header (converted from **1. ...**)
     h3({ children }) {
       return (
-        <h3 className="font-serif text-[1rem] font-bold text-foreground mt-6 mb-2 leading-snug border-l-[3px] border-primary pl-3">
+        <h3 className="font-serif text-[1.05rem] font-extrabold text-foreground mt-6 mb-2 leading-snug border-l-[3px] border-primary pl-3 tracking-tight">
           {children}
         </h3>
       );
