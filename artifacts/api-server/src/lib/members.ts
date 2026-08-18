@@ -180,10 +180,29 @@ const WELCOME_REPORT_DESCRIPTIONS: Record<string, string> = {
     "Careers pages as disclosure documents: the job-title tells, the posting patterns that reveal a buildout weeks before any purchase order, and a full named walkthrough of a nine-figure streaming-sports buildout.",
 };
 
+function foundingRateLockHtml(amountCents: number | null): string {
+  const p = (s: string) => `<p>${s}</p>`;
+  const h = (s: string) =>
+    `<p style="font-family:Arial,sans-serif;font-size:12px;letter-spacing:2px;color:#8a8577;text-transform:uppercase;margin:32px 0 12px;">${s}</p>`;
+  // Derive annual and weekly display from the actual checkout amount so this
+  // is always accurate regardless of plan variant or future pricing changes.
+  let rateHtml: string;
+  if (amountCents && amountCents > 0) {
+    const annual = (amountCents / 100).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
+    const weekly = Math.round(amountCents / 52 / 100);
+    rateHtml = `${p(`Your Founding Member rate is <strong>$${weekly} a week (${annual} a year, billed annually)</strong>. This rate is locked for the life of your membership — it will never increase as long as you remain a member. When Hollywood Sales Wire raises prices for new members, your rate stays exactly where it is today.`)}`;
+  } else {
+    rateHtml = `${p("Your Founding Member rate is locked for the life of your membership — it will never increase as long as you remain a member. When Hollywood Sales Wire raises prices for new members, your rate stays exactly where it is today.")}`;
+  }
+  return `${h("Your Founding Member rate — locked for life")}${rateHtml}`;
+}
+
 function welcomeHtml(
   email: string,
   firstName: string | null,
   reports: Array<{ slug: string; title: string }> | null,
+  plan: string | null,
+  amountCents: number | null,
 ): string {
   const p = (s: string) => `<p>${s}</p>`;
   const h = (s: string) =>
@@ -217,6 +236,7 @@ function welcomeHtml(
     <div style="max-width:560px;margin:0 auto;padding:32px 24px;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;font-size:17px;line-height:1.6;background:#ffffff;">
       ${p(greeting)}
       ${p("Thank you for choosing Hollywood Sales Wire, and welcome. Your membership is now active, and everything that comes with your subscription is below.")}
+      ${plan?.startsWith("founding") ? foundingRateLockHtml(amountCents) : ""}
       ${reportsSection}
       ${h("The latest issue of the HSW Weekly Wire")}
       ${p(`<a href="${shelfLink}" style="color:#1d5c3a;font-weight:bold;">Click here</a> for the latest issue of the HSW Weekly Wire. Your subscription will actually start with next Tuesday's issue. It will arrive in your inbox here as well.`)}
@@ -553,10 +573,12 @@ async function sendUnifiedWelcome(email: string): Promise<void> {
     if (!reportsClaimId) reports = null; // already delivered — don't repeat links
   }
   const [memberRow] = await db
-    .select({ name: membersTable.name })
+    .select({ name: membersTable.name, plan: membersTable.plan, amountCents: membersTable.amountCents })
     .from(membersTable)
     .where(eq(membersTable.email, email));
   const firstName = memberRow?.name?.trim().split(/\s+/)[0] || null;
+  const plan = memberRow?.plan ?? null;
+  const amountCents = memberRow?.amountCents ?? null;
 
   // Deterministic idempotency key: Stripe webhook retries and welcome-claim
   // releases can re-invoke this — Resend dedupes for 24 h, so the member can
@@ -575,7 +597,7 @@ async function sendUnifiedWelcome(email: string): Promise<void> {
       from: FROM_ADDRESS,
       to: [email],
       subject: "Welcome to Hollywood Sales Wire — your membership is active",
-      html: welcomeHtml(email, firstName, reports),
+      html: welcomeHtml(email, firstName, reports, plan, amountCents),
     },
     headers: { "Idempotency-Key": idempotencyKey },
   });
