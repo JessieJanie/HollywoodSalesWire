@@ -1,22 +1,26 @@
 ---
 name: Typefully social drafts (LinkedIn + X)
-description: How the weekly Brief and Wed/Fri highlights reach Typefully, and the safety rails around them
+description: Auto-published weekly social schedule via Typefully — Mon/Wed/Fri highlights + Tuesday Brief with masthead
 ---
 
 # Typefully social drafts
 
-Three drafts per week land in Karilyn's Typefully account, always as **unscheduled drafts** (never `publish_at`/`plan_at` — nothing auto-publishes; she edits/posts in Typefully):
-- **Monday** (inside the research run): the free Brief rewritten for LinkedIn + a ≤260-char X version in the same draft.
-- **Wednesday & Friday** (scheduler tick, ~8am PT with next-day catch-up, **production only** so a dev workspace can't push duplicates): a short one-signal highlight (LinkedIn + X). Friday is given Wednesday's post text as an "avoid this angle" hint.
+Four auto-published posts per week (requires Republish to go live as of Aug 18 2026):
+- **Monday ~5 pm PT**: short highlight, `plan_at` = now+5min (fires when wire is ready >= 17:00 PT). Kind = "mon".
+- **Tuesday ~9 am PT**: full Weekly Brief with HSW masthead image (`SITE_URL/og-card.png` via `media_urls`), `plan_at` = 15h from Monday wire completion. Kind = "brief".
+- **Wednesday ~8 am PT**: short highlight, `plan_at` = now+5min. Kind = "wed".
+- **Friday ~8 am PT**: short highlight, `plan_at` = now+5min. Kind = "fri".
 
-**Why:** she chose Typefully over a LinkedIn developer app (LinkedIn's API can't publish articles; OAuth expires ~60d). Fits her publisher-owns-the-send rule.
+Wednesday is given Monday's post as avoid-angle. Friday is given Wednesday's (or Monday's) post as avoid-angle.
+
+**Why:** she chose Typefully over a LinkedIn developer app (LinkedIn's API can't publish articles; OAuth expires ~60d). Fits her publisher-owns-the-send rule. Auto-publish implemented Aug 18 2026 at her request.
 
 **How to apply:**
 - Auth = `TYPEFULLY_API_KEY` secret (Bearer, api.typefully.com v2). Social set discovered at runtime (first set with LinkedIn or X) — never hardcode set IDs. Her set has both LinkedIn and X (personal accounts; Creator plan = one set shared by HSW and RIA Wire).
-- Idempotency = `social_drafts` DB table, unique (kind, week_key), kinds brief/wed/fri; insert-onConflictDoNothing is the claim, with a 30-min stale-`pending` lease takeover for crash recovery. `failed` is terminal — no auto-retry; failure sends her a notify email. Deleting a draft in Typefully must NOT recreate it (title-checking Typefully is not a valid dedupe).
-- Pushes are strictly best-effort with a real cancellation deadline (one AbortSignal propagated into Anthropic + all Typefully calls, 120s ceiling) — never blocks or fails the weekly run; the Monday social block is fenced in its own try/catch so a DB error there can't mark the run failed.
+- Idempotency = `social_drafts` DB table, unique (kind, week_key), kinds: brief/mon/wed/fri; insert-onConflictDoNothing is the claim, with a 30-min stale-`pending` lease takeover for crash recovery. `failed` is terminal — no auto-retry; failure sends her a notify email.
+- Pushes are strictly best-effort with a real cancellation deadline (one AbortSignal propagated into Anthropic + all Typefully calls, 120s ceiling) — never blocks or fails the weekly run.
+- Masthead image on Tuesday Brief uses `media_urls: [url]` in the Typefully post object — untested in prod, gracefully degrades to text-only if unsupported.
 - Errors are sanitized to category strings / HTTP status only — provider response bodies must never reach logs or her emails.
-- Rewrites keep the Brief's information boundary (shape only, no names/figures/methods) — same Agora rules. X gets the FULL write-up, same substance as LinkedIn (she confirmed X Premium on @kacolegrove Aug 15 2026 — long posts allowed; she wants "meat", not a 3-line teaser). Fallback: if the model's X version is unusably short, reuse the LinkedIn text.
-- Typefully API v1 is dead (403); only v2 works. One-off reposts CAN set `publish_at` (v2 field name) when she explicitly says no approval needed — the never-auto-publish rail applies to the weekly pipeline, not to her direct requests. Published posts can never be deleted via API — she deletes on X/LinkedIn herself.
-- X caches link-preview cards per URL: after the og:image changes, repost with a varied query string (e.g. `?ref=art2`) or the old card keeps showing.
-- Schema deploys via Replit's Publish flow (dev→prod diff on Republish) — no manual prod migrations.
+- Rewrites keep the Brief's information boundary (shape only, no names/figures/methods). X gets the FULL write-up (she confirmed X Premium, long posts allowed).
+- Typefully API v1 is dead (403); only v2 works. `plan_at` is the v2 field name for scheduling.
+- Schema deploys via Replit's Publish flow — no manual prod migrations.
