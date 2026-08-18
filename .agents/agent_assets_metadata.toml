@@ -45,3 +45,10 @@ uri = "file://marketing/welcome-email-preview.html"
 type = "text"
 title = "Welcome Email — Founding Member"
 description = "Exactly what a new Founding Member receives. Dynamic values (name, shelf link, report download links) are personalized per recipient at send time."
+
+[[outputs]]
+id = "ghywjOii-NkDcZO9Pohtk"
+uri = "file://marketing/welcome-email-rendered.jpg"
+type = "image"
+title = "Welcome Email — as a subscriber sees it"
+description = "Rendered view of the founding member welcome email."
