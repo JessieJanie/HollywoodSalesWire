@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Header, Footer } from "@/components/layout/Shell";
 import { SUPPORT_EMAIL } from "@/lib/constants";
+import { WireRenderer } from "@/components/WireRenderer";
 
 interface ShelfReport {
   slug: string;
@@ -210,8 +211,8 @@ export default function ShelfPage() {
                             WEEK OF {issueDate(issue.weekKey).toUpperCase()}
                           </span>
                         </summary>
-                        <div className="px-4 pb-4 border-t border-border pt-4 whitespace-pre-wrap leading-relaxed">
-                          {issue.bodyText}
+                        <div className="border-t border-border pt-4">
+                          <WireRenderer markdown={issue.bodyText} />
                         </div>
                       </details>
                     </li>
