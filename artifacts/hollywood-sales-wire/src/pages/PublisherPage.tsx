@@ -5,6 +5,7 @@ import {
   usePublisherSend,
   usePublisherWireLatest,
   usePublisherWireRun,
+  usePublisherWireSave,
   usePublisherPaidSend,
   usePublisherReports,
   usePublisherReportsUploadUrl,
@@ -69,6 +70,9 @@ export default function PublisherPage() {
   const [paidSubject, setPaidSubject] = useState("");
   const [paidBody, setPaidBody] = useState("");
   const [paidSentCount, setPaidSentCount] = useState<number | null>(null);
+  const [wireEditText, setWireEditText] = useState<string | null>(null); // null = not in edit mode
+  const [wireSaved, setWireSaved] = useState(false);
+  const wireSave = usePublisherWireSave();
 
   // Complimentary member
   const compMember = usePublisherCompMember();
@@ -393,7 +397,7 @@ export default function PublisherPage() {
                 </span>
                 <button
                   onClick={() => {
-                    void navigator.clipboard.writeText(wire.data?.wireMarkdown ?? "");
+                    void navigator.clipboard.writeText(wireEditText ?? wire.data?.wireMarkdown ?? "");
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
                   }}
@@ -402,10 +406,46 @@ export default function PublisherPage() {
                 >
                   <Copy className="w-3 h-3" /> {copied ? "Copied!" : "Copy"}
                 </button>
+                {wireEditText === null ? (
+                  <button
+                    onClick={() => { setWireEditText(wire.data?.wireMarkdown ?? ""); setWireSaved(false); }}
+                    className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+                  >
+                    Edit
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      disabled={wireSave.isPending}
+                      onClick={() => {
+                        wireSave.mutate(
+                          { data: { key, wireMarkdown: wireEditText } },
+                          {
+                            onSuccess: () => {
+                              void wire.refetch();
+                              setWireSaved(true);
+                              setTimeout(() => setWireSaved(false), 3000);
+                            },
+                          },
+                        );
+                      }}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-primary disabled:opacity-50"
+                    >
+                      {wireSave.isPending ? "Saving…" : wireSaved ? "Saved ✓" : "Save"}
+                    </button>
+                    <button
+                      onClick={() => { setWireEditText(null); setWireSaved(false); }}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                )}
               </div>
               <textarea
-                readOnly
-                value={wire.data.wireMarkdown}
+                readOnly={wireEditText === null}
+                value={wireEditText ?? wire.data.wireMarkdown}
+                onChange={(e) => setWireEditText(e.target.value)}
                 rows={16}
                 className="w-full border border-border bg-background p-3 text-sm font-mono leading-relaxed focus:outline-none"
                 data-testid="text-wire-draft"
@@ -413,7 +453,7 @@ export default function PublisherPage() {
               <div className="mt-4 flex flex-wrap items-center gap-4">
                 <button
                   onClick={() => {
-                    setWireText(wire.data?.wireMarkdown ?? "");
+                    setWireText(wireEditText ?? wire.data?.wireMarkdown ?? "");
                     if (wire.data?.freeSubject) setSubject(wire.data.freeSubject);
                     if (wire.data?.freeBody) setBodyText(wire.data.freeBody);
                     setSentCount(null);
@@ -425,7 +465,7 @@ export default function PublisherPage() {
                 </button>
                 <button
                   onClick={() => {
-                    setPaidBody(wire.data?.wireMarkdown ?? "");
+                    setPaidBody(wireEditText ?? wire.data?.wireMarkdown ?? "");
                     if (wire.data?.weekKey) setPaidSubject(`Hollywood Sales Wire — Week of ${wire.data.weekKey}`);
                     setPaidSentCount(null);
                   }}

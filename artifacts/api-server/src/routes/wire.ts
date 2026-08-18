@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { timingSafeEqual } from "node:crypto";
 import { db, wireRunsTable } from "@workspace/db";
 import { runWeeklyResearch } from "../lib/wireResearch";
@@ -39,6 +39,32 @@ router.get("/publisher/wire/latest", async (req, res): Promise<void> => {
     ...(run.freeBody ? { freeBody: run.freeBody } : {}),
     ...(run.sources ? { sources: run.sources } : {}),
   });
+});
+
+router.patch("/publisher/wire/save", async (req, res): Promise<void> => {
+  if (!keyOk(req.body?.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  const wireMarkdown = typeof req.body?.wireMarkdown === "string" ? req.body.wireMarkdown.trim() : "";
+  if (wireMarkdown.length < 100) {
+    res.status(400).json({ error: "wireMarkdown too short." });
+    return;
+  }
+  const [run] = await db
+    .select({ weekKey: wireRunsTable.weekKey, status: wireRunsTable.status })
+    .from(wireRunsTable)
+    .orderBy(desc(wireRunsTable.startedAt))
+    .limit(1);
+  if (!run || run.status !== "ready") {
+    res.status(409).json({ error: "No ready draft to update." });
+    return;
+  }
+  await db
+    .update(wireRunsTable)
+    .set({ wireMarkdown })
+    .where(eq(wireRunsTable.weekKey, run.weekKey));
+  res.json({ weekKey: run.weekKey, saved: true });
 });
 
 router.post("/publisher/wire/run", async (req, res): Promise<void> => {

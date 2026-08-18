@@ -29,6 +29,8 @@ export * from './publisherSendResult';
 export * from './publisherStatus';
 export * from './publisherStatusParams';
 export * from './publisherWireLatestParams';
+export * from './publisherWireSaveInput';
+export * from './publisherWireSaveResult';
 export * from './subscribeResult';
 export * from './subscriberInput';
 export * from './wireRunStarted';

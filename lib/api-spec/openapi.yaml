@@ -312,6 +312,42 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMessage"
+  /publisher/wire/save:
+    patch:
+      operationId: publisherWireSave
+      tags: [publisher]
+      summary: Save edited wire markdown back to the current ready draft (key-protected)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublisherWireSaveInput"
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublisherWireSaveResult"
+        "400":
+          description: Bad input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
+        "409":
+          description: No ready draft
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
   /publisher/wire/run:
     post:
       operationId: publisherWireRun
@@ -395,6 +431,23 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/WireSource"
+    PublisherWireSaveInput:
+      type: object
+      required: [key, wireMarkdown]
+      properties:
+        key:
+          type: string
+        wireMarkdown:
+          type: string
+          minLength: 100
+    PublisherWireSaveResult:
+      type: object
+      required: [weekKey, saved]
+      properties:
+        weekKey:
+          type: string
+        saved:
+          type: boolean
     PublisherStatus:
       type: object
       required: [subscriberCount, memberCount, paidSentThisWeek]

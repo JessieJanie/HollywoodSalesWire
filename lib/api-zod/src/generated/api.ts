@@ -217,6 +217,24 @@ export const PublisherReportsConfirmResponse = zod.object({
 
 
 /**
+ * @summary Save edited wire markdown back to the current ready draft (key-protected)
+ */
+export const publisherWireSaveBodyWireMarkdownMin = 100;
+
+
+
+export const PublisherWireSaveBody = zod.object({
+  "key": zod.string(),
+  "wireMarkdown": zod.string().min(publisherWireSaveBodyWireMarkdownMin)
+})
+
+export const PublisherWireSaveResponse = zod.object({
+  "weekKey": zod.string(),
+  "saved": zod.boolean()
+})
+
+
+/**
  * @summary Start a research run now (key-protected)
  */
 export const PublisherWireRunBody = zod.object({

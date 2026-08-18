@@ -34,6 +34,17 @@ export interface WireRunStatus {
   sources?: WireSource[];
 }
 
+export interface PublisherWireSaveInput {
+  key: string;
+  /** @minLength 100 */
+  wireMarkdown: string;
+}
+
+export interface PublisherWireSaveResult {
+  weekKey: string;
+  saved: boolean;
+}
+
 export interface PublisherStatus {
   subscriberCount: number;
   lastSentAt?: string;

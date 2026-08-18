@@ -41,6 +41,8 @@ import type {
   PublisherStatus,
   PublisherStatusParams,
   PublisherWireLatestParams,
+  PublisherWireSaveInput,
+  PublisherWireSaveResult,
   SubscribeResult,
   SubscriberInput,
   WireRunStarted,
@@ -983,6 +985,77 @@ export const usePublisherReportsConfirm = <TError = ErrorType<ApiMessage>,
         TContext
       > => {
       return useMutation(getPublisherReportsConfirmMutationOptions(options));
+    }
+
+export const getPublisherWireSaveUrl = () => {
+
+
+
+
+  return `/api/publisher/wire/save`
+}
+
+/**
+ * @summary Save edited wire markdown back to the current ready draft (key-protected)
+ */
+export const publisherWireSave = async (publisherWireSaveInput: PublisherWireSaveInput, options?: Parameters<typeof customFetch>[1]): Promise<PublisherWireSaveResult> => {
+
+  return customFetch<PublisherWireSaveResult>(getPublisherWireSaveUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(publisherWireSaveInput)
+  }
+);}
+
+
+
+
+
+export const getPublisherWireSaveMutationOptions = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherWireSave>>, TError,{data: BodyType<PublisherWireSaveInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof publisherWireSave>>, TError,{data: BodyType<PublisherWireSaveInput>}, TContext> => {
+
+const mutationKey = ['publisherWireSave'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publisherWireSave>>, {data: BodyType<PublisherWireSaveInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  publisherWireSave(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PublisherWireSaveMutationResult = NonNullable<Awaited<ReturnType<typeof publisherWireSave>>>
+    export type PublisherWireSaveMutationBody = BodyType<PublisherWireSaveInput>
+    export type PublisherWireSaveMutationError = ErrorType<ApiMessage>
+
+    /**
+ * @summary Save edited wire markdown back to the current ready draft (key-protected)
+ */
+export const usePublisherWireSave = <TError = ErrorType<ApiMessage>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publisherWireSave>>, TError,{data: BodyType<PublisherWireSaveInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof publisherWireSave>>,
+        TError,
+        {data: BodyType<PublisherWireSaveInput>},
+        TContext
+      > => {
+      return useMutation(getPublisherWireSaveMutationOptions(options));
     }
 
 export const getPublisherWireRunUrl = () => {
