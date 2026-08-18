@@ -249,6 +249,7 @@ function welcomeHtml(
       ${p("One more thing: reply to this email any time — it reaches me directly. If a report raises a question, or an issue points somewhere you'd like more information on, please don't hesitate to let me know. This is your service, and your suggestions will help shape it going forward.")}
       ${p("Warm regards,")}
       ${p("Karilyn Colegrove,<br />Publisher, Hollywood Sales Wire")}
+      ${p("P.S. One habit worth building from week one: read Tuesday's issue on Tuesday. The leads in it are live — the window on some of them closes within a week or two of the award date. The Wire earns its keep fastest when it's read the day it arrives.")}
       <hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />
       <p style="font-size:12px;color:#8a8577;font-family:Arial,sans-serif;">
         Hollywood Sales Wire &middot; <a href="${SITE_URL}" style="color:#8a8577;">hollywoodsaleswire.com</a><br />
