@@ -15,7 +15,7 @@
  * To update copy: edit that file and sync the template strings below.
  */
 
-import { count, desc, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db, coldCampaignsTable } from "@workspace/db";
 import { logger } from "./logger";
 
@@ -30,12 +30,13 @@ const MONITOR_FIRST = "Karilyn";
 const STEP_DELAYS = [0, 1, 1, 2, 3] as const;
 
 /**
- * Ramp schedule for daily send limit per campaign batch.
- * Index = number of completed batches before this one (0-based).
- * Caps at the mailbox daily limit (30). Staying conservative avoids
- * inbox-provider flags on a still-young sending domain.
+ * Mailbox daily ceiling — Instantly slow-ramp is enabled at the account level
+ * on karilyn@hollywoodsaleswires.com, so we do NOT set a campaign-level
+ * daily_limit. Instantly increases volume automatically from a low starting
+ * point up to 50/day. Setting a campaign cap would override that and starve
+ * sending unnecessarily.
  */
-const DAILY_LIMIT_RAMP = [2, 5, 10, 20, 30] as const;
+const MAILBOX_DAILY_CAP = 50; // informational only — not sent to Instantly API
 
 /** Hard ceiling on prospect leads per batch (Instantly Growth plan cap). */
 const PLAN_CONTACT_CAP = 40;
@@ -302,7 +303,6 @@ export interface ColdBatchResult {
   campaignId: string;
   batchTag: string;
   deadline: string;
-  dailyLimit: number;
 }
 
 export interface ColdLead {
@@ -341,22 +341,18 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
     .replace(/\//g, "");
   const batchTag = `hsw-cold-${dateStamp}`;
 
-  // Ramp: query how many batches have already run to pick the right daily limit.
-  const [{ value: batchCount }] = await db.select({ value: count() }).from(coldCampaignsTable);
-  const rampIndex = Math.min(Number(batchCount), DAILY_LIMIT_RAMP.length - 1);
-  const dailyLimit = DAILY_LIMIT_RAMP[rampIndex];
-
   const campaignName = `HSW Founding Offer — Cold (starts ${startDate.toLocaleDateString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" })}, deadline ${deadline})`;
   const emails = buildEmails(deadline, batchTag);
 
-  logger.info({ deadline, batchTag, dailyLimit, batchNumber: batchCount + 1 }, "cold-campaigns: creating Instantly batch");
+  logger.info({ deadline, batchTag }, "cold-campaigns: creating Instantly batch");
 
   // Step 1: POST creates the campaign structure (bodies are not saved on POST).
   const created = await instantly<{ id: string }>("POST", "/campaigns", {
     name: campaignName,
     status: 0, // draft on creation; activated explicitly below via /activate
     email_list: [SENDING_ACCOUNT],
-    daily_limit: dailyLimit,
+    // No daily_limit set here — Instantly slow-ramp on the mailbox handles volume
+    // automatically (starts low, increases to MAILBOX_DAILY_CAP over time).
     campaign_schedule: {
       schedules: [
         {
@@ -415,11 +411,12 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
     logger.error({ err, campaignId }, "cold-campaigns: failed to enroll monitor lead");
   }
 
-  // Step 5: Record in DB for lead-upload tracking and ramp continuity.
-  await db.insert(coldCampaignsTable).values({ campaignId, batchTag, deadline, dailyLimit });
+  // Step 5: Record in DB for lead-upload tracking.
+  // dailyLimit stored as the mailbox cap for reference; actual ramp is managed by Instantly.
+  await db.insert(coldCampaignsTable).values({ campaignId, batchTag, deadline, dailyLimit: MAILBOX_DAILY_CAP });
 
-  logger.info({ campaignId, batchTag, deadline, dailyLimit }, "cold-campaigns: batch created and active");
-  return { campaignId, batchTag, deadline, dailyLimit };
+  logger.info({ campaignId, batchTag, deadline }, "cold-campaigns: batch created and active");
+  return { campaignId, batchTag, deadline };
 }
 
 /**
