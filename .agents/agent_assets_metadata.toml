@@ -50,5 +50,5 @@ description = "Exactly what a new Founding Member receives. Dynamic values (name
 id = "ghywjOii-NkDcZO9Pohtk"
 uri = "file://marketing/welcome-email-rendered.jpg"
 type = "image"
-title = "Welcome Email — as a subscriber sees it"
-description = "Rendered view of the founding member welcome email."
+title = "Welcome Email — full view"
+description = "Complete founding member welcome email including signature and footer."
