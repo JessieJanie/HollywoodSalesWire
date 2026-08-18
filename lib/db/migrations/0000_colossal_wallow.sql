@@ -112,3 +112,15 @@ CREATE UNIQUE INDEX IF NOT EXISTS "paid_wire_sends_week_key_unique" ON "paid_wir
 ALTER TABLE "members" ADD COLUMN IF NOT EXISTS "special_reports_sent_at" timestamp with time zone;
 --> statement-breakpoint
 ALTER TABLE "members" ADD COLUMN IF NOT EXISTS "special_reports_delivered_at" timestamp with time zone;
+--> statement-breakpoint
+-- Tracks each Instantly cold-campaign batch: ID, daily limit, and leads uploaded.
+CREATE TABLE IF NOT EXISTS "cold_campaigns" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"campaign_id" text NOT NULL,
+	"batch_tag" text NOT NULL,
+	"deadline" text NOT NULL,
+	"daily_limit" integer NOT NULL,
+	"leads_uploaded" integer NOT NULL DEFAULT 0,
+	"created_at" timestamp with time zone NOT NULL DEFAULT now(),
+	CONSTRAINT "cold_campaigns_batch_tag_unique" UNIQUE("batch_tag")
+);

@@ -14,6 +14,7 @@ import { PublisherSendResponse } from "@workspace/api-zod";
 import { currentWeekKey } from "../lib/wireResearch";
 import { ObjectStorageService } from "../lib/objectStorage";
 import { deliverReportsToPendingMembers } from "../lib/members";
+import { uploadColdLeads, getLatestColdCampaign, type ColdLead } from "../lib/coldCampaigns";
 
 const router: IRouter = Router();
 
@@ -280,6 +281,89 @@ router.post("/publisher/reports/confirm", async (req, res): Promise<void> => {
   }
 
   res.json({ slug, objectPath, deliveredCount });
+});
+
+/**
+ * POST /publisher/cold-leads
+ * Upload prospect leads to the latest active cold campaign.
+ *
+ * Body: { key, leads: [{email, first_name?, last_name?, company?}] }
+ *
+ * Enforces the 40-contact plan cap automatically; any leads that would push
+ * over the cap are skipped and reported in the response. The RIA Wire agent
+ * or any automated tool can call this endpoint — no Instantly UI access needed.
+ *
+ * Example curl:
+ *   curl -X POST https://hollywoodsaleswire.com/api/publisher/cold-leads \
+ *     -H "Content-Type: application/json" \
+ *     -d '{"key":"<PUBLISHER_KEY>","leads":[{"email":"jane@studio.com","first_name":"Jane","company":"Acme Films"}]}'
+ */
+router.post("/publisher/cold-leads", async (req, res): Promise<void> => {
+  if (!keyOk(req.body?.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+
+  const raw = req.body?.leads;
+  if (!Array.isArray(raw) || raw.length === 0) {
+    res.status(400).json({ error: "leads must be a non-empty array" });
+    return;
+  }
+
+  // Validate each lead has at least an email.
+  const leads: ColdLead[] = [];
+  for (const item of raw) {
+    if (typeof item?.email !== "string" || !item.email.includes("@")) {
+      res.status(400).json({ error: `Invalid lead — missing or malformed email: ${JSON.stringify(item)}` });
+      return;
+    }
+    leads.push({
+      email: item.email,
+      first_name: typeof item.first_name === "string" ? item.first_name : undefined,
+      last_name: typeof item.last_name === "string" ? item.last_name : undefined,
+      company: typeof item.company === "string" ? item.company : undefined,
+    });
+  }
+
+  // Check a campaign exists before doing any work.
+  const campaign = await getLatestColdCampaign();
+  if (!campaign) {
+    res.status(409).json({ error: "No cold campaign found — wait for the scheduler to create one" });
+    return;
+  }
+
+  try {
+    const result = await uploadColdLeads(leads);
+    res.json(result);
+  } catch (err) {
+    console.error("cold-leads upload error:", err);
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+/**
+ * GET /publisher/cold-campaign — status of the latest cold campaign batch.
+ * Returns campaign ID, daily limit, leads uploaded so far, and slots remaining.
+ */
+router.get("/publisher/cold-campaign", async (req, res): Promise<void> => {
+  if (!keyOk(req.query?.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  const campaign = await getLatestColdCampaign();
+  if (!campaign) {
+    res.status(404).json({ error: "No cold campaign found yet" });
+    return;
+  }
+  res.json({
+    campaignId: campaign.campaignId,
+    batchTag: campaign.batchTag,
+    deadline: campaign.deadline,
+    dailyLimit: campaign.dailyLimit,
+    leadsUploaded: campaign.leadsUploaded,
+    remaining: Math.max(0, 40 - campaign.leadsUploaded),
+    createdAt: campaign.createdAt,
+  });
 });
 
 export default router;

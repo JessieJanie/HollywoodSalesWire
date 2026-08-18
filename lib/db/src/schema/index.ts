@@ -25,3 +25,4 @@ export * from "./paidWireSends";
 export * from "./specialReports";
 export * from "./scheduledSends";
 export * from "./socialDrafts";
+export * from "./coldCampaigns";

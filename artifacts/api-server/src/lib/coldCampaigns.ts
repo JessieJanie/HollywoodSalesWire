@@ -4,13 +4,19 @@
  * Called by the scheduler every Tuesday, Wednesday, and Thursday at 8 AM PT.
  * Each run creates one campaign batch in Instantly (status: active), enrolls
  * kerricolegrove@gmail.com so Karilyn sees every email her prospects receive,
- * and logs the campaign ID. Real prospect leads are added manually via the
- * Instantly UI or a future bulk-load call.
+ * stores the campaign record in the cold_campaigns table, and auto-ramps the
+ * daily send limit based on how many batches have run before.
+ *
+ * Lead upload is handled by uploadColdLeads() — called from the publisher API
+ * endpoint POST /publisher/cold-leads — so neither Karilyn nor another agent
+ * needs to touch the Instantly UI.
  *
  * Copy source: marketing/cold-campaign-draft1.txt (publisher-locked).
  * To update copy: edit that file and sync the template strings below.
  */
 
+import { count, desc, eq } from "drizzle-orm";
+import { db, coldCampaignsTable } from "@workspace/db";
 import { logger } from "./logger";
 
 const INSTANTLY_BASE = "https://api.instantly.ai/api/v2";
@@ -22,6 +28,17 @@ const MONITOR_FIRST = "Karilyn";
 
 /** E1=Day0, E2=+1, E3=+1, E4=+2, E5=+3 → E5 lands on Day 7. */
 const STEP_DELAYS = [0, 1, 1, 2, 3] as const;
+
+/**
+ * Ramp schedule for daily send limit per campaign batch.
+ * Index = number of completed batches before this one (0-based).
+ * Caps at the mailbox daily limit (30). Staying conservative avoids
+ * inbox-provider flags on a still-young sending domain.
+ */
+const DAILY_LIMIT_RAMP = [2, 5, 10, 20, 30] as const;
+
+/** Hard ceiling on prospect leads per batch (Instantly Growth plan cap). */
+const PLAN_CONTACT_CAP = 40;
 
 /** Instantly only validates this timezone string; it controls the send window. */
 const SCHEDULE_TIMEZONE = "Etc/GMT+12";
@@ -285,12 +302,29 @@ export interface ColdBatchResult {
   campaignId: string;
   batchTag: string;
   deadline: string;
+  dailyLimit: number;
+}
+
+export interface ColdLead {
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  company?: string;
+}
+
+export interface UploadLeadsResult {
+  uploaded: number;
+  skipped: number;
+  campaignId: string;
+  leadsUploaded: number; // total after this upload
+  remaining: number;     // slots left before PLAN_CONTACT_CAP
 }
 
 /**
  * Create one Instantly cold campaign batch, activate it, and enroll the
  * monitor address so Karilyn receives every email her prospects receive.
- * Real leads are added manually via the Instantly UI.
+ * The daily send limit is auto-ramped based on how many batches have run
+ * before, and the campaign record is stored in cold_campaigns for lead tracking.
  */
 export async function createColdBatch(startDate = new Date()): Promise<ColdBatchResult> {
   const deadlineDate = addDays(startDate, 7);
@@ -307,16 +341,22 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
     .replace(/\//g, "");
   const batchTag = `hsw-cold-${dateStamp}`;
 
+  // Ramp: query how many batches have already run to pick the right daily limit.
+  const [{ value: batchCount }] = await db.select({ value: count() }).from(coldCampaignsTable);
+  const rampIndex = Math.min(Number(batchCount), DAILY_LIMIT_RAMP.length - 1);
+  const dailyLimit = DAILY_LIMIT_RAMP[rampIndex];
+
   const campaignName = `HSW Founding Offer — Cold (starts ${startDate.toLocaleDateString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" })}, deadline ${deadline})`;
   const emails = buildEmails(deadline, batchTag);
 
-  logger.info({ deadline, batchTag }, "cold-campaigns: creating Instantly batch");
+  logger.info({ deadline, batchTag, dailyLimit, batchNumber: batchCount + 1 }, "cold-campaigns: creating Instantly batch");
 
   // Step 1: POST creates the campaign structure (bodies are not saved on POST).
   const created = await instantly<{ id: string }>("POST", "/campaigns", {
     name: campaignName,
     status: 0, // draft on creation; activated explicitly below via /activate
     email_list: [SENDING_ACCOUNT],
+    daily_limit: dailyLimit,
     campaign_schedule: {
       schedules: [
         {
@@ -375,6 +415,77 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
     logger.error({ err, campaignId }, "cold-campaigns: failed to enroll monitor lead");
   }
 
-  logger.info({ campaignId, batchTag, deadline }, "cold-campaigns: batch created and active");
-  return { campaignId, batchTag, deadline };
+  // Step 5: Record in DB for lead-upload tracking and ramp continuity.
+  await db.insert(coldCampaignsTable).values({ campaignId, batchTag, deadline, dailyLimit });
+
+  logger.info({ campaignId, batchTag, deadline, dailyLimit }, "cold-campaigns: batch created and active");
+  return { campaignId, batchTag, deadline, dailyLimit };
+}
+
+/**
+ * Returns the most recently created cold campaign row, or null if none exist.
+ * Used by the publisher lead-upload endpoint to find the active campaign.
+ */
+export async function getLatestColdCampaign() {
+  const rows = await db
+    .select()
+    .from(coldCampaignsTable)
+    .orderBy(desc(coldCampaignsTable.createdAt))
+    .limit(1);
+  return rows[0] ?? null;
+}
+
+/**
+ * Upload prospect leads to the latest active cold campaign.
+ * Enforces PLAN_CONTACT_CAP (40) and updates leads_uploaded in the DB.
+ * Skips leads that would push over the cap; returns counts for the caller.
+ *
+ * Called from POST /publisher/cold-leads — no Instantly UI access needed.
+ */
+export async function uploadColdLeads(leads: ColdLead[]): Promise<UploadLeadsResult> {
+  const campaign = await getLatestColdCampaign();
+  if (!campaign) throw new Error("No cold campaign found — run createColdBatch first");
+
+  const alreadyUploaded = campaign.leadsUploaded;
+  const slotsLeft = PLAN_CONTACT_CAP - alreadyUploaded;
+
+  // Trim the list to what fits, skipping the rest.
+  const toUpload = leads.slice(0, slotsLeft);
+  const skipped = leads.length - toUpload.length;
+
+  let uploaded = 0;
+  for (const lead of toUpload) {
+    try {
+      await instantly("POST", "/leads", {
+        campaign_id: campaign.campaignId,
+        email: lead.email.trim().toLowerCase(),
+        ...(lead.first_name ? { first_name: lead.first_name } : {}),
+        ...(lead.last_name ? { last_name: lead.last_name } : {}),
+        ...(lead.company ? { company_name: lead.company } : {}),
+      });
+      uploaded++;
+    } catch (err) {
+      logger.error({ err, email: lead.email }, "cold-campaigns: failed to upload lead — skipping");
+    }
+  }
+
+  // Update the running total in the DB.
+  const newTotal = alreadyUploaded + uploaded;
+  await db
+    .update(coldCampaignsTable)
+    .set({ leadsUploaded: newTotal })
+    .where(eq(coldCampaignsTable.id, campaign.id));
+
+  logger.info(
+    { campaignId: campaign.campaignId, uploaded, skipped, newTotal },
+    "cold-campaigns: leads uploaded",
+  );
+
+  return {
+    uploaded,
+    skipped,
+    campaignId: campaign.campaignId,
+    leadsUploaded: newTotal,
+    remaining: PLAN_CONTACT_CAP - newTotal,
+  };
 }
