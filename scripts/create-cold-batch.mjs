@@ -154,7 +154,7 @@ console.log(`Creating campaign: "${campName}" ...`);
 
 const created = await instantly("POST", "/campaigns", {
   name: campName,
-  status: 0, // draft / paused — activate manually in Instantly after adding leads
+  status: 0, // activated via /activate below
   email_list: [SENDING_ACCOUNT],
   campaign_schedule: {
     schedules: [{
@@ -208,17 +208,31 @@ if (!allSaved) {
   });
 }
 
+// Step 3: Activate — /activate is the only endpoint that flips status to 1
+console.log("Activating campaign ...");
+await instantly("POST", `/campaigns/${campaignId}/activate`);
+console.log("✓ Campaign active");
+
+// Step 4: Add monitor lead so Karilyn receives the full sequence
+console.log("Adding monitor lead (kerricolegrove@gmail.com) ...");
+const monitorRes = await instantly("POST", "/leads", {
+  campaign_id: campaignId,
+  email: "kerricolegrove@gmail.com",
+  first_name: "Karilyn",
+});
+console.log(`✓ Monitor lead enrolled: ${monitorRes.id ?? "ok"}`);
+
 console.log(`
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅  Batch ${batchNum} ready in Instantly (status: paused)
+✅  Batch ${batchNum} is ACTIVE in Instantly
     Campaign ID : ${campaignId}
     Deadline    : midnight Eastern, ${deadlineLabel}
-    
+    Monitor     : kerricolegrove@gmail.com (enrolled)
+
 Next steps:
-  1. Add leads in Instantly → Campaigns → this campaign → Leads tab
+  1. Add prospect leads in Instantly → this campaign → Leads tab
   2. Keep total leads across all active campaigns ≤ 10 each (30/day shared limit)
-  3. Activate the campaign when leads are loaded (toggle to Active in Instantly)
-  4. Instantly will send on weekdays, 8am–6pm, stop-on-reply
+  3. Instantly sends on weekdays 8am–6pm; stops on any reply
 
 View in Instantly:
   https://app.instantly.ai/app/campaigns/${campaignId}

@@ -16,6 +16,7 @@ import { runWeeklyResearch, currentWeekKey } from "./wireResearch";
 import { FROM_ADDRESS, SEQUENCE, SITE_URL } from "./emailSequence";
 import { deadlineLabel } from "./foundingDeadline";
 import { resendRequest } from "./resend";
+import { createColdBatch } from "./coldCampaigns";
 import { logger } from "./logger";
 
 /**
@@ -411,6 +412,59 @@ async function notifySocialFailure(slotName: string, reason: string): Promise<vo
   }
 }
 
+/**
+ * Returns true on Tuesday, Wednesday, or Thursday at or after 8 AM PT.
+ * The same batch-tag dedup below prevents a second campaign if the server
+ * restarts mid-day on a launch day.
+ */
+function isColdCampaignDue(now = new Date()): boolean {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles",
+    weekday: "short",
+    hour: "2-digit",
+    hour12: false,
+  }).formatToParts(now);
+  const dow = parts.find((p) => p.type === "weekday")?.value ?? "";
+  const hour = Number(parts.find((p) => p.type === "hour")?.value ?? "0");
+  return (dow === "Tue" || dow === "Wed" || dow === "Thu") && hour >= 8;
+}
+
+/** Tracks the PT date of the last cold campaign created in this process. */
+let lastColdBatchDay: string | null = null;
+
+function ptDateString(now = new Date()): string {
+  return now.toLocaleDateString("en-US", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
+/**
+ * Creates one Instantly cold campaign batch per Tue/Wed/Thu launch day.
+ * Production only. The in-memory date guard means at most one batch per
+ * calendar day regardless of how often the scheduler ticks.
+ */
+async function tickColdCampaigns(): Promise<void> {
+  if (process.env.REPLIT_DEPLOYMENT !== "1") return;
+  if (!process.env.INSTANTLY_API_KEY) return;
+  if (!isColdCampaignDue()) return;
+  const today = ptDateString();
+  if (lastColdBatchDay === today) return;
+  lastColdBatchDay = today; // claim before await — prevents concurrent ticks racing
+  try {
+    const result = await createColdBatch(new Date());
+    logger.info(
+      { campaignId: result.campaignId, batchTag: result.batchTag, deadline: result.deadline },
+      "scheduler: cold campaign batch created and active — add leads in Instantly to begin sending",
+    );
+  } catch (err) {
+    lastColdBatchDay = null; // release so next tick retries
+    logger.error({ err }, "scheduler: cold campaign batch creation failed — will retry next tick");
+  }
+}
+
 async function tick(): Promise<void> {
   try {
     await tickPendingEmails();
@@ -431,6 +485,11 @@ async function tick(): Promise<void> {
     await tickSocialHighlights();
   } catch (err) {
     logger.error({ err }, "social-highlight tick failed");
+  }
+  try {
+    await tickColdCampaigns();
+  } catch (err) {
+    logger.error({ err }, "cold-campaign tick failed");
   }
   try {
     if (!isDue()) return;
