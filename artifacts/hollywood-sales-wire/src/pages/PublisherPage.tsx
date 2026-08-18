@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { WireRenderer } from "../components/WireRenderer";
 import {
   usePublisherStatus,
   usePublisherDraft,
@@ -442,14 +443,17 @@ export default function PublisherPage() {
                   </>
                 )}
               </div>
-              <textarea
-                readOnly={wireEditText === null}
-                value={wireEditText ?? wire.data.wireMarkdown}
-                onChange={(e) => setWireEditText(e.target.value)}
-                rows={16}
-                className="w-full border border-border bg-background p-3 text-sm font-mono leading-relaxed focus:outline-none"
-                data-testid="text-wire-draft"
-              />
+              {wireEditText === null ? (
+                <WireRenderer markdown={wire.data.wireMarkdown} />
+              ) : (
+                <textarea
+                  value={wireEditText}
+                  onChange={(e) => setWireEditText(e.target.value)}
+                  rows={20}
+                  className="w-full border border-border bg-background p-3 text-sm font-mono leading-relaxed focus:outline-none"
+                  data-testid="text-wire-draft"
+                />
+              )}
               <div className="mt-4 flex flex-wrap items-center gap-4">
                 <button
                   onClick={() => {
