@@ -3,11 +3,15 @@ import { SITE_URL } from "./emailSequence";
 
 /**
  * Typefully integration: push weekly social drafts (LinkedIn + X) into the
- * publisher's Typefully account for review.
+ * publisher's Typefully account, auto-scheduled to publish automatically.
  *
- * Safety rails (deliberate):
- * - Drafts only — publish_at / plan_at are never set. Nothing auto-publishes;
- *   she edits and posts from Typefully herself.
+ * Schedule:
+ * - Monday ~5 pm PT: short highlight post, auto-publishes ~5 min after creation.
+ * - Tuesday ~9 am PT: full Weekly Brief with masthead image, scheduled from
+ *   Monday when the wire run completes (~now + 15 h).
+ * - Wednesday ~8 am PT: short highlight, auto-publishes ~5 min after creation.
+ * - Friday ~8 am PT: short highlight, auto-publishes ~5 min after creation.
+ *
  * - Entirely optional and best-effort: if TYPEFULLY_API_KEY is missing or any
  *   call fails or hangs, the weekly run and scheduler are unaffected.
  * - Same information boundary as the free Brief: shape of signals only —
@@ -126,26 +130,41 @@ async function draftPosts(systemPrompt: string, briefBody: string, signal?: Abor
 async function createDraft(
   title: string,
   posts: { linkedin: string; x: string },
-  signal?: AbortSignal,
+  opts: { planAt?: string; mastheadUrl?: string; signal?: AbortSignal },
 ): Promise<{ draftId?: string }> {
+  const { planAt, mastheadUrl, signal } = opts;
   const set = await findSocialSet(signal);
   const platforms: Record<string, unknown> = {};
-  if (set.hasLinkedIn) platforms.linkedin = { enabled: true, posts: [{ text: posts.linkedin }] };
-  if (set.hasX && posts.x.length > 0) platforms.x = { enabled: true, posts: [{ text: posts.x }] };
+  const mediaArr = mastheadUrl ? [{ url: mastheadUrl }] : undefined;
+  if (set.hasLinkedIn)
+    platforms.linkedin = {
+      enabled: true,
+      posts: [{ text: posts.linkedin, ...(mediaArr ? { media_urls: [mastheadUrl] } : {}) }],
+    };
+  if (set.hasX && posts.x.length > 0)
+    platforms.x = {
+      enabled: true,
+      posts: [{ text: posts.x, ...(mediaArr ? { media_urls: [mastheadUrl] } : {}) }],
+    };
   if (Object.keys(platforms).length === 0) throw new Error("No Typefully social set has LinkedIn or X connected");
+  const payload: Record<string, unknown> = { draft_title: title, platforms };
+  if (planAt) payload.plan_at = planAt;
   const draft = (await typefullyFetch(
     `/v2/social-sets/${set.id}/drafts`,
-    {
-      method: "POST",
-      body: JSON.stringify({
-        draft_title: title,
-        platforms,
-        // No publish_at / plan_at: stays an unscheduled draft until she acts.
-      }),
-    },
+    { method: "POST", body: JSON.stringify(payload) },
     signal,
   )) as { id?: number | string };
   return { draftId: draft.id === undefined ? undefined : String(draft.id) };
+}
+
+/** ISO timestamp approximately N hours from now — used to schedule posts. */
+function hoursFromNow(h: number): string {
+  return new Date(Date.now() + h * 60 * 60 * 1000).toISOString();
+}
+
+/** ISO timestamp approximately N minutes from now. */
+function minutesFromNow(m: number): string {
+  return new Date(Date.now() + m * 60 * 1000).toISOString();
 }
 
 /**
@@ -174,10 +193,16 @@ function summarizeError(err: unknown): string {
 }
 
 /**
- * Monday: push the weekly Brief into Typefully as an unscheduled LinkedIn + X
- * draft. Returns a status line for the pre-flight email. Never throws.
+ * Tuesday brief: push the full Weekly Brief into Typefully, scheduled ~15 h
+ * from now (fires Monday ~5 pm PT → publishes Tuesday ~8–9 am PT), with the
+ * HSW masthead image attached. Returns a status line for the pre-flight email.
+ * Never throws.
  */
-export async function pushBriefToTypefully(weekKey: string, briefBody: string): Promise<PushResult> {
+export async function pushBriefToTypefully(
+  weekKey: string,
+  briefBody: string,
+  mastheadUrl: string,
+): Promise<PushResult> {
   if (!process.env.TYPEFULLY_API_KEY) {
     return { ok: false, status: "Social drafts: skipped (Typefully not configured in this environment)." };
   }
@@ -185,13 +210,18 @@ export async function pushBriefToTypefully(weekKey: string, briefBody: string): 
     return await withOverallDeadline(
       async (signal): Promise<PushResult> => {
         const posts = await draftPosts(BRIEF_POSTS_PROMPT, briefBody, signal);
-        const { draftId } = await createDraft(`HSW Weekly Brief — week of ${weekKey}`, posts, signal);
-        logger.info({ weekKey, draftId }, "typefully: weekly Brief draft pushed");
+        const planAt = hoursFromNow(15); // Monday 5 pm → Tuesday ~8 am PT
+        const { draftId } = await createDraft(
+          `HSW Weekly Brief — week of ${weekKey}`,
+          posts,
+          { planAt, mastheadUrl, signal },
+        );
+        logger.info({ weekKey, draftId, planAt }, "typefully: weekly Brief scheduled for Tuesday");
         return {
           ok: true,
           draftId,
           linkedinText: posts.linkedin,
-          status: `Social drafts: the Brief is waiting in Typefully (LinkedIn${posts.x ? " + X" : ""}, unscheduled) — edit and post it whenever you like.`,
+          status: `Social drafts: the Tuesday Brief is scheduled in Typefully (LinkedIn${posts.x ? " + X" : ""}) and will auto-post ~9 am PT.`,
         };
       },
     );
@@ -206,12 +236,13 @@ export async function pushBriefToTypefully(weekKey: string, briefBody: string): 
 }
 
 /**
- * Wednesday/Friday: push a short highlight draft (one signal, fresh angle)
- * into Typefully. `avoidAngle` is an earlier post's text this week so Friday
- * doesn't repeat Wednesday. Never throws.
+ * Monday/Wednesday/Friday: push a short highlight draft (one signal, fresh
+ * angle) into Typefully, scheduled ~5 minutes from now so it auto-publishes
+ * immediately. `avoidAngle` prevents Friday from repeating Wednesday's angle.
+ * Never throws.
  */
 export async function pushHighlightToTypefully(
-  slot: "Wednesday" | "Friday",
+  slot: "Monday" | "Wednesday" | "Friday",
   weekKey: string,
   briefBody: string,
   avoidAngle: string | null,
@@ -223,8 +254,13 @@ export async function pushHighlightToTypefully(
     return await withOverallDeadline(
       async (signal): Promise<PushResult> => {
         const posts = await draftPosts(HIGHLIGHT_POSTS_PROMPT(slot, avoidAngle), briefBody, signal);
-        const { draftId } = await createDraft(`HSW ${slot} highlight — week of ${weekKey}`, posts, signal);
-        logger.info({ weekKey, slot, draftId }, "typefully: highlight draft pushed");
+        const planAt = minutesFromNow(5); // auto-publish ~5 min after creation
+        const { draftId } = await createDraft(
+          `HSW ${slot} highlight — week of ${weekKey}`,
+          posts,
+          { planAt, signal },
+        );
+        logger.info({ weekKey, slot, draftId, planAt }, "typefully: highlight scheduled");
         return { ok: true, draftId, linkedinText: posts.linkedin, status: "pushed" };
       },
     );

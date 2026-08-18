@@ -486,7 +486,7 @@ export async function runWeeklyResearch(
       try {
         const briefClaim = await claimSocialDraft("brief", weekKey);
         if (briefClaim) {
-          const push = await pushBriefToTypefully(weekKey, free.bodyText);
+          const push = await pushBriefToTypefully(weekKey, free.bodyText, `${SITE_URL}/og-card.png`);
           typefullyStatus = push.status;
           await db
             .update(socialDraftsTable)

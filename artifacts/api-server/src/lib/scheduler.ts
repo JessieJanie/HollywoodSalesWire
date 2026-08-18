@@ -330,7 +330,7 @@ async function tickScheduledSends(): Promise<void> {
  * attempted exactly once per week. A failed push is recorded and NOT retried
  * automatically — she can always post manually.
  */
-function dueHighlightSlot(now = new Date()): "wed" | "fri" | null {
+function dueHighlightSlot(now = new Date()): "mon" | "wed" | "fri" | null {
   const parts = new Intl.DateTimeFormat("en-US", {
     timeZone: "America/Los_Angeles",
     weekday: "short",
@@ -339,6 +339,10 @@ function dueHighlightSlot(now = new Date()): "wed" | "fri" | null {
   }).formatToParts(now);
   const dow = parts.find((p) => p.type === "weekday")?.value ?? "";
   const hour = Number(parts.find((p) => p.type === "hour")?.value ?? "0");
+  // Monday short post: fires at 17:00 PT or later, after the wire run completes.
+  // Tuesday before 8 am catches up a missed Monday.
+  if (dow === "Mon" && hour >= 17) return "mon";
+  if (dow === "Tue" && hour < 8) return "mon";
   if (dow === "Wed" && hour >= 8) return "wed";
   // Thursday catches up a missed Wednesday (autoscale may have slept).
   if (dow === "Thu") return "wed";
@@ -366,19 +370,22 @@ async function tickSocialHighlights(): Promise<void> {
   const claim = await claimSocialDraft(slot, weekKey);
   if (!claim) return;
 
-  // Friday avoids repeating the angle already posted this week (Wednesday's
-  // highlight if it exists, else Monday's Brief post).
+  // Wednesday and Friday avoid repeating an angle already posted this week.
   let avoidAngle: string | null = null;
-  if (slot === "fri") {
+  if (slot === "wed" || slot === "fri") {
     const earlier = await db
       .select({ kind: socialDraftsTable.kind, postText: socialDraftsTable.postText })
       .from(socialDraftsTable)
       .where(and(eq(socialDraftsTable.weekKey, weekKey), eq(socialDraftsTable.status, "pushed")));
-    avoidAngle = earlier.find((d) => d.kind === "wed")?.postText ?? earlier.find((d) => d.kind === "brief")?.postText ?? null;
+    if (slot === "wed") {
+      avoidAngle = earlier.find((d) => d.kind === "mon")?.postText ?? earlier.find((d) => d.kind === "brief")?.postText ?? null;
+    } else {
+      avoidAngle = earlier.find((d) => d.kind === "wed")?.postText ?? earlier.find((d) => d.kind === "mon")?.postText ?? null;
+    }
   }
 
-  const slotName = slot === "wed" ? "Wednesday" : "Friday";
-  const push = await pushHighlightToTypefully(slotName, weekKey, run.freeBody, avoidAngle);
+  const slotName = slot === "mon" ? "Monday" : slot === "wed" ? "Wednesday" : "Friday";
+  const push = await pushHighlightToTypefully(slotName as "Monday" | "Wednesday" | "Friday", weekKey, run.freeBody, avoidAngle);
   await db
     .update(socialDraftsTable)
     .set({
