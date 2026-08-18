@@ -39,7 +39,7 @@ ${VOICE_RULES}
 
 Respond with ONLY valid JSON: {"linkedin": "...", "x": "..."}`;
 
-const HIGHLIGHT_POSTS_PROMPT = (slot: "Wednesday" | "Friday", avoidAngle: string | null) => `You are the editor of "Hollywood Sales Wire," a paid weekly sales-intelligence briefing for vendors selling into the entertainment industry. You are given this week's Weekly Brief (the free teaser already sent to warm prospects).
+const HIGHLIGHT_POSTS_PROMPT = (slot: "Monday" | "Wednesday" | "Friday", avoidAngle: string | null) => `You are the editor of "Hollywood Sales Wire," a paid weekly sales-intelligence briefing for vendors selling into the entertainment industry. You are given this week's Weekly Brief (the free teaser already sent to warm prospects).
 
 Write a SHORT ${slot} follow-up for the publisher's personal accounts: pick the SINGLE most interesting signal from the Brief and go one thought deeper on why it matters for vendors — a fresh angle, not a summary of the whole week.${avoidAngle ? `\n\nEarlier this week the publisher already posted about the angle below — pick a DIFFERENT signal or a clearly different angle:\n---\n${avoidAngle.slice(0, 1500)}\n---` : ""}
 
