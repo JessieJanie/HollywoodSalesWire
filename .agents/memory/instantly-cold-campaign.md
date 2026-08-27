@@ -12,6 +12,15 @@ description: How HSW cold outreach campaigns are structured in Instantly, includ
 - Org ID: `eb13be48-1e9c-40d9-ad9a-697f9d7e257b`
 - API: `https://api.instantly.ai/api/v2`, Bearer auth via `INSTANTLY_API_KEY` secret
 
+## Sending-domain and tracking-domain separation
+- Active sender domains are `hollywoodsaleswires.com`, `tryhollywoodsaleswire.com`, `hollywood-sales-wire.com`, `ria-wires.com`, `tryriawire.com`, and `getriawire.com`.
+- Instantly custom tracking hosts are `inst.tryhollywoodsaleswire.com`, `inst.hollywood-sales-wire.com`, `inst.tryriawire.com`, and `inst.getriawire.com`; do not redirect or alter these hosts.
+- The two sender mailboxes `hollywoodsaleswires.com` and `ria-wires.com` currently have no custom tracking host listed in Instantly.
+
+**Why:** Sending mail and web/tracking traffic use different DNS functions; redirecting a sender domain's root is safe only when the Instantly tracking hosts remain separate and email records stay intact.
+
+**How to apply:** Redirect each sender domain's root and `www` web host to its real site, while preserving all MX, SPF, DKIM, and DMARC records and leaving every `inst.*` tracking host unchanged.
+
 ## API quirks
 - Email body must be **HTML** (not plain text with newlines) — the API silently drops plain-text bodies on both POST and PATCH. Convert: `\n\n` → `</p><p>`, `\n` → `<br>`.
 - Creating a campaign with sequences in the POST body saves the step structure (subjects, delays) but NOT the bodies. Always follow with a PATCH to set bodies.
