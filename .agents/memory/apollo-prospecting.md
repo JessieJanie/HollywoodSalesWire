@@ -30,13 +30,12 @@ description: How to use the Apollo.io API to find named sales contacts for the I
   Momentous, Aon/NFP, ISS Props, Sohonet, Sargent-Disc, Shoot Blue, 3 Mills, Lee Filters,
   Panalux, Molinare, Clear Cut, Technicolor, Production Park, UK Screen Alliance, EP, Tysers
 
-## Instantly lead upload format (v2)
+## Instantly lead upload format (v2) — SOLVED Aug 18, 2026
 - One POST per lead to `POST /api/v2/leads`
-- Body: `{ campaign_id, email, first_name?, last_name?, company_name? }`
+- Body: `{ campaign: "<uuid>", email, first_name?, last_name?, company_name? }`
+- **The field is `campaign`, NOT `campaign_id`** — `campaign_id` is silently accepted and ignored, orphaning the lead (campaign: NONE). This was the root cause of the earlier "known bug"; verified live: `campaign` attaches correctly (confirmed via `POST /leads/list`).
 - NOT a batch array — sending `leads: [array]` returns "Email is required" error
 - 150ms sleep between posts to avoid rate limiting
-
-## Instantly v2 lead upload — known bug
-`POST /api/v2/leads` with `campaign_id` consistently orphans leads (campaign: NONE) for HSW campaigns. Tried: active campaigns, paused campaigns, minimal fields — all orphan. The same endpoint works for RIA Wire campaigns (unclear why). The existing `uploadColdLeads()` in `artifacts/api-server/src/lib/coldCampaigns.ts` has the same bug and has never run successfully in production (cold_campaigns table shows leads_uploaded=0). **Workaround: upload via Instantly UI using the CSV at `exports/hsw-cold-leads-40.csv`.** Orphaned leads (campaign: NONE) from failed API attempts are in the org — Karilyn should bulk-delete them from the Instantly UI (filter by no campaign). Do not attempt more API uploads until the root cause is understood.
+- Orphaned leads from old `campaign_id` attempts may remain in the org — filter by no campaign and bulk-delete via UI or `DELETE /api/v2/leads/{id}`.
 
 **Why:** Apollo's film/TV industry coverage is strong for named BD/sales people at vendors. Snov and Skim both failed for this niche. The keyword-per-company approach with client-side title filtering is the reliable pattern.

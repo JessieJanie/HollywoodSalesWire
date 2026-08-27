@@ -401,7 +401,8 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
   // Step 4: Enroll monitor address so Karilyn sees every email prospects receive.
   try {
     await instantly("POST", "/leads", {
-      campaign_id: campaignId,
+      // NOTE: field must be `campaign` — `campaign_id` is silently ignored and orphans the lead.
+      campaign: campaignId,
       email: MONITOR_EMAIL,
       first_name: MONITOR_FIRST,
     });
@@ -454,7 +455,9 @@ export async function uploadColdLeads(leads: ColdLead[]): Promise<UploadLeadsRes
   for (const lead of toUpload) {
     try {
       await instantly("POST", "/leads", {
-        campaign_id: campaign.campaignId,
+        // NOTE: field must be `campaign` — `campaign_id` is silently accepted but ignored,
+        // leaving the lead orphaned in the org (campaign: NONE). Verified live Aug 18, 2026.
+        campaign: campaign.campaignId,
         email: lead.email.trim().toLowerCase(),
         ...(lead.first_name ? { first_name: lead.first_name } : {}),
         ...(lead.last_name ? { last_name: lead.last_name } : {}),
