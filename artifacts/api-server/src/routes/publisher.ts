@@ -14,7 +14,12 @@ import { PublisherSendResponse } from "@workspace/api-zod";
 import { currentWeekKey } from "../lib/wireResearch";
 import { ObjectStorageService } from "../lib/objectStorage";
 import { deliverReportsToPendingMembers } from "../lib/members";
-import { uploadColdLeads, getLatestColdCampaign, type ColdLead } from "../lib/coldCampaigns";
+import {
+  uploadColdLeads,
+  getLatestColdCampaign,
+  validateColdLead,
+  type ColdLead,
+} from "../lib/coldCampaigns";
 
 const router: IRouter = Router();
 
@@ -287,7 +292,7 @@ router.post("/publisher/reports/confirm", async (req, res): Promise<void> => {
  * POST /publisher/cold-leads
  * Upload prospect leads to the latest active cold campaign.
  *
- * Body: { key, leads: [{email, first_name?, last_name?, company?}] }
+ * Body: { key, leads: [{email, first_name, last_name?, company?}] }
  *
  * Enforces the 40-contact plan cap automatically; any leads that would push
  * over the cap are skipped and reported in the response. The RIA Wire agent
@@ -310,19 +315,25 @@ router.post("/publisher/cold-leads", async (req, res): Promise<void> => {
     return;
   }
 
-  // Validate each lead has at least an email.
+  // Only named people with person-specific mailboxes may enter cold outreach.
   const leads: ColdLead[] = [];
   for (const item of raw) {
-    if (typeof item?.email !== "string" || !item.email.includes("@")) {
-      res.status(400).json({ error: `Invalid lead — missing or malformed email: ${JSON.stringify(item)}` });
+    if (typeof item?.email !== "string" || typeof item?.first_name !== "string") {
+      res.status(400).json({ error: "Every lead must include an email and first_name" });
       return;
     }
-    leads.push({
+    const lead: ColdLead = {
       email: item.email,
-      first_name: typeof item.first_name === "string" ? item.first_name : undefined,
+      first_name: item.first_name,
       last_name: typeof item.last_name === "string" ? item.last_name : undefined,
       company: typeof item.company === "string" ? item.company : undefined,
-    });
+    };
+    const validationError = validateColdLead(lead);
+    if (validationError) {
+      res.status(400).json({ error: `Invalid lead — ${validationError}` });
+      return;
+    }
+    leads.push(lead);
   }
 
   // Check a campaign exists before doing any work.

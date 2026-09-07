@@ -45,6 +45,56 @@ const MAILBOX_DAILY_CAP = 50; // informational only — not sent to Instantly AP
 /** Hard ceiling on prospect leads per batch (Instantly Growth plan cap). */
 const PLAN_CONTACT_CAP = 40;
 
+const GENERIC_MAILBOX_NAMES = new Set([
+  "accounts",
+  "accounting",
+  "admin",
+  "administration",
+  "billing",
+  "bookings",
+  "business",
+  "careers",
+  "casting",
+  "contact",
+  "customerservice",
+  "enquiries",
+  "events",
+  "hello",
+  "help",
+  "hr",
+  "info",
+  "inquiries",
+  "jobs",
+  "legal",
+  "mail",
+  "marketing",
+  "media",
+  "noreply",
+  "office",
+  "operations",
+  "orders",
+  "partnerships",
+  "press",
+  "production",
+  "reception",
+  "sales",
+  "service",
+  "social",
+  "studio",
+  "support",
+  "team",
+]);
+
+const NON_PERSON_FIRST_NAMES = new Set([
+  ...GENERIC_MAILBOX_NAMES,
+  "madam",
+  "na",
+  "none",
+  "sir",
+  "there",
+  "unknown",
+]);
+
 /** Instantly only validates this timezone string; it controls the send window. */
 const SCHEDULE_TIMEZONE = "Etc/GMT+12";
 
@@ -311,9 +361,36 @@ export interface ColdBatchResult {
 
 export interface ColdLead {
   email: string;
-  first_name?: string;
+  first_name: string;
   last_name?: string;
   company?: string;
+}
+
+function normalizedWord(value: string): string {
+  return value.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+/** Returns a user-facing reason when a prospect is not a named person. */
+export function validateColdLead(lead: ColdLead): string | null {
+  const email = lead.email.trim().toLowerCase();
+  const at = email.lastIndexOf("@");
+  if (at <= 0 || at === email.length - 1) return "missing or malformed email";
+
+  const mailbox = normalizedWord(email.slice(0, at)).replace(/\d+$/, "");
+  if (GENERIC_MAILBOX_NAMES.has(mailbox)) {
+    return `generic role address (${email})`;
+  }
+
+  const firstName = lead.first_name.trim();
+  const normalizedFirstName = normalizedWord(firstName);
+  if (
+    normalizedFirstName.length < 2 ||
+    NON_PERSON_FIRST_NAMES.has(normalizedFirstName)
+  ) {
+    return `missing or non-person first name (${email})`;
+  }
+
+  return null;
 }
 
 export interface UploadLeadsResult {
@@ -445,6 +522,13 @@ export async function getLatestColdCampaign() {
  * Called from POST /publisher/cold-leads — no Instantly UI access needed.
  */
 export async function uploadColdLeads(leads: ColdLead[]): Promise<UploadLeadsResult> {
+  for (const lead of leads) {
+    const validationError = validateColdLead(lead);
+    if (validationError) {
+      throw new Error(`Rejected cold lead: ${validationError}`);
+    }
+  }
+
   const campaign = await getLatestColdCampaign();
   if (!campaign) throw new Error("No cold campaign found — run createColdBatch first");
 
@@ -463,7 +547,7 @@ export async function uploadColdLeads(leads: ColdLead[]): Promise<UploadLeadsRes
         // leaving the lead orphaned in the org (campaign: NONE). Verified live Aug 18, 2026.
         campaign: campaign.campaignId,
         email: lead.email.trim().toLowerCase(),
-        ...(lead.first_name ? { first_name: lead.first_name } : {}),
+        first_name: lead.first_name.trim(),
         ...(lead.last_name ? { last_name: lead.last_name } : {}),
         ...(lead.company ? { company_name: lead.company } : {}),
       });
