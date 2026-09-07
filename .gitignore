@@ -48,3 +48,11 @@ Thumbs.db
 .cache/
 .local/
 wallet-key-DELETE-ME.txt
+
+# Prospect exports contain personal contact data and must not enter version control.
+/exports/hsw-cold-leads-*.csv
+/attached_assets/Pasted-Delivered-To-*
+/attached_assets/Pasted-40-contacts-are-live-in-the-campaign-*
+/attached_assets/Pasted--xml-version-1-0-encoding-UTF-8-feedback-*
+/attached_assets/Pasted--PAID-WIRE-HSW-Weekly-Wire-*
+/attached_assets/Pasted-Launch-is-tomorrow-morning-*
