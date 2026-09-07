@@ -20,7 +20,11 @@ import { db, coldCampaignsTable } from "@workspace/db";
 import { logger } from "./logger";
 
 const INSTANTLY_BASE = "https://api.instantly.ai/api/v2";
-const SENDING_ACCOUNT = "karilyn@hollywoodsaleswires.com";
+const SENDING_ACCOUNTS = [
+  "karilyn@hollywoodsaleswires.com",
+  "karilyn@tryhollywoodsaleswire.com",
+  "karilyn@hollywood-sales-wire.com",
+] as const;
 
 /** Added automatically to every batch so Karilyn sees exactly what prospects receive. */
 const MONITOR_EMAIL = "kerricolegrove@gmail.com";
@@ -31,10 +35,10 @@ const STEP_DELAYS = [0, 1, 1, 2, 3] as const;
 
 /**
  * Mailbox daily ceiling — Instantly slow-ramp is enabled at the account level
- * on karilyn@hollywoodsaleswires.com, so we do NOT set a campaign-level
- * daily_limit. Instantly increases volume automatically from a low starting
- * point up to 50/day. Setting a campaign cap would override that and starve
- * sending unnecessarily.
+ * on each HSW sender, so we do NOT set a campaign-level daily_limit. Instantly
+ * distributes sends across the campaign's warmed mailboxes and applies each
+ * mailbox's own ramp up to 50/day. A campaign cap would override that and
+ * starve sending unnecessarily.
  */
 const MAILBOX_DAILY_CAP = 50; // informational only — not sent to Instantly API
 
@@ -350,7 +354,7 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
   const created = await instantly<{ id: string }>("POST", "/campaigns", {
     name: campaignName,
     status: 0, // draft on creation; activated explicitly below via /activate
-    email_list: [SENDING_ACCOUNT],
+    email_list: [...SENDING_ACCOUNTS],
     // No daily_limit set here — Instantly slow-ramp on the mailbox handles volume
     // automatically (starts low, increases to MAILBOX_DAILY_CAP over time).
     campaign_schedule: {
