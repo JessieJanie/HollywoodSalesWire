@@ -17,6 +17,19 @@ export const RESEARCH_BEAT: { url: string; label: string }[] = [
     label: "California Film Commission — approved projects (all award rounds)",
   },
   {
+    // California SOS directed the publisher to BizFile after declining a
+    // records request. Its official portal/help materials describe Business
+    // Entity bulk orders and free weekly data unloads. Keep these access pages
+    // in the beat so exploration can discover and test the current download
+    // route without assuming a CALICO publication account is the only option.
+    url: "https://www.sos.ca.gov/business-programs/bizfile",
+    label: "California SOS — BizFile business-entity data access (research source; not a lead)",
+  },
+  {
+    url: "https://www.sos.ca.gov/administration/public-records-act-requests/business-entity-records",
+    label: "California SOS — official business-entity records access routes (research source; not a lead)",
+  },
+  {
     url: "https://www.esd.ny.gov/esd-media-center/reports/film-tax-credit-2025-quarterly-reports",
     label: "New York ESD — film tax credit quarterly reports index",
   },
@@ -44,6 +57,11 @@ const PREV_PAGE_CHARS = 4000;
 const EXPLORE_PROMPT = `You are the research lead for "Hollywood Sales Wire," a paid weekly sales-intelligence briefing for vendors selling into the entertainment industry (cameras, stages, software, localization, post, payroll, insurance).
 
 You are given this week's fetched source pages (markdown, with URLs). Propose up to ${MAX_EXPLORE_URLS} ADDITIONAL absolute URLs worth fetching right now to turn these signals into named, dated, sellable leads. Rules:
+- CALIFORNIA ENTITY-FORMATION PRIORITY: make a special effort to follow official California SOS/BizFile links that could expose free weekly Business Entity data unloads, bulk-order downloads, formation/registration records, initial filing dates, or stable public query/download endpoints. California SOS directed the publisher to BizFile after declining a records request, and its official help materials state that weekly Business Entity data unloads are free. Test that route before assuming a CALICO publication account is required.
+- A California entity source is usable for the recurring weekly beat only if it is lawful, repeatably accessible, identifies newly formed entities for a bounded recent date range, and includes an initial filing/formation date plus a stable entity identifier or official detail/document URL. Prefer official state or local government data. A public third-party index may be used only to discover candidates that can be verified against an official record.
+- Reject agent/registered-agent exports, static master lists with no formation date, pages requiring manual one-name-at-a-time guessing, and sources that cannot distinguish newly formed entities from later amendments or foreign registrations. The prior BizFile Agents export is specifically unsuitable.
+- If BizFile's weekly unload requires a free account or manual download, still follow any public documentation or sample/schema links that establish the file contents and cadence; propose only public fetchable URLs here, and do not invent a download URL.
+- Treat BizFile access/help pages as research instructions, never as lead items for the Wire. Only actual recent entity records that pass the above checks can become leads.
 - Prefer links that actually appear in the provided pages (award-round PDFs, press releases, quarterly report PDFs, named-production announcements).
 - Prefer primary sources over coverage of them. State film offices, official press pages, and PDFs read best.
 - Avoid: paywalled pages, login walls, search pages, JavaScript app pages (job-board searches rarely work), and anything already provided.
