@@ -477,8 +477,8 @@ export async function runWeeklyResearch(
         })
         .where(eq(wireRunsTable.id, run.id));
 
-      // Best-effort: push a LinkedIn + X version of the Brief into Typefully
-      // as an unscheduled draft. Never blocks or fails the run. The
+      // Best-effort: schedule a LinkedIn + X version of the Brief in Typefully.
+      // Never blocks or fails the run. The
       // social_drafts row is the idempotency claim across instances.
       // The whole social block is fenced off in its own try/catch: no DB or
       // network failure here may ever change the run's status to failed.
@@ -491,7 +491,7 @@ export async function runWeeklyResearch(
           await db
             .update(socialDraftsTable)
             .set({
-              status: push.ok ? "pushed" : "failed",
+              status: push.ok ? (push.publishState === "published" ? "published" : "scheduled") : "failed",
               typefullyDraftId: push.draftId ?? null,
               postText: push.linkedinText ?? null,
               error: push.ok ? null : push.status,

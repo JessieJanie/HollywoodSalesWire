@@ -7,7 +7,14 @@ import {
   scheduledSendsTable,
   socialDraftsTable,
 } from "@workspace/db";
-import { pushHighlightToTypefully } from "./typefully";
+import {
+  confirmPlannedTypefullyDraft,
+  inspectTypefullyDraft,
+  isTypefullyNotFound,
+  normalizeTypefullyDraftStatus,
+  pushHighlightToTypefully,
+  type TypefullyDraftInspection,
+} from "./typefully";
 import { claimSocialDraft } from "./socialDrafts";
 import { executeBriefSend, executePaidSend } from "./sendWire";
 import { SCHEDULED_SEND_SEEDS } from "./scheduledSeeds";
@@ -320,8 +327,8 @@ async function tickScheduledSends(): Promise<void> {
 }
 
 /**
- * Wednesday/Friday mid-week social highlight drafts: pick the week's ready
- * run and push a short one-signal Typefully draft (LinkedIn + X, unscheduled)
+ * Monday/Wednesday/Friday social highlights: pick the week's ready run and
+ * schedule a short one-signal Typefully post for LinkedIn + X
  * around 8 AM Pacific, with catch-up on later ticks the same day or the next.
  * Production only — a dev workspace open on a Wednesday must not push
  * duplicate drafts into the publisher's real Typefully account.
@@ -351,6 +358,231 @@ function dueHighlightSlot(now = new Date()): "mon" | "wed" | "fri" | null {
   return null;
 }
 
+const SOCIAL_PUBLISH_GRACE_MS = 30 * 60 * 1000;
+const SOCIAL_PENDING_RECONCILE_MS = 30 * 60 * 1000;
+/** `plan_at` automation first went live on this date; older `pushed` rows are intentional review drafts. */
+const LEGACY_AUTOPUBLISH_CUTOFF_MS = Date.parse("2026-08-18T00:00:00Z");
+type SocialDraftRow = typeof socialDraftsTable.$inferSelect;
+
+function socialSlotName(kind: string): string {
+  if (kind === "brief") return "Tuesday Brief";
+  if (kind === "mon") return "Monday";
+  if (kind === "wed") return "Wednesday";
+  if (kind === "fri") return "Friday";
+  return kind;
+}
+
+function isPastPublishGrace(row: SocialDraftRow, inspection: TypefullyDraftInspection, now = Date.now()): boolean {
+  const scheduledAt = inspection.scheduledDate ? Date.parse(inspection.scheduledDate) : Number.NaN;
+  const createdAt = row.createdAt.getTime();
+  const dueAt = Number.isFinite(scheduledAt) ? Math.max(scheduledAt, createdAt) : createdAt;
+  return now > dueAt + SOCIAL_PUBLISH_GRACE_MS;
+}
+
+async function getAvoidAngle(weekKey: string, slot: "wed" | "fri"): Promise<string | null> {
+  const earlier = await db
+    .select({
+      kind: socialDraftsTable.kind,
+      status: socialDraftsTable.status,
+      postText: socialDraftsTable.postText,
+    })
+    .from(socialDraftsTable)
+    .where(eq(socialDraftsTable.weekKey, weekKey));
+  const usable = earlier.filter((draft) => ["scheduled", "published", "pushed"].includes(draft.status));
+  if (slot === "wed") {
+    return usable.find((draft) => draft.kind === "mon")?.postText
+      ?? usable.find((draft) => draft.kind === "brief")?.postText
+      ?? null;
+  }
+  return usable.find((draft) => draft.kind === "wed")?.postText
+    ?? usable.find((draft) => draft.kind === "mon")?.postText
+    ?? null;
+}
+
+async function recordSocialFailure(row: SocialDraftRow, reason: string): Promise<void> {
+  const changed = await db
+    .update(socialDraftsTable)
+    .set({ status: "failed", error: reason })
+    .where(
+      and(
+        eq(socialDraftsTable.id, row.id),
+        or(
+          eq(socialDraftsTable.status, "scheduled"),
+          eq(socialDraftsTable.status, "pushed"),
+          eq(socialDraftsTable.status, "confirming"),
+          eq(socialDraftsTable.status, "pending"),
+        ),
+      ),
+    )
+    .returning({ id: socialDraftsTable.id });
+  if (changed.length === 0) return;
+  const slotName = socialSlotName(row.kind);
+  logger.error({ weekKey: row.weekKey, kind: row.kind, reason }, "scheduler: social post failed to publish");
+  await notifySocialFailure(slotName, reason);
+}
+
+function legacyPlanCanPublishNow(kind: string, scheduledDate: string | null, now = new Date()): boolean {
+  if (scheduledDate && Date.parse(scheduledDate) > now.getTime()) return true;
+  if (kind === "mon" || kind === "wed" || kind === "fri") return dueHighlightSlot(now) === kind;
+  if (kind !== "brief") return false;
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles",
+    weekday: "short",
+    hour: "2-digit",
+    hour12: false,
+  }).formatToParts(now);
+  const dow = parts.find((part) => part.type === "weekday")?.value ?? "";
+  const hour = Number(parts.find((part) => part.type === "hour")?.value ?? "0");
+  return dow === "Tue" && hour >= 8;
+}
+
+/**
+ * Follow every real schedule through to Typefully's terminal published state.
+ * Current-week legacy `plan_at` rows are confirmed in place. Missing drafts are
+ * failed and notified rather than recreated because Typefully offers no
+ * idempotency key that could make provider-side recreation duplicate-proof.
+ */
+async function tickSocialPublishVerification(): Promise<void> {
+  if (process.env.REPLIT_DEPLOYMENT !== "1") return;
+  if (!process.env.TYPEFULLY_API_KEY) return;
+
+  const staleConfirmation = new Date(Date.now() - 30 * 60 * 1000);
+  await db
+    .update(socialDraftsTable)
+    .set({ status: "pushed" })
+    .where(and(eq(socialDraftsTable.status, "confirming"), lte(socialDraftsTable.createdAt, staleConfirmation)));
+
+  const stalePendingBefore = new Date(Date.now() - SOCIAL_PENDING_RECONCILE_MS);
+  const stalePending = await db
+    .select()
+    .from(socialDraftsTable)
+    .where(and(eq(socialDraftsTable.status, "pending"), lte(socialDraftsTable.createdAt, stalePendingBefore)));
+  for (const row of stalePending) {
+    await recordSocialFailure(
+      row,
+      "Typefully result is uncertain after an interrupted push; automatic retry was skipped to prevent duplicates",
+    );
+  }
+
+  const rows = await db
+    .select()
+    .from(socialDraftsTable)
+    .where(or(eq(socialDraftsTable.status, "scheduled"), eq(socialDraftsTable.status, "pushed")));
+  for (const row of rows) {
+    if (row.status === "pushed" && row.createdAt.getTime() < LEGACY_AUTOPUBLISH_CUTOFF_MS) continue;
+    if (!row.typefullyDraftId) {
+      await recordSocialFailure(row, "Typefully draft ID is missing; automatic recreation was skipped to prevent duplicates");
+      continue;
+    }
+
+    let inspection: TypefullyDraftInspection;
+    try {
+      inspection = await inspectTypefullyDraft(row.typefullyDraftId);
+    } catch (err) {
+      if (isTypefullyNotFound(err)) {
+        await recordSocialFailure(row, "Typefully draft is missing; automatic recreation was skipped to prevent duplicates");
+      } else {
+        const verificationWindowMs = row.kind === "brief" ? 16 * 60 * 60 * 1000 : 60 * 60 * 1000;
+        if (Date.now() > row.createdAt.getTime() + verificationWindowMs) {
+          await recordSocialFailure(row, "Typefully publish state could not be verified before the deadline");
+        } else {
+          logger.warn(
+            { weekKey: row.weekKey, kind: row.kind },
+            "scheduler: Typefully publish verification unavailable — will retry",
+          );
+        }
+      }
+      continue;
+    }
+
+    let providerStatus = normalizeTypefullyDraftStatus(inspection);
+    if (providerStatus === "planned") {
+      if (row.status !== "pushed") {
+        await recordSocialFailure(row, "A scheduled Typefully post unexpectedly regressed to planned");
+        continue;
+      }
+      if (row.weekKey !== currentWeekKey()) {
+        await recordSocialFailure(row, "Planned post is from a past week and was not auto-published");
+        continue;
+      }
+      if (!legacyPlanCanPublishNow(row.kind, inspection.scheduledDate)) {
+        await recordSocialFailure(row, "Planned post missed its safe catch-up window and was not auto-published");
+        continue;
+      }
+      const confirmationStartedAt = new Date();
+      const [confirmationClaim] = await db
+        .update(socialDraftsTable)
+        .set({ status: "confirming", createdAt: confirmationStartedAt })
+        .where(and(eq(socialDraftsTable.id, row.id), eq(socialDraftsTable.status, "pushed")))
+        .returning({ id: socialDraftsTable.id });
+      if (!confirmationClaim) continue;
+      const confirmingRow: SocialDraftRow = { ...row, status: "confirming", createdAt: confirmationStartedAt };
+      try {
+        inspection = await confirmPlannedTypefullyDraft(row.typefullyDraftId, inspection.scheduledDate);
+        providerStatus = normalizeTypefullyDraftStatus(inspection);
+        await db
+          .update(socialDraftsTable)
+          .set({ status: providerStatus === "published" ? "published" : "scheduled", error: null, createdAt: new Date() })
+          .where(
+            and(
+              eq(socialDraftsTable.id, row.id),
+              eq(socialDraftsTable.status, "confirming"),
+            ),
+          );
+        logger.info(
+          { weekKey: row.weekKey, kind: row.kind, draftId: row.typefullyDraftId, providerStatus },
+          "scheduler: legacy planned Typefully draft confirmed for publishing",
+        );
+        if (providerStatus === "error") {
+          await recordSocialFailure(confirmingRow, "Typefully reports a publishing error");
+        }
+        continue;
+      } catch {
+        await recordSocialFailure(confirmingRow, "Typefully could not confirm the planned post for publishing");
+        continue;
+      }
+    }
+
+    if (providerStatus === "published") {
+      await db
+        .update(socialDraftsTable)
+        .set({ status: "published", error: null })
+        .where(
+          and(
+            eq(socialDraftsTable.id, row.id),
+            or(eq(socialDraftsTable.status, "scheduled"), eq(socialDraftsTable.status, "pushed")),
+          ),
+        );
+      logger.info(
+        { weekKey: row.weekKey, kind: row.kind, draftId: row.typefullyDraftId },
+        "scheduler: Typefully post confirmed published",
+      );
+      continue;
+    }
+
+    if (providerStatus === "error") {
+      await recordSocialFailure(row, "Typefully reports a publishing error");
+      continue;
+    }
+    if (providerStatus === "draft" && row.status === "pushed") {
+      // Pre-automation drafts were intentionally created for manual review.
+      continue;
+    }
+    if (!["scheduled", "publishing"].includes(providerStatus)) {
+      await recordSocialFailure(row, `Typefully returned non-publishing state: ${providerStatus}`);
+      continue;
+    }
+    if (isPastPublishGrace(row, inspection)) {
+      await recordSocialFailure(row, `Typefully post remained ${providerStatus} after its publish time`);
+    } else if (row.status === "pushed") {
+      await db
+        .update(socialDraftsTable)
+        .set({ status: "scheduled", error: null })
+        .where(and(eq(socialDraftsTable.id, row.id), eq(socialDraftsTable.status, "pushed")));
+    }
+  }
+}
+
 async function tickSocialHighlights(): Promise<void> {
   if (process.env.REPLIT_DEPLOYMENT !== "1") return;
   if (!process.env.TYPEFULLY_API_KEY) return;
@@ -366,22 +598,15 @@ async function tickSocialHighlights(): Promise<void> {
     .limit(1);
   if (!run?.freeBody) return;
 
-  // Atomic once-per-week claim with stale-pending takeover (crash recovery).
+  // Atomic once-per-week claim. Stale pending rows require manual
+  // reconciliation because the provider may have accepted the lost request.
   const claim = await claimSocialDraft(slot, weekKey);
   if (!claim) return;
 
   // Wednesday and Friday avoid repeating an angle already posted this week.
   let avoidAngle: string | null = null;
   if (slot === "wed" || slot === "fri") {
-    const earlier = await db
-      .select({ kind: socialDraftsTable.kind, postText: socialDraftsTable.postText })
-      .from(socialDraftsTable)
-      .where(and(eq(socialDraftsTable.weekKey, weekKey), eq(socialDraftsTable.status, "pushed")));
-    if (slot === "wed") {
-      avoidAngle = earlier.find((d) => d.kind === "mon")?.postText ?? earlier.find((d) => d.kind === "brief")?.postText ?? null;
-    } else {
-      avoidAngle = earlier.find((d) => d.kind === "wed")?.postText ?? earlier.find((d) => d.kind === "mon")?.postText ?? null;
-    }
+    avoidAngle = await getAvoidAngle(weekKey, slot);
   }
 
   const slotName = slot === "mon" ? "Monday" : slot === "wed" ? "Wednesday" : "Friday";
@@ -389,14 +614,14 @@ async function tickSocialHighlights(): Promise<void> {
   await db
     .update(socialDraftsTable)
     .set({
-      status: push.ok ? "pushed" : "failed",
+      status: push.ok ? (push.publishState === "published" ? "published" : "scheduled") : "failed",
       typefullyDraftId: push.draftId ?? null,
       postText: push.linkedinText ?? null,
       error: push.ok ? null : push.status,
     })
     .where(eq(socialDraftsTable.id, claim.id));
   if (push.ok) {
-    logger.info({ weekKey, slot }, "scheduler: mid-week social highlight pushed to Typefully");
+    logger.info({ weekKey, slot }, "scheduler: social highlight scheduled in Typefully");
   } else {
     logger.error({ weekKey, slot, reason: push.status }, "scheduler: mid-week social highlight failed");
     await notifySocialFailure(slotName, push.status);
@@ -410,8 +635,8 @@ async function notifySocialFailure(slotName: string, reason: string): Promise<vo
       body: {
         from: FROM_ADDRESS,
         to: ["hello@hollywoodsaleswire.com"],
-        subject: `${slotName} LinkedIn/X draft did not reach Typefully`,
-        text: `Karilyn,\n\nThis week's ${slotName} social highlight could not be pushed to Typefully (${reason}).\n\nNo action needed for the Wire — this only affects the social draft. You can post manually this week, or ask your agent to look into it.\n\n— Hollywood Sales Wire research desk`,
+        subject: `${slotName} LinkedIn/X post did not publish`,
+        text: `Karilyn,\n\nThis week's ${slotName} LinkedIn/X post did not publish through Typefully (${reason}).\n\nNo action needed for the Wire — this only affects the social post. You can post manually this week, or ask your agent to look into it.\n\n— Hollywood Sales Wire research desk`,
       },
     });
   } catch (err) {
@@ -487,6 +712,11 @@ async function tick(): Promise<void> {
     await tickScheduledSends();
   } catch (err) {
     logger.error({ err }, "scheduled-send tick failed");
+  }
+  try {
+    await tickSocialPublishVerification();
+  } catch (err) {
+    logger.error({ err }, "social-publish verification tick failed");
   }
   try {
     await tickSocialHighlights();

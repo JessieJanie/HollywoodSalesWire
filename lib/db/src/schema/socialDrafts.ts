@@ -6,8 +6,10 @@ import { pgTable, text, serial, timestamp, uniqueIndex } from "drizzle-orm/pg-co
  * can never push the same draft twice — even if the publisher deletes the
  * draft in Typefully afterwards.
  *
- * kind: "brief" (Monday full Brief) | "wed" | "fri" (mid-week highlights).
- * status: pending (claimed, push in flight) → pushed | failed.
+ * kind: "brief" (Tuesday full Brief) | "mon" | "wed" | "fri" (highlights).
+ * status: pending (claimed) → scheduled → published, or failed. Stale pending
+ * is never retried because provider success may be ambiguous. Legacy pushed
+ * rows briefly use confirming while an in-place `plan_at` repair is leased.
  * A failed row is NOT retried automatically — the pre-flight/notify email
  * tells the publisher, matching the paid-Wire safety-rail philosophy.
  */

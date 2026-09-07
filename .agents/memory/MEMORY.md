@@ -13,7 +13,7 @@
 - [Shelf & publisher access](shelf-access.md) — magic link + 1-yr remember-me cookie, "email me my link" form; canceled members keep access by design; dev/prod share SESSION_SECRET.
 - [Site prerendering for AI crawlers](site-prerender.md) — public pages prerendered to static HTML (GEO); new public pages must join the prerender list + sitemap; prod file-vs-rewrite precedence unverified.
 - [Press releases as proofs](press-releases.md) — dated releases (/press + ProductionHUB) prove HSW finds news before the trades; never reveal research methods; "first" claims verified literally.
-- [Typefully social drafts](typefully-linkedin.md) — Mon Brief + Wed/Fri highlights pushed as UNSCHEDULED LinkedIn+X drafts; social_drafts table is the dedupe claim; best-effort, sanitized errors.
+- [Typefully social publishing](typefully-linkedin.md) — real auto-publishing requires `publish_at`; X must stay URL-free while LinkedIn may retain its link.
 - [Instantly cold campaign](instantly-cold-campaign.md) — 5-effort cold sequence in Instantly; rolling deadline = Day 7 from lead-add; HTML bodies required; API quirks documented; Batch 1 created (paused, deadline Aug 25).
 - [Special Reports delivery](special-reports-delivery.md) — permanent download links + member Shelf page; two-state outbox (sentAt=lease/deliveredAt=confirmed), no lease release on error, stale-lease TTL + Resend 24h idempotency cover retry safety; plan detection uses payment_link ID map + session metadata (all 4 plinks updated); push not migrate for schema deployment.
-- [Apollo prospecting](apollo-prospecting.md) — APOLLO_API_KEY works; q_keywords per company + client-side title filter + /v1/people/match reveal; Snov/Skim both failed for this niche; 54 leads uploaded Aug 2026 to Instantly campaign 98360956.
+- [Apollo prospecting](apollo-prospecting.md) — keyword-per-company search plus client-side title filtering is reliable; Instantly lead enrollment requires the `campaign` field.
