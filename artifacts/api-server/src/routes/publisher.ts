@@ -294,9 +294,10 @@ router.post("/publisher/reports/confirm", async (req, res): Promise<void> => {
  *
  * Body: { key, leads: [{email, first_name, last_name?, company?}] }
  *
- * Enforces the 40-contact plan cap automatically; any leads that would push
- * over the cap are skipped and reported in the response. The RIA Wire agent
- * or any automated tool can call this endpoint — no Instantly UI access needed.
+ * Enforces the gradual weekly contact cap automatically; any leads that would
+ * push over the campaign's cap are skipped and reported in the response. The
+ * RIA Wire agent or any automated tool can call this endpoint — no Instantly
+ * UI access needed.
  *
  * Example curl:
  *   curl -X POST https://hollywoodsaleswire.com/api/publisher/cold-leads \

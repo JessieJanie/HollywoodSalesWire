@@ -42,8 +42,10 @@ const STEP_DELAYS = [0, 1, 1, 2, 3] as const;
  */
 const MAILBOX_DAILY_CAP = 50; // informational only — not sent to Instantly API
 
-/** Hard ceiling on prospect leads per batch (Instantly Growth plan cap). */
-const PLAN_CONTACT_CAP = 40;
+/** Week 1 begins Tuesday, September 8, 2026; Week 5+ stays at 30 contacts. */
+const CONTACT_RAMP_START_UTC = Date.UTC(2026, 8, 8);
+const CONTACT_RAMP = [10, 15, 20, 25, 30] as const;
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const GENERIC_MAILBOX_NAMES = new Set([
   "accounts",
@@ -357,6 +359,7 @@ export interface ColdBatchResult {
   campaignId: string;
   batchTag: string;
   deadline: string;
+  contactCap: number;
 }
 
 export interface ColdLead {
@@ -398,7 +401,53 @@ export interface UploadLeadsResult {
   skipped: number;
   campaignId: string;
   leadsUploaded: number; // total after this upload
-  remaining: number;     // slots left before PLAN_CONTACT_CAP
+  remaining: number;     // slots left in this campaign's ramp week
+}
+
+function pacificDateParts(date: Date): {
+  year: number;
+  month: number;
+  day: number;
+  weekday: string;
+} {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Los_Angeles",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    weekday: "short",
+  }).formatToParts(date);
+  const value = (type: Intl.DateTimeFormatPartTypes) =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return {
+    year: Number(value("year")),
+    month: Number(value("month")),
+    day: Number(value("day")),
+    weekday: value("weekday"),
+  };
+}
+
+/**
+ * Returns the named-prospect cap for a campaign date.
+ * Throws before any Instantly call when the date is not Tue/Wed/Thu.
+ */
+export function getColdCampaignContactCap(startDate: Date): number {
+  const { year, month, day, weekday } = pacificDateParts(startDate);
+  if (!["Tue", "Wed", "Thu"].includes(weekday)) {
+    throw new Error(
+      `Cold campaigns may only start Tuesday, Wednesday, or Thursday (received ${weekday})`,
+    );
+  }
+
+  const campaignDateUtc = Date.UTC(year, month - 1, day);
+  if (campaignDateUtc < CONTACT_RAMP_START_UTC) {
+    throw new Error("Cold campaign contact ramp begins September 8, 2026");
+  }
+
+  const weekIndex = Math.floor(
+    (campaignDateUtc - CONTACT_RAMP_START_UTC) / (7 * DAY_MS),
+  );
+  return CONTACT_RAMP[Math.min(weekIndex, CONTACT_RAMP.length - 1)];
 }
 
 /**
@@ -408,6 +457,7 @@ export interface UploadLeadsResult {
  * before, and the campaign record is stored in cold_campaigns for lead tracking.
  */
 export async function createColdBatch(startDate = new Date()): Promise<ColdBatchResult> {
+  const contactCap = getColdCampaignContactCap(startDate);
   const deadlineDate = addDays(startDate, 7);
   const deadline = formatDeadline(deadlineDate);
 
@@ -425,7 +475,10 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
   const campaignName = `HSW Founding Offer — Cold (starts ${startDate.toLocaleDateString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" })}, deadline ${deadline})`;
   const emails = buildEmails(deadline, batchTag);
 
-  logger.info({ deadline, batchTag }, "cold-campaigns: creating Instantly batch");
+  logger.info(
+    { deadline, batchTag, contactCap },
+    "cold-campaigns: creating Instantly batch",
+  );
 
   // Step 1: POST creates the campaign structure (bodies are not saved on POST).
   const created = await instantly<{ id: string }>("POST", "/campaigns", {
@@ -497,8 +550,11 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
   // dailyLimit stored as the mailbox cap for reference; actual ramp is managed by Instantly.
   await db.insert(coldCampaignsTable).values({ campaignId, batchTag, deadline, dailyLimit: MAILBOX_DAILY_CAP });
 
-  logger.info({ campaignId, batchTag, deadline }, "cold-campaigns: batch created and active");
-  return { campaignId, batchTag, deadline };
+  logger.info(
+    { campaignId, batchTag, deadline, contactCap },
+    "cold-campaigns: batch created and active",
+  );
+  return { campaignId, batchTag, deadline, contactCap };
 }
 
 /**
@@ -516,7 +572,8 @@ export async function getLatestColdCampaign() {
 
 /**
  * Upload prospect leads to the latest active cold campaign.
- * Enforces PLAN_CONTACT_CAP (40) and updates leads_uploaded in the DB.
+ * Enforces the campaign's gradual weekly contact cap and updates
+ * leads_uploaded in the DB.
  * Skips leads that would push over the cap; returns counts for the caller.
  *
  * Called from POST /publisher/cold-leads — no Instantly UI access needed.
@@ -533,7 +590,8 @@ export async function uploadColdLeads(leads: ColdLead[]): Promise<UploadLeadsRes
   if (!campaign) throw new Error("No cold campaign found — run createColdBatch first");
 
   const alreadyUploaded = campaign.leadsUploaded;
-  const slotsLeft = PLAN_CONTACT_CAP - alreadyUploaded;
+  const contactCap = getColdCampaignContactCap(campaign.createdAt);
+  const slotsLeft = Math.max(0, contactCap - alreadyUploaded);
 
   // Trim the list to what fits, skipping the rest.
   const toUpload = leads.slice(0, slotsLeft);
@@ -574,6 +632,6 @@ export async function uploadColdLeads(leads: ColdLead[]): Promise<UploadLeadsRes
     skipped,
     campaignId: campaign.campaignId,
     leadsUploaded: newTotal,
-    remaining: PLAN_CONTACT_CAP - newTotal,
+    remaining: Math.max(0, contactCap - newTotal),
   };
 }

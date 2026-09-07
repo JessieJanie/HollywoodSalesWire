@@ -688,7 +688,12 @@ async function tickColdCampaigns(): Promise<void> {
   try {
     const result = await createColdBatch(new Date());
     logger.info(
-      { campaignId: result.campaignId, batchTag: result.batchTag, deadline: result.deadline },
+      {
+        campaignId: result.campaignId,
+        batchTag: result.batchTag,
+        deadline: result.deadline,
+        contactCap: result.contactCap,
+      },
       "scheduler: cold campaign batch created and active — add leads in Instantly to begin sending",
     );
   } catch (err) {

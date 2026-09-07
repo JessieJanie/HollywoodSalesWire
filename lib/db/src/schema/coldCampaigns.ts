@@ -2,8 +2,9 @@ import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
 
 /**
  * One row per Instantly campaign batch created by the cold-campaign scheduler.
- * Tracks the daily send limit (auto-ramped per batch) and how many prospect
- * leads have been uploaded so far, so the API can enforce the plan cap.
+ * Tracks the historical mailbox ceiling and how many prospect leads have been
+ * uploaded so far. The API derives each campaign's contact cap from its launch
+ * week so the gradual ramp remains consistent across Tuesday–Thursday.
  */
 export const coldCampaignsTable = pgTable("cold_campaigns", {
   id: serial("id").primaryKey(),
@@ -13,7 +14,7 @@ export const coldCampaignsTable = pgTable("cold_campaigns", {
   batchTag: text("batch_tag").notNull().unique(),
   /** Human-readable deadline date string baked into email copy, e.g. "Tuesday, August 25". */
   deadline: text("deadline").notNull(),
-  /** Emails per day cap set on this campaign (auto-ramped: 2 → 5 → 10 → 20 → 30). */
+  /** Historical mailbox daily ceiling; retained for backward-compatible records. */
   dailyLimit: integer("daily_limit").notNull(),
   /** Count of prospect leads uploaded so far (excludes the monitor address). */
   leadsUploaded: integer("leads_uploaded").notNull().default(0),
