@@ -1,8 +1,84 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const dbMock = vi.hoisted(() => ({
+  insert: vi.fn(),
+  select: vi.fn(),
+  update: vi.fn(),
+}));
+
+vi.mock("@workspace/db", () => ({
+  db: dbMock,
+  coldCampaignsTable: {
+    batchTag: "batchTag",
+    campaignId: "campaignId",
+    createdAt: "createdAt",
+  },
+}));
+
 import {
+  createColdBatch,
   getColdCampaignContactCap,
   validateColdLead,
 } from "./coldCampaigns";
+
+describe("createColdBatch idempotency", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("reconciles and completes the durable provider campaign after a restart", async () => {
+    dbMock.insert.mockReturnValue({
+      values: () => ({
+        onConflictDoNothing: () => ({
+          returning: async () => [],
+        }),
+      }),
+    });
+    dbMock.select.mockReturnValue({
+      from: () => ({
+        where: () => ({
+          limit: async () => [{ campaignId: "existing-provider-campaign" }],
+        }),
+      }),
+    });
+    dbMock.update.mockReturnValue({
+      set: () => ({
+        where: async () => undefined,
+      }),
+    });
+    process.env.INSTANTLY_API_KEY = "test-key";
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockImplementation(
+      async (input, init) => {
+        const url = String(input);
+        const body =
+          url.includes("?limit=100")
+            ? { items: [{ id: "existing-provider-campaign", name: "HSW Founding Offer — Cold (starts Sep 8, deadline Tuesday, September 15)" }] }
+            : init?.method === "GET"
+              ? { status: 1 }
+              : {};
+        return new Response(JSON.stringify(body), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      },
+    );
+
+    await expect(
+      createColdBatch(new Date("2026-09-08T16:00:00Z")),
+    ).resolves.toMatchObject({
+      campaignId: "existing-provider-campaign",
+      batchTag: "hsw-cold-09082026",
+    });
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining("/campaigns/existing-provider-campaign"),
+      expect.objectContaining({ method: "PATCH" }),
+    );
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringContaining("/campaigns/existing-provider-campaign"),
+      expect.objectContaining({ method: "GET" }),
+    );
+  });
+});
 
 describe("validateColdLead", () => {
   it("accepts a named person at a person-specific address", () => {

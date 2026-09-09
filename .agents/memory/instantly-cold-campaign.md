@@ -8,14 +8,11 @@ description: How HSW cold outreach campaigns are structured in Instantly, includ
 ## Account
 - Sending mailbox: `karilyn@hollywoodsaleswires.com` (note the extra 's' — different domain from the site)
 - Second mailbox in account: `karilyn@ria-wires.com` (for RIA Wire, not HSW)
-- Both fully warmed (score 100) as of Aug 2026, daily limit 30 each
-- Org ID: `eb13be48-1e9c-40d9-ad9a-697f9d7e257b`
 - API: `https://api.instantly.ai/api/v2`, Bearer auth via `INSTANTLY_API_KEY` secret
 
 ## Sending-domain and tracking-domain separation
 - Active sender domains are `hollywoodsaleswires.com`, `tryhollywoodsaleswire.com`, `hollywood-sales-wire.com`, `ria-wires.com`, `tryriawire.com`, and `getriawire.com`.
-- Instantly custom tracking hosts are `inst.tryhollywoodsaleswire.com`, `inst.hollywood-sales-wire.com`, `inst.tryriawire.com`, and `inst.getriawire.com`; do not redirect or alter these hosts.
-- The two sender mailboxes `hollywoodsaleswires.com` and `ria-wires.com` currently have no custom tracking host listed in Instantly.
+- Instantly custom tracking hosts use `inst.*`; do not redirect or alter these hosts.
 
 **Why:** Sending mail and web/tracking traffic use different DNS functions; redirecting a sender domain's root is safe only when the Instantly tracking hosts remain separate and email records stay intact.
 
@@ -26,10 +23,6 @@ description: How HSW cold outreach campaigns are structured in Instantly, includ
 - Creating a campaign with sequences in the POST body saves the step structure (subjects, delays) but NOT the bodies. Always follow with a PATCH to set bodies.
 - Timezone enum is undocumented. Known working value: `"Etc/GMT+12"` (same as existing RIA Wire campaign). Other IANA names (America/Los_Angeles, US/Pacific, etc.) are rejected.
 - Campaign status: 0 = draft/not-launched, 2 = paused, 1 = active. Create at 0 or 2; activate manually after review.
-
-## Current campaigns
-- RIA Wire AI SDR: `e0618bad-911d-4a09-965b-7f532d88a5ec` (AI SDR, uses template variable bodies)
-- HSW Cold Batch 1: `78856448-f0db-4b86-b963-233ff7a331f8` (deadline Aug 25, status 0/draft, paused for review)
 
 ## 5-effort sequence structure
 Delays: Day 0, +1, +1, +2, +3 (= E5 lands on Day 7 from lead add).
@@ -59,22 +52,14 @@ When creating a new batch: replace [DATE TOKEN] in all 5 emails with the actual 
 - `dailyLimit` column in cold_campaigns DB stores 50 (mailbox ceiling) for reference only — not sent to Instantly.
 - Plan cap: 40 prospect leads max per batch (Growth plan, shared with RIA Wire; ~49 slots remain as of Aug 2026).
 
-## Programmatic lead upload
-- `cold_campaigns` DB table tracks: campaign_id, batch_tag, deadline, daily_limit, leads_uploaded, created_at.
-- `createColdBatch()` now queries batch count for ramp, adds `daily_limit` to POST, stores row in DB.
-- `uploadColdLeads(leads: ColdLead[])` in `coldCampaigns.ts` — uploads array to Instantly, enforces cap, updates DB.
-- `POST /publisher/cold-leads` (key-auth) — accepts `{leads: [{email, first_name?, last_name?, company?}]}`.
-- `GET /publisher/cold-campaign` (key-auth, query param) — returns current campaign status and remaining slots.
-- Lead upload: one POST /leads call per lead (known-working); Instantly bulk endpoint untested.
-- lib/db requires `npx tsc --build` in lib/db/ after any schema change (project references, emitDeclarationOnly).
+## Automation safety rule
+Claim each launch date durably before creating anything in Instantly. If a run
+stops partway through, reconcile by exact campaign name and resume the same
+provider campaign; never create another campaign merely because the process
+restarted.
 
-## Prospect list
-- Not yet built. Plan: use Skim research to build targeting vendors selling into entertainment production (catering, AV, security, equipment, stage services, production tech).
-- UTM tags: `utm_source=cold&utm_medium=email&utm_campaign=hsw-cold-1&utm_content=e1` (increment campaign number per batch).
+**Why:** Process-local date guards do not survive deployments and can multiply
+active campaigns, duplicate outreach, and damage sender reputation.
 
-## How new campaign batches work (fully automated now)
-1. Scheduler fires Tue/Wed/Thu 8am PT → calls createColdBatch().
-2. Batch count queried from cold_campaigns → daily_limit selected from ramp array.
-3. Campaign POSTed with daily_limit, PATCHed with bodies, activated, monitor lead enrolled, DB row inserted.
-4. To add prospect leads: POST /publisher/cold-leads with key + leads array (no Instantly UI needed).
-5. RIA Wire agent or Karilyn can call /publisher/cold-leads to upload the prospect list.
+**How to apply:** Every automated campaign creator must use a durable unique
+launch key plus provider reconciliation before any create call.

@@ -15,7 +15,8 @@
  * To update copy: edit that file and sync the template strings below.
  */
 
-import { desc, eq } from "drizzle-orm";
+import { randomUUID } from "node:crypto";
+import { and, desc, eq } from "drizzle-orm";
 import { db, coldCampaignsTable } from "@workspace/db";
 import { logger } from "./logger";
 
@@ -474,14 +475,95 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
 
   const campaignName = `HSW Founding Offer — Cold (starts ${startDate.toLocaleDateString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric" })}, deadline ${deadline})`;
   const emails = buildEmails(deadline, batchTag);
+  const claimId = `pending:${Date.now()}:${randomUUID()}`;
+
+  // Claim the date in Postgres before touching Instantly. The unique batch tag
+  // makes this guard survive restarts and concurrent deployment instances.
+  const claimed = await db
+    .insert(coldCampaignsTable)
+    .values({
+      campaignId: claimId,
+      batchTag,
+      deadline,
+      dailyLimit: MAILBOX_DAILY_CAP,
+    })
+    .onConflictDoNothing({ target: coldCampaignsTable.batchTag })
+    .returning({ campaignId: coldCampaignsTable.campaignId });
+
+  const existingRows = claimed.length
+    ? claimed
+    : await db
+        .select({ campaignId: coldCampaignsTable.campaignId })
+        .from(coldCampaignsTable)
+        .where(eq(coldCampaignsTable.batchTag, batchTag))
+        .limit(1);
+  let storedCampaignId = existingRows[0]?.campaignId;
+  let ownsClaim = storedCampaignId === claimId;
+
+  if (!ownsClaim) {
+    const listed = await instantly<{ items?: Array<{ id: string; name: string }> }>(
+      "GET",
+      `/campaigns?limit=100&search=${encodeURIComponent(campaignName)}`,
+    );
+    const providerCampaignId = listed.items?.find(
+      (campaign) => campaign.name === campaignName,
+    )?.id;
+    if (providerCampaignId && storedCampaignId) {
+      await db
+        .update(coldCampaignsTable)
+        .set({ campaignId: providerCampaignId })
+        .where(
+          and(
+            eq(coldCampaignsTable.batchTag, batchTag),
+            eq(coldCampaignsTable.campaignId, storedCampaignId),
+          ),
+        );
+      storedCampaignId = providerCampaignId;
+    } else {
+      const claimedAt = Number(storedCampaignId?.split(":")[1]);
+      if (Number.isFinite(claimedAt) && Date.now() - claimedAt < 5 * 60_000) {
+        throw new Error(`Cold campaign ${batchTag} is already being created`);
+      }
+      const takeover = await db
+        .update(coldCampaignsTable)
+        .set({ campaignId: claimId })
+        .where(
+          and(
+            eq(coldCampaignsTable.batchTag, batchTag),
+            eq(coldCampaignsTable.campaignId, storedCampaignId ?? ""),
+          ),
+        )
+        .returning({ campaignId: coldCampaignsTable.campaignId });
+      ownsClaim = takeover[0]?.campaignId === claimId;
+      if (!ownsClaim) {
+        throw new Error(`Cold campaign ${batchTag} claim changed concurrently`);
+      }
+      storedCampaignId = claimId;
+    }
+  }
 
   logger.info(
     { deadline, batchTag, contactCap },
     "cold-campaigns: creating Instantly batch",
   );
 
+  // If a process died after POST but before persisting the provider ID, adopt
+  // the exact-name campaign instead of creating another one.
+  let campaignId =
+    storedCampaignId && !storedCampaignId.startsWith("pending:")
+      ? storedCampaignId
+      : undefined;
+  if (!campaignId) {
+    const listed = await instantly<{ items?: Array<{ id: string; name: string }> }>(
+      "GET",
+      `/campaigns?limit=100&search=${encodeURIComponent(campaignName)}`,
+    );
+    campaignId = listed.items?.find((campaign) => campaign.name === campaignName)?.id;
+  }
+
   // Step 1: POST creates the campaign structure (bodies are not saved on POST).
-  const created = await instantly<{ id: string }>("POST", "/campaigns", {
+  if (!campaignId) {
+    const created = await instantly<{ id: string }>("POST", "/campaigns", {
     name: campaignName,
     status: 0, // draft on creation; activated explicitly below via /activate
     email_list: [...SENDING_ACCOUNTS],
@@ -511,9 +593,19 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
         })),
       },
     ],
-  });
+    });
+    campaignId = created.id;
+  }
 
-  const campaignId = created.id;
+  await db
+    .update(coldCampaignsTable)
+    .set({ campaignId })
+    .where(
+      and(
+        eq(coldCampaignsTable.batchTag, batchTag),
+        eq(coldCampaignsTable.campaignId, claimId),
+      ),
+    );
 
   // Step 2: PATCH to save HTML bodies (Instantly silently drops them on POST).
   await instantly("PATCH", `/campaigns/${campaignId}`, {
@@ -529,8 +621,11 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
     ],
   });
 
-  // Step 3: Activate — /activate is the only endpoint that flips status to 1.
-  await instantly("POST", `/campaigns/${campaignId}/activate`);
+  // Step 3: Activate — avoid re-activating a resumed campaign.
+  const campaign = await instantly<{ status: number }>("GET", `/campaigns/${campaignId}`);
+  if (campaign.status !== 1) {
+    await instantly("POST", `/campaigns/${campaignId}/activate`);
+  }
 
   // Step 4: Enroll monitor address so Karilyn sees every email prospects receive.
   try {
@@ -545,10 +640,6 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
     // Non-fatal — campaign is still active; Karilyn can add herself manually.
     logger.error({ err, campaignId }, "cold-campaigns: failed to enroll monitor lead");
   }
-
-  // Step 5: Record in DB for lead-upload tracking.
-  // dailyLimit stored as the mailbox cap for reference; actual ramp is managed by Instantly.
-  await db.insert(coldCampaignsTable).values({ campaignId, batchTag, deadline, dailyLimit: MAILBOX_DAILY_CAP });
 
   logger.info(
     { campaignId, batchTag, deadline, contactCap },
