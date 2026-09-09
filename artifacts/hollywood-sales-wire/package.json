@@ -78,6 +78,7 @@
     "zod": "catalog:"
   },
   "dependencies": {
+    "@replit/connectors-sdk": "^0.4.1",
     "react-markdown": "^10.1.0"
   }
 }

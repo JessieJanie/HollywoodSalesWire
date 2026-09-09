@@ -6,12 +6,16 @@
  *   pnpm --filter @workspace/hollywood-sales-wire check:production -- http://localhost:4173
  *   pnpm --filter @workspace/hollywood-sales-wire check:production -- --verified-production
  */
+import { createHash } from 'node:crypto';
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { ReplitConnectors } from '@replit/connectors-sdk';
 
 export const DEFAULT_ORIGIN = 'https://hollywoodsaleswire.com';
 export const HOME_TITLE =
   'Hollywood Sales Wire — Weekly Entertainment Industry Sales Leads &amp; Buying Signals';
+const ALERT_RECIPIENT = 'hello@hollywoodsaleswire.com';
+const ALERT_SENDER = 'Hollywood Sales Wire <briefings@hollywoodsaleswire.com>';
 
 export interface PageExpectation {
   path: string;
@@ -27,6 +31,11 @@ interface PrerenderRoute {
 interface ServerEntry {
   render: (path: string) => string;
   getPrerenderRoutes: () => PrerenderRoute[];
+}
+
+interface PageFailure {
+  path: string;
+  assertions: string[];
 }
 
 function escapeHtml(s: string): string {
@@ -67,6 +76,45 @@ function canonicalHref(html: string): string | undefined {
 
 function titleText(html: string): string | undefined {
   return html.match(/<title>([\s\S]*?)<\/title>/i)?.[1].trim();
+}
+
+function alertIdempotencyKey(failures: PageFailure[]): string {
+  const fingerprint = createHash('sha256')
+    .update(JSON.stringify(failures))
+    .digest('hex')
+    .slice(0, 32);
+  return `crawler-check-failed-${fingerprint}`;
+}
+
+function escapeAlertHtml(value: string): string {
+  return escapeHtml(value).replaceAll('\n', '<br>');
+}
+
+async function notifyPublisher(failures: PageFailure[]): Promise<void> {
+  const summary = failures.flatMap(({ path, assertions }) =>
+    assertions.map((assertion) => `${path}: ${assertion}`),
+  );
+  const connectors = new ReplitConnectors();
+  const response = await connectors.proxy('resend', '/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Idempotency-Key': alertIdempotencyKey(failures),
+    },
+    body: JSON.stringify({
+      from: ALERT_SENDER,
+      to: [ALERT_RECIPIENT],
+      subject: `Crawler check failed on ${failures.length} route${failures.length === 1 ? '' : 's'}`,
+      text: `The live crawler check failed:\n\n${summary.map((line) => `- ${line}`).join('\n')}`,
+      html: `<p>The live crawler check failed:</p><ul>${summary
+        .map((line) => `<li>${escapeAlertHtml(line)}</li>`)
+        .join('')}</ul>`,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Resend returned ${response.status}: ${await response.text()}`);
+  }
 }
 
 export async function checkPage(
@@ -132,10 +180,13 @@ export async function main(arguments_ = process.argv.slice(2)): Promise<void> {
   ];
   const origin = resolveOrigin(arguments_);
   const canonicalOrigin = new URL(process.env.CANONICAL_ORIGIN ?? DEFAULT_ORIGIN);
+  const verifiedProduction = arguments_
+    .filter((argument) => argument !== '--')
+    .includes('--verified-production');
 
   console.log(`Checking crawler-visible HTML at ${origin.origin}`);
 
-  let failed = false;
+  const pageFailures: PageFailure[] = [];
   for (const page of pages) {
     try {
       const failures = await checkPage(page, origin, canonicalOrigin);
@@ -144,18 +195,29 @@ export async function main(arguments_ = process.argv.slice(2)): Promise<void> {
         continue;
       }
 
-      failed = true;
+      pageFailures.push({ path: page.path, assertions: failures });
       console.error(`FAIL ${page.path}`);
       for (const failure of failures) console.error(`  - ${failure}`);
     } catch (error) {
-      failed = true;
+      const failure = `request failed: ${error instanceof Error ? error.message : String(error)}`;
+      pageFailures.push({ path: page.path, assertions: [failure] });
       console.error(`FAIL ${page.path}`);
-      console.error(`  - request failed: ${error instanceof Error ? error.message : String(error)}`);
+      console.error(`  - ${failure}`);
     }
   }
 
-  if (failed) {
+  if (pageFailures.length > 0) {
     console.error('Production crawler smoke check failed.');
+    if (verifiedProduction) {
+      try {
+        await notifyPublisher(pageFailures);
+        console.error('Publisher alert sent.');
+      } catch (error) {
+        console.error(
+          `Publisher alert failed: ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+    }
     process.exitCode = 1;
   } else {
     console.log('Production crawler smoke check passed.');
