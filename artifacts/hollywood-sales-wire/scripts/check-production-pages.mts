@@ -5,6 +5,8 @@
  *   pnpm --filter @workspace/hollywood-sales-wire check:production
  *   pnpm --filter @workspace/hollywood-sales-wire check:production -- http://localhost:4173
  */
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const DEFAULT_ORIGIN = 'https://hollywoodsaleswire.com';
 const canonicalOrigin = new URL(process.env.CANONICAL_ORIGIN ?? DEFAULT_ORIGIN);
@@ -14,21 +16,42 @@ const HOME_TITLE =
 interface PageExpectation {
   path: string;
   title: string;
-  bodyText: string;
+  renderedBody: string;
+}
+
+interface PrerenderRoute {
+  path: string;
+  title: string;
+}
+
+interface ServerEntry {
+  render: (path: string) => string;
+  getPrerenderRoutes: () => PrerenderRoute[];
+}
+
+const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
+const ssrEntry = path.join(root, 'dist', 'ssr', 'entry-server.js');
+const { render, getPrerenderRoutes } = (await import(pathToFileURL(ssrEntry).href)) as ServerEntry;
+
+function escapeHtml(s: string): string {
+  return s
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
 }
 
 const pages: PageExpectation[] = [
   {
-    path: '/order',
-    title: 'Subscribe — Hollywood Sales Wire',
-    bodyText: 'One closed deal sourced from one issue pays for years of it.',
+    path: '/',
+    title: HOME_TITLE,
+    renderedBody: render('/'),
   },
-  {
-    path: '/articles/hollywoods-comfortably-numb-herd-mentality',
-    title: "Hollywood's Comfortably Numb Herd Mentality — Hollywood Sales Wire",
-    bodyText:
-      'Most vendors selling into entertainment read the same things everyone else reads.',
-  },
+  ...getPrerenderRoutes().map((route) => ({
+    path: route.path,
+    title: escapeHtml(route.title),
+    renderedBody: render(route.path),
+  })),
 ];
 
 const originArgument = process.argv.slice(2).find((argument) => argument !== '--');
@@ -72,10 +95,14 @@ async function checkPage(expected: PageExpectation): Promise<string[]> {
       `canonical was ${JSON.stringify(actualCanonical)}, expected ${JSON.stringify(expectedCanonical)}`,
     );
   }
-  if (!html.includes(expected.bodyText)) {
-    failures.push(`body did not contain ${JSON.stringify(expected.bodyText)}`);
+  if (expected.renderedBody.length < 500) {
+    failures.push(`local server render was suspiciously short (${expected.renderedBody.length} bytes)`);
+  } else if (!html.includes(expected.renderedBody)) {
+    failures.push(
+      `body did not contain its route-specific server render (${expected.renderedBody.length} bytes)`,
+    );
   }
-  if (actualTitle === HOME_TITLE) {
+  if (expected.path !== '/' && actualTitle === HOME_TITLE) {
     failures.push('received the home-page shell instead of route-specific HTML');
   }
 
