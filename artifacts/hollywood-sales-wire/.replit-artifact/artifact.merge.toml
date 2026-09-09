@@ -1,0 +1,57 @@
+kind = "web"
+previewPath = "/"
+title = "Hollywood Sales Wire"
+version = "1.0.0"
+id = "artifacts/hollywood-sales-wire"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25128
+
+[services.development]
+run = "pnpm --filter @workspace/hollywood-sales-wire run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/hollywood-sales-wire", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/hollywood-sales-wire/dist/public"
+
+# SPA fallback only for gated (non-prerendered) routes.
+# Prerendered routes have their own index.html files and must not match rewrites.
+[[services.production.rewrites]]
+from = "/shelf"
+to = "/index.html"
+
+[[services.production.rewrites]]
+from = "/shelf/*"
+to = "/index.html"
+
+[[services.production.rewrites]]
+from = "/publisher"
+to = "/index.html"
+
+[[services.production.rewrites]]
+from = "/publisher/*"
+to = "/index.html"
+
+[[services.production.rewrites]]
+from = "/founding-offer"
+to = "/index.html"
+
+[[services.production.rewrites]]
+from = "/founding-offer/*"
+to = "/index.html"
+
+[[services.production.rewrites]]
+from = "/thanks"
+to = "/index.html"
+
+[[services.production.rewrites]]
+from = "/thanks/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25128"
+BASE_PATH = "/"

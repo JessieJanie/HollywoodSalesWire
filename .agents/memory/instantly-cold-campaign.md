@@ -1,14 +1,14 @@
 ---
 name: Instantly cold email campaign setup
-description: How HSW cold outreach campaigns are structured in Instantly, including API quirks and the rolling-deadline offer pattern.
+description: Durable Instantly API quirks and campaign-safety rules for cold outreach.
 ---
 
 # Instantly Cold Email Campaign
 
-## Account
-- Sending mailbox: `karilyn@hollywoodsaleswires.com` (note the extra 's' — different domain from the site)
-- Second mailbox in account: `karilyn@ria-wires.com` (for RIA Wire, not HSW)
-- API: `https://api.instantly.ai/api/v2`, Bearer auth via `INSTANTLY_API_KEY` secret
+
+## Account safety
+- Keep mailbox addresses, organization IDs, campaign IDs, and authentication details in secrets or live configuration, never in durable agent memory.
+- Verify mailbox warmup and sending limits from Instantly before launch; historical values go stale.
 
 ## Sending-domain and tracking-domain separation
 - Active sender domains are `hollywoodsaleswires.com`, `tryhollywoodsaleswire.com`, `hollywood-sales-wire.com`, `ria-wires.com`, `tryriawire.com`, and `getriawire.com`.
@@ -34,7 +34,8 @@ Delays: Day 0, +1, +1, +2, +3 (= E5 lands on Day 7 from lead add).
 
 Copy source: `marketing/cold-campaign-draft1.txt` (publisher-locked; update [DATE TOKEN] per campaign).
 
-## Rolling deadline offer rule (Karilyn's instruction, Aug 2026)
+
+## Rolling deadline offer rule
 Every new cold campaign batch gets a fresh deadline = the day E5 sends (Day 7 from lead-add date).
 Offer is always: Founding Member price ($38/wk, $1,995/yr) + 3 free Special Reports.
 When creating a new batch: replace [DATE TOKEN] in all 5 emails with the actual E5 date before loading into Instantly.
@@ -47,10 +48,8 @@ When creating a new batch: replace [DATE TOKEN] in all 5 emails with the actual 
 - Schedule: weekdays only, 08:00–18:00
 
 ## Daily sending ramp
-- DO NOT set `daily_limit` on campaigns. Instantly slow-ramp is enabled at the account level on karilyn@hollywoodsaleswires.com — it handles ramping automatically up to 50/day. A campaign-level cap overrides and starves it.
-- Mailbox settings: 50/day limit, slow ramp on, warmup running (1/day increase, 10/day cap, 30% reply rate). Same on karilyn@ria-wires.com.
-- `dailyLimit` column in cold_campaigns DB stores 50 (mailbox ceiling) for reference only — not sent to Instantly.
-- Plan cap: 40 prospect leads max per batch (Growth plan, shared with RIA Wire; ~49 slots remain as of Aug 2026).
+- Do not set `daily_limit` on campaigns when account-level slow ramp is enabled; a campaign-level cap overrides and can starve the account ramp.
+- Verify current mailbox and plan limits from Instantly rather than relying on remembered values.
 
 ## Automation safety rule
 Claim each launch date durably before creating anything in Instantly. If a run
