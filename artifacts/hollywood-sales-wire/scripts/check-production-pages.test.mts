@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { createServer, type Server } from 'node:http';
+import { readFile } from 'node:fs/promises';
 import { after, before, test } from 'node:test';
 import {
   DEFAULT_ORIGIN,
@@ -128,5 +129,28 @@ test('verified production blocks command-line and environment origin overrides',
   assert.throws(
     () => resolveOrigin(['--verified-production'], 'http://127.0.0.1:9999'),
     /remove the origin override/,
+  );
+});
+
+test('configured production server gates the live check behind crawler fixtures', async () => {
+  const packageJson = JSON.parse(
+    await readFile(new URL('../package.json', import.meta.url), 'utf8'),
+  ) as { scripts: Record<string, string> };
+  const productionServer = await readFile(
+    new URL('./serve-and-check-production.mts', import.meta.url),
+    'utf8',
+  );
+
+  assert.match(
+    packageJson.scripts['check:production:publish'],
+    /^pnpm run test:crawler-check && .*check-production-pages\.mts --verified-production$/,
+  );
+  assert.match(
+    productionServer,
+    /spawn\('pnpm', \['run', 'check:production:publish'\]/,
+  );
+  assert.equal(
+    packageJson.scripts['check:production'],
+    'node --experimental-strip-types scripts/check-production-pages.mts',
   );
 });

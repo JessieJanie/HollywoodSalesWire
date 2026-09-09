@@ -137,15 +137,11 @@ async function waitForPromotion(): Promise<void> {
 
 async function runCrawlerCheck(): Promise<void> {
   await new Promise<void>((resolve, reject) => {
-    const check = spawn(
-      process.execPath,
-      ['--experimental-strip-types', 'scripts/check-production-pages.mts', '--verified-production'],
-      {
-        cwd: new URL('..', import.meta.url),
-        env: process.env,
-        stdio: 'inherit',
-      },
-    );
+    const check = spawn('pnpm', ['run', 'check:production:publish'], {
+      cwd: new URL('..', import.meta.url),
+      env: process.env,
+      stdio: 'inherit',
+    });
 
     check.on('error', reject);
     check.on('exit', (code, signal) => {
