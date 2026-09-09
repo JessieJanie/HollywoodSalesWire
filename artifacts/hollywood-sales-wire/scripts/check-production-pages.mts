@@ -4,6 +4,7 @@
  * Usage:
  *   pnpm --filter @workspace/hollywood-sales-wire check:production
  *   pnpm --filter @workspace/hollywood-sales-wire check:production -- http://localhost:4173
+ *   pnpm --filter @workspace/hollywood-sales-wire check:production -- --verified-production
  */
 import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -54,8 +55,19 @@ const pages: PageExpectation[] = [
   })),
 ];
 
-const originArgument = process.argv.slice(2).find((argument) => argument !== '--');
-const origin = new URL(originArgument ?? process.env.PRODUCTION_ORIGIN ?? DEFAULT_ORIGIN);
+const arguments_ = process.argv.slice(2).filter((argument) => argument !== '--');
+const verifiedProduction = arguments_.includes('--verified-production');
+const originArgument = arguments_.find((argument) => argument !== '--verified-production');
+
+if (verifiedProduction && (originArgument || process.env.PRODUCTION_ORIGIN)) {
+  throw new Error(
+    'The automatic publish check must use the verified production URL; remove the origin override.',
+  );
+}
+
+const origin = new URL(
+  verifiedProduction ? DEFAULT_ORIGIN : (originArgument ?? process.env.PRODUCTION_ORIGIN ?? DEFAULT_ORIGIN),
+);
 origin.pathname = '/';
 origin.search = '';
 origin.hash = '';
