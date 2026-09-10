@@ -6,6 +6,7 @@ import {
   DEFAULT_ORIGIN,
   HOME_TITLE,
   checkPage,
+  publisherAlertSuccessMessage,
   resolveOrigin,
   type PageExpectation,
 } from './check-production-pages.mts';
@@ -152,5 +153,12 @@ test('configured production server gates the live check behind crawler fixtures'
   assert.equal(
     packageJson.scripts['check:production'],
     'node --experimental-strip-types scripts/check-production-pages.mts',
+  );
+});
+
+test('successful publisher alerts log only the Resend email ID', () => {
+  assert.equal(
+    publisherAlertSuccessMessage('email_123'),
+    'Publisher alert sent (Resend email ID: email_123).',
   );
 });

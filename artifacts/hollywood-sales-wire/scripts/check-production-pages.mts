@@ -90,7 +90,11 @@ function escapeAlertHtml(value: string): string {
   return escapeHtml(value).replaceAll('\n', '<br>');
 }
 
-async function notifyPublisher(failures: PageFailure[]): Promise<void> {
+export function publisherAlertSuccessMessage(emailId: string): string {
+  return `Publisher alert sent (Resend email ID: ${emailId}).`;
+}
+
+async function notifyPublisher(failures: PageFailure[]): Promise<string> {
   const summary = failures.flatMap(({ path, assertions }) =>
     assertions.map((assertion) => `${path}: ${assertion}`),
   );
@@ -115,6 +119,9 @@ async function notifyPublisher(failures: PageFailure[]): Promise<void> {
   if (!response.ok) {
     throw new Error(`Resend returned ${response.status}: ${await response.text()}`);
   }
+
+  const { id } = (await response.json()) as { id: string };
+  return id;
 }
 
 export async function checkPage(
@@ -210,8 +217,8 @@ export async function main(arguments_ = process.argv.slice(2)): Promise<void> {
     console.error('Production crawler smoke check failed.');
     if (verifiedProduction) {
       try {
-        await notifyPublisher(pageFailures);
-        console.error('Publisher alert sent.');
+        const emailId = await notifyPublisher(pageFailures);
+        console.error(publisherAlertSuccessMessage(emailId));
       } catch (error) {
         console.error(
           `Publisher alert failed: ${error instanceof Error ? error.message : String(error)}`,
