@@ -11,6 +11,13 @@ import {
   collectCreatorJobSignals,
   formatCreatorJobSignals,
 } from "./creatorJobs";
+import {
+  recordProjectSignal,
+  pruneExpiredProjectSignals,
+  listTrackedProjectStages,
+  formatProjectStages,
+  looksLikeProductionEntity,
+} from "./productionStage";
 
 const NOTIFY_EMAIL = "hello@hollywoodsaleswire.com";
 
@@ -316,6 +323,21 @@ export async function runWeeklyResearch(
           for (const i of fresh.filter((f) => f.payload.official).slice(0, 5)) {
             officialIncentiveUrls.push(i.url);
           }
+          // Official awards anchor the production-stage estimate model.
+          for (const i of fresh.filter((f) => f.payload.official)) {
+            try {
+              await recordProjectSignal({
+                sourceType: "incentive_award",
+                name: i.title,
+                jurisdiction: i.payload.state,
+                triggerDate: new Date(i.payload.publishedAt),
+                sourceUrl: i.url,
+                weekKey,
+              });
+            } catch (err) {
+              logger.warn({ err }, "failed to record incentive-award project signal; continuing");
+            }
+          }
         }
       } catch (err) {
         recordFeed(feedHealth, {
@@ -442,6 +464,22 @@ export async function runWeeklyResearch(
             status: "ok (structured signal)",
             fetchedAt: new Date().toISOString(),
           });
+          // Only names that pass the same production-entity heuristic anchor
+          // the stage model — noisy non-production filings are excluded.
+          for (const i of fresh.filter((f) => looksLikeProductionEntity(f.payload.entityName))) {
+            try {
+              await recordProjectSignal({
+                sourceType: "entity_formation",
+                name: i.payload.entityName,
+                jurisdiction: i.payload.jurisdiction,
+                triggerDate: new Date(i.payload.publishedAt),
+                sourceUrl: i.payload.sourceUrl,
+                weekKey,
+              });
+            } catch (err) {
+              logger.warn({ err }, "failed to record entity-formation project signal; continuing");
+            }
+          }
         }
       } catch (err) {
         recordFeed(feedHealth, {
@@ -451,6 +489,31 @@ export async function runWeeklyResearch(
           detail: err instanceof Error ? err.message.slice(0, 120) : "unknown error",
         });
         logger.warn({ err }, "entity-formations signal unavailable; continuing without it");
+      }
+      try {
+        await pruneExpiredProjectSignals();
+        const trackedStages = await listTrackedProjectStages();
+        recordFeed(feedHealth, {
+          name: "Production-stage estimate model",
+          status: trackedStages.length > 0 ? "ok" : "empty",
+          itemCount: trackedStages.length,
+        });
+        pages.push({
+          url: "internal://production-stage-model",
+          label: "HSW model — estimated production stage per tracked formation/award",
+          markdown: formatProjectStages(trackedStages),
+          wordCount: trackedStages.length * 20,
+          status: "ok (internal model, not a live source)",
+          fetchedAt: new Date().toISOString(),
+        });
+      } catch (err) {
+        recordFeed(feedHealth, {
+          name: "Production-stage estimate model",
+          status: "failed",
+          itemCount: 0,
+          detail: err instanceof Error ? err.message.slice(0, 120) : "unknown error",
+        });
+        logger.warn({ err }, "production-stage model unavailable; continuing without it");
       }
 
       // 1. Fetch the beat (sequentially — be a polite payer).

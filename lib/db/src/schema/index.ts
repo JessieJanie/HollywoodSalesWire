@@ -26,3 +26,4 @@ export * from "./specialReports";
 export * from "./scheduledSends";
 export * from "./socialDrafts";
 export * from "./coldCampaigns";
+export * from "./projectSignals";
