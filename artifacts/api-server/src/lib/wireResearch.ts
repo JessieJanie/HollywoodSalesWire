@@ -7,6 +7,10 @@ import { claimSocialDraft } from "./socialDrafts";
 import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
 import { logger } from "./logger";
+import {
+  collectCreatorJobSignals,
+  formatCreatorJobSignals,
+} from "./creatorJobs";
 
 const NOTIFY_EMAIL = "hello@hollywoodsaleswire.com";
 
@@ -353,6 +357,49 @@ export async function runWeeklyResearch(
           detail: err instanceof Error ? err.message.slice(0, 120) : "unknown error",
         });
         logger.warn({ err }, "studio-jobs signal unavailable; continuing without it");
+      }
+      try {
+        const signals = await collectCreatorJobSignals();
+        const failed = signals.filter((signal) => signal.status === "failed");
+        const matches = signals.flatMap((signal) => signal.matches);
+        recordFeed(feedHealth, {
+          name: "Digital Creator job-title search",
+          status:
+            failed.length === signals.length
+              ? "failed"
+              : matches.length > 0
+                ? "ok"
+                : "empty",
+          itemCount: matches.length,
+          detail:
+            failed.length > 0
+              ? `${failed.length}/${signals.length} title/source searches unavailable`
+              : undefined,
+        });
+
+        const md = formatCreatorJobSignals(signals);
+        pages.push({
+          url: "https://www.imdb.com/pressroom/",
+          label: "HSW direct search — IMDb Digital Creator category job signals (weekly)",
+          markdown: md,
+          wordCount: md.split(/\s+/).filter(Boolean).length,
+          status:
+            failed.length > 0
+              ? `partial (${failed.length}/${signals.length} searches unavailable)`
+              : "ok (direct official ATS search)",
+          fetchedAt: new Date().toISOString(),
+        });
+      } catch (err) {
+        recordFeed(feedHealth, {
+          name: "Digital Creator job-title search",
+          status: "failed",
+          itemCount: 0,
+          detail: err instanceof Error ? err.message.slice(0, 120) : "unknown error",
+        });
+        logger.warn(
+          { err },
+          "digital-creator jobs search unavailable; continuing without it",
+        );
       }
       try {
         // NOTE: the feed returns at most the ~100 newest items globally and
