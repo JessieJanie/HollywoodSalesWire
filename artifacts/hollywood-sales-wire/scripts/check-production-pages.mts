@@ -33,10 +33,20 @@ interface ServerEntry {
   getPrerenderRoutes: () => PrerenderRoute[];
 }
 
-interface PageFailure {
+export interface PageFailure {
   path: string;
   assertions: string[];
 }
+
+type ResendProxy = (
+  connector: string,
+  path: string,
+  init: {
+    method: string;
+    headers: Record<string, string>;
+    body: string;
+  },
+) => Promise<Response>;
 
 function escapeHtml(s: string): string {
   return s
@@ -94,12 +104,15 @@ export function publisherAlertSuccessMessage(emailId: string): string {
   return `Publisher alert sent (Resend email ID: ${emailId}).`;
 }
 
-async function notifyPublisher(failures: PageFailure[]): Promise<string> {
+export async function notifyPublisher(
+  failures: PageFailure[],
+  proxy: ResendProxy = (connector, proxyPath, init) =>
+    new ReplitConnectors().proxy(connector, proxyPath, init),
+): Promise<string> {
   const summary = failures.flatMap(({ path, assertions }) =>
     assertions.map((assertion) => `${path}: ${assertion}`),
   );
-  const connectors = new ReplitConnectors();
-  const response = await connectors.proxy('resend', '/emails', {
+  const response = await proxy('resend', '/emails', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

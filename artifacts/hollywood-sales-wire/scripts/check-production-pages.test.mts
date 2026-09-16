@@ -6,8 +6,10 @@ import {
   DEFAULT_ORIGIN,
   HOME_TITLE,
   checkPage,
+  notifyPublisher,
   publisherAlertSuccessMessage,
   resolveOrigin,
+  type PageFailure,
   type PageExpectation,
 } from './check-production-pages.mts';
 
@@ -131,6 +133,67 @@ test('verified production blocks command-line and environment origin overrides',
     () => resolveOrigin(['--verified-production'], 'http://127.0.0.1:9999'),
     /remove the origin override/,
   );
+});
+
+test('publisher alerts use stable failure fingerprints and include actionable details', async () => {
+  const requests: Array<{
+    connector: string;
+    path: string;
+    init: {
+      method: string;
+      headers: Record<string, string>;
+      body: string;
+    };
+  }> = [];
+  const proxy = async (
+    connector: string,
+    path: string,
+    init: {
+      method: string;
+      headers: Record<string, string>;
+      body: string;
+    },
+  ): Promise<Response> => {
+    requests.push({ connector, path, init });
+    return Response.json({ id: `email_${requests.length}` });
+  };
+  const failure: PageFailure[] = [
+    {
+      path: '/article/example',
+      assertions: ['title was "Wrong title"', 'canonical was "https://wrong.example/article"'],
+    },
+  ];
+
+  await notifyPublisher(failure, proxy);
+  await notifyPublisher(structuredClone(failure), proxy);
+  await notifyPublisher([{ ...failure[0], path: '/article/changed' }], proxy);
+  await notifyPublisher(
+    [{ ...failure[0], assertions: ['title was "Another wrong title"'] }],
+    proxy,
+  );
+
+  assert.equal(requests.length, 4);
+  assert.ok(requests.every(({ connector, path }) => connector === 'resend' && path === '/emails'));
+
+  const keys = requests.map(({ init }) => init.headers['Idempotency-Key']);
+  assert.equal(keys[0], keys[1]);
+  assert.notEqual(keys[0], keys[2]);
+  assert.notEqual(keys[0], keys[3]);
+
+  const payload = JSON.parse(requests[0].init.body) as {
+    to: string[];
+    subject: string;
+    text: string;
+    html: string;
+  };
+  assert.deepEqual(payload.to, ['hello@hollywoodsaleswire.com']);
+  assert.equal(payload.subject, 'Crawler check failed on 1 route');
+  assert.match(payload.text, /\/article\/example: title was "Wrong title"/);
+  assert.match(
+    payload.text,
+    /\/article\/example: canonical was "https:\/\/wrong\.example\/article"/,
+  );
+  assert.match(payload.html, /\/article\/example: title was &quot;Wrong title&quot;/);
 });
 
 test('configured production server gates the live check behind crawler fixtures', async () => {
