@@ -1,19 +1,28 @@
 import { describe, expect, it } from "vitest";
 import {
   STAGE_SCHEDULE,
+  INCENTIVE_AWARD_STAGE_SCHEDULE,
   estimateStage,
   looksLikeProductionEntity,
   formatProjectStages,
   type TrackedProjectStage,
 } from "./productionStage";
 
+function expectNoGapsOrOverlaps(schedule: { startWeek: number; endWeek: number }[]) {
+  const sorted = [...schedule].sort((a, b) => a.startWeek - b.startWeek);
+  expect(sorted[0]!.startWeek).toBe(0);
+  for (let i = 1; i < sorted.length; i++) {
+    expect(sorted[i]!.startWeek).toBe(sorted[i - 1]!.endWeek);
+  }
+}
+
 describe("stage schedule", () => {
-  it("covers zero weeks with no gaps or overlaps", () => {
-    const sorted = [...STAGE_SCHEDULE].sort((a, b) => a.startWeek - b.startWeek);
-    expect(sorted[0]!.startWeek).toBe(0);
-    for (let i = 1; i < sorted.length; i++) {
-      expect(sorted[i]!.startWeek).toBe(sorted[i - 1]!.endWeek);
-    }
+  it("covers zero weeks with no gaps or overlaps (entity_formation schedule)", () => {
+    expectNoGapsOrOverlaps(STAGE_SCHEDULE);
+  });
+
+  it("covers zero weeks with no gaps or overlaps (incentive_award schedule)", () => {
+    expectNoGapsOrOverlaps(INCENTIVE_AWARD_STAGE_SCHEDULE);
   });
 });
 
@@ -47,6 +56,21 @@ describe("estimateStage", () => {
   it("never returns a negative elapsed time for a future-dated trigger", () => {
     const future = new Date(trigger.getTime() + 7 * 24 * 3600 * 1000);
     expect(estimateStage(future, trigger)?.weeksSinceTrigger).toBe(0);
+  });
+
+  it("times incentive-award triggers on a later clock than entity formations", () => {
+    // Real spot-check: CA awarded Tracker S4 its tax credit ~15 weeks before
+    // filming started. Under the entity_formation schedule that gap already
+    // reads as post-production; under incentive_award it correctly reads
+    // as still in production.
+    const now = new Date(trigger.getTime() + 15 * 7 * 24 * 3600 * 1000);
+    expect(estimateStage(trigger, now, "entity_formation")?.stage).toBe("Post-production");
+    expect(estimateStage(trigger, now, "incentive_award")?.stage).toBe("Production");
+  });
+
+  it("defaults to the entity_formation schedule when sourceType is omitted", () => {
+    const now = new Date(trigger.getTime() + 3 * 7 * 24 * 3600 * 1000);
+    expect(estimateStage(trigger, now)?.stage).toBe("Crew build-out");
   });
 });
 
