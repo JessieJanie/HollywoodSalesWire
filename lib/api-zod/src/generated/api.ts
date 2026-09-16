@@ -246,3 +246,24 @@ export const PublisherWireRunResponse = zod.object({
 })
 
 
+/**
+ * @summary List tracked projects with their modeled production-stage estimate (key-protected)
+ */
+export const PublisherProductionStagesQueryParams = zod.object({
+  "key": zod.coerce.string()
+})
+
+export const PublisherProductionStagesResponse = zod.object({
+  "projects": zod.array(zod.object({
+  "sourceType": zod.enum(['entity_formation', 'incentive_award']),
+  "name": zod.string(),
+  "jurisdiction": zod.string(),
+  "sourceUrl": zod.string(),
+  "triggerDate": zod.string(),
+  "stage": zod.string(),
+  "vendorWindow": zod.string(),
+  "weeksSinceTrigger": zod.number()
+}))
+})
+
+

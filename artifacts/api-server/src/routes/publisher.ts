@@ -10,6 +10,7 @@ import {
   specialReportsTable,
 } from "@workspace/db";
 import { executeBriefSend, executePaidSend } from "../lib/sendWire";
+import { listTrackedProjectStages } from "../lib/productionStage";
 import { PublisherSendResponse } from "@workspace/api-zod";
 import { currentWeekKey } from "../lib/wireResearch";
 import { ObjectStorageService } from "../lib/objectStorage";
@@ -286,6 +287,21 @@ router.post("/publisher/reports/confirm", async (req, res): Promise<void> => {
   }
 
   res.json({ slug, objectPath, deliveredCount });
+});
+
+/**
+ * GET /publisher/production-stages — tracked projects (entity formations and
+ * incentive awards) with their modeled current hiring/vendor-buying stage.
+ * These are elapsed-time estimates from a typical production timeline, not
+ * confirmed hiring status for any named project.
+ */
+router.get("/publisher/production-stages", async (req, res): Promise<void> => {
+  if (!keyOk(req.query.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  const projects = await listTrackedProjectStages();
+  res.json({ projects });
 });
 
 /**

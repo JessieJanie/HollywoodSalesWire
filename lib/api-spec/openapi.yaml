@@ -378,6 +378,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMessage"
+  /publisher/production-stages:
+    get:
+      operationId: publisherProductionStages
+      tags: [publisher]
+      summary: List tracked projects with their modeled production-stage estimate (key-protected)
+      parameters:
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tracked project stage estimates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublisherProductionStagesList"
+        "401":
+          description: Bad key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiMessage"
 components:
   schemas:
     PublisherKeyInput:
@@ -556,6 +580,35 @@ components:
             $ref: "#/components/schemas/PublisherReport"
         pendingMemberCount:
           type: number
+    TrackedProjectStage:
+      type: object
+      required: [sourceType, name, jurisdiction, sourceUrl, triggerDate, stage, vendorWindow, weeksSinceTrigger]
+      properties:
+        sourceType:
+          type: string
+          enum: [entity_formation, incentive_award]
+        name:
+          type: string
+        jurisdiction:
+          type: string
+        sourceUrl:
+          type: string
+        triggerDate:
+          type: string
+        stage:
+          type: string
+        vendorWindow:
+          type: string
+        weeksSinceTrigger:
+          type: number
+    PublisherProductionStagesList:
+      type: object
+      required: [projects]
+      properties:
+        projects:
+          type: array
+          items:
+            $ref: "#/components/schemas/TrackedProjectStage"
     PublisherReportUploadUrlInput:
       type: object
       required: [key, slug]

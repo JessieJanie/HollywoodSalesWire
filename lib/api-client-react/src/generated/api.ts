@@ -30,6 +30,8 @@ import type {
   PublisherDraftInput,
   PublisherDraftResult,
   PublisherKeyInput,
+  PublisherProductionStagesList,
+  PublisherProductionStagesParams,
   PublisherReportConfirmInput,
   PublisherReportConfirmResult,
   PublisherReportUploadUrlInput,
@@ -1128,4 +1130,88 @@ export const usePublisherWireRun = <TError = ErrorType<ApiMessage>,
       > => {
       return useMutation(getPublisherWireRunMutationOptions(options));
     }
+
+export const getPublisherProductionStagesUrl = (params: PublisherProductionStagesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/publisher/production-stages?${stringifiedParams}` : `/api/publisher/production-stages`
+}
+
+/**
+ * @summary List tracked projects with their modeled production-stage estimate (key-protected)
+ */
+export const publisherProductionStages = async (params: PublisherProductionStagesParams, options?: Parameters<typeof customFetch>[1]): Promise<PublisherProductionStagesList> => {
+
+  return customFetch<PublisherProductionStagesList>(getPublisherProductionStagesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getPublisherProductionStagesQueryKey = (params?: PublisherProductionStagesParams,) => {
+    return [
+    `/api/publisher/production-stages`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getPublisherProductionStagesQueryOptions = <TData = Awaited<ReturnType<typeof publisherProductionStages>>, TError = ErrorType<ApiMessage>>(params: PublisherProductionStagesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof publisherProductionStages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getPublisherProductionStagesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof publisherProductionStages>>> = ({ signal }) => publisherProductionStages(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof publisherProductionStages>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type PublisherProductionStagesQueryResult = NonNullable<Awaited<ReturnType<typeof publisherProductionStages>>>
+export type PublisherProductionStagesQueryError = ErrorType<ApiMessage>
+
+
+/**
+ * @summary List tracked projects with their modeled production-stage estimate (key-protected)
+ */
+
+export function usePublisherProductionStages<TData = Awaited<ReturnType<typeof publisherProductionStages>>, TError = ErrorType<ApiMessage>>(
+ params: PublisherProductionStagesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof publisherProductionStages>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getPublisherProductionStagesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 

@@ -121,6 +121,29 @@ export interface PublisherReportsList {
   pendingMemberCount: number;
 }
 
+export type TrackedProjectStageSourceType = typeof TrackedProjectStageSourceType[keyof typeof TrackedProjectStageSourceType];
+
+
+export const TrackedProjectStageSourceType = {
+  entity_formation: 'entity_formation',
+  incentive_award: 'incentive_award',
+} as const;
+
+export interface TrackedProjectStage {
+  sourceType: TrackedProjectStageSourceType;
+  name: string;
+  jurisdiction: string;
+  sourceUrl: string;
+  triggerDate: string;
+  stage: string;
+  vendorWindow: string;
+  weeksSinceTrigger: number;
+}
+
+export interface PublisherProductionStagesList {
+  projects: TrackedProjectStage[];
+}
+
 export interface PublisherReportUploadUrlInput {
   key: string;
   slug: string;
@@ -179,6 +202,10 @@ key: string;
 };
 
 export type PublisherReportsParams = {
+key: string;
+};
+
+export type PublisherProductionStagesParams = {
 key: string;
 };
 
