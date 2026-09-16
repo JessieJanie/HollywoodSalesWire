@@ -8,6 +8,7 @@ import {
   parseNbcUniversalJobs,
   parseNetflixJobs,
   parseWarnerBrosDiscoveryJobs,
+  type CreatorJobTrend,
 } from "./creatorJobs";
 
 describe("creator job title taxonomy", () => {
@@ -163,5 +164,115 @@ describe("weekly research handoff", () => {
     expect(markdown).toContain("Never sum categories");
     expect(markdown).toContain("not proof of an approved production budget");
     expect(markdown).toContain("0 exact-title matches");
+  });
+
+  it("says no trend is available before a second week's snapshot exists", () => {
+    const markdown = formatCreatorJobSignals(
+      [
+        {
+          studio: "Netflix",
+          category: "Digital Creator",
+          searchUrl: "https://example.com/search",
+          status: "ok",
+          matches: [{ title: "Digital Creator", url: "https://example.com/job/1" }],
+        },
+      ],
+      null,
+    );
+    expect(markdown).toContain("not yet available");
+    expect(markdown).not.toMatch(/vs\. \d{4}-\d{2}-\d{2}/);
+  });
+
+  it("reports a per-title-per-company delta against the prior week, never a summed total", () => {
+    const trend: CreatorJobTrend = {
+      priorWeekKey: "2026-09-07",
+      byKey: new Map([
+        ["Netflix|Digital Creator", { status: "ok", matchCount: 2 }],
+        ["Netflix|Streamer", { status: "ok", matchCount: 0 }],
+      ]),
+    };
+    const markdown = formatCreatorJobSignals(
+      [
+        {
+          studio: "Netflix",
+          category: "Digital Creator",
+          searchUrl: "https://example.com/search",
+          status: "ok",
+          matches: [{ title: "Digital Creator", url: "https://example.com/job/1" }],
+        },
+        {
+          studio: "Netflix",
+          category: "Streamer",
+          searchUrl: "https://example.com/search",
+          status: "ok",
+          matches: [{ title: "Streamer", url: "https://example.com/job/2" }],
+        },
+      ],
+      trend,
+    );
+    // Digital Creator dropped 2 -> 1 (-1); Streamer rose 0 -> 1 (+1). Each
+    // title/company pair is diffed on its own — never summed into one number.
+    expect(markdown).toContain("vs. 2026-09-07: -1");
+    expect(markdown).toContain("vs. 2026-09-07: +1");
+  });
+
+  it("never fabricates a delta when this title/company pair has no prior snapshot", () => {
+    const trend: CreatorJobTrend = { priorWeekKey: "2026-09-07", byKey: new Map() };
+    const markdown = formatCreatorJobSignals(
+      [
+        {
+          studio: "Amazon",
+          category: "Vlogger",
+          searchUrl: "https://example.com/search",
+          status: "ok",
+          matches: [],
+        },
+      ],
+      trend,
+    );
+    expect(markdown).toContain("no prior data");
+  });
+
+  it("treats a prior week's failed search as unknown coverage, never a flat/zero comparison", () => {
+    const trend: CreatorJobTrend = {
+      priorWeekKey: "2026-09-07",
+      byKey: new Map([["Disney|Vlogger", { status: "failed", matchCount: 0 }]]),
+    };
+    const markdown = formatCreatorJobSignals(
+      [
+        {
+          studio: "Disney",
+          category: "Vlogger",
+          searchUrl: "https://example.com/search",
+          status: "ok",
+          matches: [{ title: "Vlogger", url: "https://example.com/job/3" }],
+        },
+      ],
+      trend,
+    );
+    expect(markdown).toContain("prior coverage unavailable");
+    expect(markdown).not.toContain("vs. 2026-09-07: +1");
+  });
+
+  it("keeps a failed current-week search labeled unavailable rather than a comparable zero", () => {
+    const trend: CreatorJobTrend = {
+      priorWeekKey: "2026-09-07",
+      byKey: new Map([["NBCUniversal|Gaming Creator", { status: "ok", matchCount: 3 }]]),
+    };
+    const markdown = formatCreatorJobSignals(
+      [
+        {
+          studio: "NBCUniversal",
+          category: "Gaming Creator",
+          searchUrl: "https://example.com/search",
+          status: "failed",
+          matches: [],
+          detail: "timeout",
+        },
+      ],
+      trend,
+    );
+    expect(markdown).toContain("COVERAGE UNAVAILABLE");
+    expect(markdown).toContain("last known count 2026-09-07: 3");
   });
 });

@@ -1,3 +1,6 @@
+import { and, desc, eq, lt, sql } from "drizzle-orm";
+import { db, creatorJobSnapshotsTable } from "@workspace/db";
+
 const FETCH_TIMEOUT_MS = 20_000;
 
 export const CREATOR_JOB_TITLES = [
@@ -281,23 +284,124 @@ export async function collectCreatorJobSignals(): Promise<CreatorJobSignal[]> {
   );
 }
 
+function snapshotKey(studio: string, category: string): string {
+  return `${studio}|${category}`;
+}
+
+/**
+ * Persist this week's per-studio, per-category counts so future weeks can
+ * diff against them. Upserts on (weekKey, studio, category) so a manual
+ * retry within the same week replaces its own snapshot instead of
+ * duplicating it. A "failed" search is recorded as failed, never as a 0
+ * count, so missing coverage stays distinguishable from a genuine zero.
+ */
+export async function recordCreatorJobSnapshot(
+  weekKey: string,
+  signals: CreatorJobSignal[],
+): Promise<void> {
+  for (const signal of signals) {
+    await db
+      .insert(creatorJobSnapshotsTable)
+      .values({
+        weekKey,
+        studio: signal.studio,
+        category: signal.category,
+        status: signal.status,
+        matchCount: signal.status === "ok" ? signal.matches.length : 0,
+      })
+      .onConflictDoUpdate({
+        target: [
+          creatorJobSnapshotsTable.weekKey,
+          creatorJobSnapshotsTable.studio,
+          creatorJobSnapshotsTable.category,
+        ],
+        set: {
+          status: signal.status,
+          matchCount: signal.status === "ok" ? signal.matches.length : 0,
+          recordedAt: new Date(),
+        },
+      });
+  }
+  // Bound the table's growth — a few months of weekly trend history is
+  // plenty; nothing in the Wire looks back further than "last week".
+  await db
+    .delete(creatorJobSnapshotsTable)
+    .where(lt(creatorJobSnapshotsTable.recordedAt, sql`now() - interval '120 days'`));
+}
+
+export interface CreatorJobTrend {
+  /** Week key of the prior snapshot actually used for comparison (never the current week). */
+  priorWeekKey: string;
+  /** Map of "<studio>|<category>" -> prior week's row. */
+  byKey: Map<string, { status: "ok" | "failed"; matchCount: number }>;
+}
+
+/**
+ * Load the most recent snapshot week strictly before `weekKey`, so the Wire
+ * can compare current vs. prior once at least two distinct weeks exist.
+ * Returns null when there is no earlier week to compare against yet.
+ */
+export async function loadCreatorJobTrend(weekKey: string): Promise<CreatorJobTrend | null> {
+  const [priorWeekRow] = await db
+    .select({ weekKey: creatorJobSnapshotsTable.weekKey })
+    .from(creatorJobSnapshotsTable)
+    .where(lt(creatorJobSnapshotsTable.weekKey, weekKey))
+    .orderBy(desc(creatorJobSnapshotsTable.weekKey))
+    .limit(1);
+  if (!priorWeekRow) return null;
+
+  const rows = await db
+    .select()
+    .from(creatorJobSnapshotsTable)
+    .where(
+      and(
+        eq(creatorJobSnapshotsTable.weekKey, priorWeekRow.weekKey),
+      ),
+    );
+  const byKey = new Map<string, { status: "ok" | "failed"; matchCount: number }>();
+  for (const row of rows) {
+    byKey.set(snapshotKey(row.studio, row.category), {
+      status: row.status as "ok" | "failed",
+      matchCount: row.matchCount,
+    });
+  }
+  return { priorWeekKey: priorWeekRow.weekKey, byKey };
+}
+
 /** Build the evidence block handed to the weekly Wire drafting prompt. */
-export function formatCreatorJobSignals(signals: CreatorJobSignal[]): string {
+export function formatCreatorJobSignals(
+  signals: CreatorJobSignal[],
+  trend?: CreatorJobTrend | null,
+): string {
   return (
     `Weekly search of official studio ATS sources for IMDb's Digital Creator professional categories.\n` +
     `SEARCHED TITLES: ${CREATOR_JOB_TITLES.join(", ")}.\n` +
     `SOURCES: Netflix, Warner Bros. Discovery, Disney, Amazon, and NBCUniversal.\n` +
-    `READING RULES: Treat each title at each company as a separate hiring signal. Never sum categories or claim the matches are unique jobs across categories because one posting can overlap. A posting is not proof of an approved production budget or immediate purchase. Zero matches means only that this exact-title search found none; a failed search means coverage is unavailable, never zero. Do not treat individual creators as prospects merely because IMDb recognizes the category.\n\n` +
+    `READING RULES: Treat each title at each company as a separate hiring signal. Never sum categories or claim the matches are unique jobs across categories because one posting can overlap. A posting is not proof of an approved production budget or immediate purchase. Zero matches means only that this exact-title search found none; a failed search means coverage is unavailable, never zero. Do not treat individual creators as prospects merely because IMDb recognizes the category.\n` +
+    (trend
+      ? `WEEK-OVER-WEEK: each line below is tagged with its change vs. the week of ${trend.priorWeekKey}. Report per-title-per-company trends only — never sum categories into one trend line. "no prior data" means this exact title/company pair had no comparable snapshot last time; "prior coverage unavailable" means last week's search failed, so no comparison is possible — treat that as unknown, not flat.\n`
+      : `WEEK-OVER-WEEK: not yet available — fewer than two weekly snapshots exist. Report only this week's counts; do not claim a trend.\n`) +
+    `\n` +
     signals
       .map((signal) => {
+        const prior = trend?.byKey.get(snapshotKey(signal.studio, signal.category));
+        let trendNote = "";
+        if (trend) {
+          if (!prior) trendNote = " (no prior data)";
+          else if (prior.status === "failed") trendNote = " (prior coverage unavailable)";
+          else if (signal.status === "ok") {
+            const delta = signal.matches.length - prior.matchCount;
+            trendNote = ` (vs. ${trend.priorWeekKey}: ${delta > 0 ? `+${delta}` : delta})`;
+          }
+        }
         if (signal.status === "failed") {
-          return `- ${signal.studio} / ${signal.category}: COVERAGE UNAVAILABLE (${signal.detail ?? "search failed"})`;
+          return `- ${signal.studio} / ${signal.category}: COVERAGE UNAVAILABLE (${signal.detail ?? "search failed"})${trend && prior && prior.status === "ok" ? ` (last known count ${trend.priorWeekKey}: ${prior.matchCount})` : ""}`;
         }
         if (signal.matches.length === 0) {
-          return `- ${signal.studio} / ${signal.category}: 0 exact-title matches`;
+          return `- ${signal.studio} / ${signal.category}: 0 exact-title matches${trendNote}`;
         }
         return (
-          `- ${signal.studio} / ${signal.category}: ${signal.matches.length} exact-title match(es)\n` +
+          `- ${signal.studio} / ${signal.category}: ${signal.matches.length} exact-title match(es)${trendNote}\n` +
           signal.matches
             .map(
               (job) =>

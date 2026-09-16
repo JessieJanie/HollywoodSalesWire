@@ -399,7 +399,12 @@ export async function runWeeklyResearch(
               : undefined,
         });
 
-        const md = formatCreatorJobSignals(signals);
+        // Persist this week's counts before drafting so the comparison is
+        // available as soon as this run's own snapshot lands, and load the
+        // most recent PRIOR week (never this one) to diff against.
+        const trend = await loadCreatorJobTrend(weekKey);
+        const md = formatCreatorJobSignals(signals, trend);
+        await recordCreatorJobSnapshot(weekKey, signals);
         pages.push({
           url: "https://www.imdb.com/pressroom/",
           label: "HSW direct search — IMDb Digital Creator category job signals (weekly)",
