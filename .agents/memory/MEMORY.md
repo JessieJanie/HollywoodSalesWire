@@ -20,3 +20,4 @@
 - [Apollo prospecting](apollo-prospecting.md) — keyword-per-company search plus client-side title filtering is reliable; Instantly lead enrollment requires the `campaign` field.
 - [Cold-email campaign format](cold-email-campaign-format.md) — HSW cold outreach always uses five-email campaigns; never draft or launch a three-email sequence.
 - [Production-stage timing model calibration](production-stage-timing-model.md) — entity_formation and incentive_award triggers need separate STAGE_SCHEDULEs; award-to-shoot gap runs far later than formation-to-shoot.
+- [Instantly campaign bulk cleanup](instantly-campaign-cleanup.md) — diff by campaign ID against cold_campaigns table, not by name; orphans only ever got the monitor lead, never real prospects.
