@@ -19,19 +19,25 @@ import { ArrowRight, CheckCircle2, Lock, ShieldCheck, Users, User } from "lucide
 export function PricingContent({
   founding,
   deadlineLabel,
-  token,
+  checkoutSource,
 }: {
   founding: boolean;
   deadlineLabel?: string;
-  token?: string;
+  /** Either a subscriber's personal token, or "cold" for the tokenless cold-campaign offer. */
+  checkoutSource?: { token: string } | { source: "cold" };
 }) {
   const indWk = founding ? FOUNDING_RATE_WK : REGULAR_RATE_WK;
   const indYr = founding ? FOUNDING_RATE_YR : REGULAR_RATE_YR;
   const teamYr = founding ? TEAM_FOUNDING_RATE_YR : TEAM_REGULAR_RATE_YR;
   // Founding checkout is never linked directly — the server re-verifies the
-  // subscriber's deadline before redirecting to Stripe.
-  const foundingCheckout = (plan: string) =>
-    `${import.meta.env.BASE_URL}api/founding-checkout?token=${encodeURIComponent(token ?? "")}&plan=${plan}`;
+  // offer is genuinely still open (by token, or by the cold-campaign window)
+  // before redirecting to Stripe.
+  const foundingCheckout = (plan: string) => {
+    const params = new URLSearchParams({ plan });
+    if (checkoutSource && "token" in checkoutSource) params.set("token", checkoutSource.token);
+    if (checkoutSource && "source" in checkoutSource) params.set("source", checkoutSource.source);
+    return `${import.meta.env.BASE_URL}api/founding-checkout?${params.toString()}`;
+  };
   const indLink = founding ? foundingCheckout("individual") : CHECKOUT_LINKS.INDIVIDUAL_REGULAR;
   const teamLink = founding ? foundingCheckout("team") : CHECKOUT_LINKS.TEAM_REGULAR;
 

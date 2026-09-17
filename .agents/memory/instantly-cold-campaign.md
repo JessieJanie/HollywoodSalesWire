@@ -40,6 +40,13 @@ Every new cold campaign batch gets a fresh deadline = the day E5 sends (Day 7 fr
 Offer is always: Founding Member price ($38/wk, $1,995/yr) + 3 free Special Reports.
 When creating a new batch: replace [DATE TOKEN] in all 5 emails with the actual E5 date before loading into Instantly.
 
+## CTA links must land on a founding-verified page
+Cold leads have no per-lead token/DB record (uploadColdLeads only pushes to Instantly, no local lead table), so their CTA links must point to `/founding-offer` (tokenless), which calls `GET /api/cold-offer` to check whether ANY recent cold-campaign batch's 7-day window is still open, then checkout goes through `/api/founding-checkout?source=cold` (server re-verifies before honoring the founding Stripe link).
+
+**Why:** all 5 emails promise the $38/wk founding rate; a CTA pointing at the bare homepage/regular `/order` page silently reverts a cold-email prospect to the $77/wk regular rate with no path back to the promised price. Found Sept 2026 with all 14 cold-campaign batches created since Aug 18 having `leads_uploaded = 0` (no real prospect had ever actually been sent a cold email), so this bug hadn't yet caused a real loss — but would have as soon as leads were uploaded.
+
+**How to apply:** any change to cold-campaign email copy/CTAs must keep the link as `/founding-offer?...` (existing UTM params fine), never a bare `/` or `/order` link.
+
 ## Campaign settings
 - `stop_on_reply: true` (lead exits sequence on any reply)
 - `open_tracking: false` (better cold deliverability)

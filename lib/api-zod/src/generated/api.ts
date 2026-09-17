@@ -48,6 +48,16 @@ export const FoundingOfferResponse = zod.object({
 
 
 /**
+ * @summary Whether a cold-campaign Founding-rate window is currently open
+ */
+export const ColdOfferResponse = zod.object({
+  "active": zod.boolean(),
+  "deadline": zod.string(),
+  "deadlineLabel": zod.string()
+})
+
+
+/**
  * @summary Publisher dashboard status (key-protected)
  */
 export const PublisherStatusQueryParams = zod.object({

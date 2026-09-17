@@ -10,6 +10,8 @@ import { logger } from "./logger";
 import {
   collectCreatorJobSignals,
   formatCreatorJobSignals,
+  loadCreatorJobTrend,
+  recordCreatorJobSnapshot,
 } from "./creatorJobs";
 import {
   recordProjectSignal,

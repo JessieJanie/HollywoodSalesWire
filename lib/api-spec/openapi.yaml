@@ -72,6 +72,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiMessage"
+  /cold-offer:
+    get:
+      operationId: coldOffer
+      tags: [marketing]
+      summary: Whether a cold-campaign Founding-rate window is currently open
+      responses:
+        "200":
+          description: Offer status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FoundingOfferStatus"
   /publisher/status:
     get:
       operationId: publisherStatus

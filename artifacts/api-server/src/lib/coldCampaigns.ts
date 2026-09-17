@@ -19,6 +19,10 @@ import { randomUUID } from "node:crypto";
 import { and, desc, eq } from "drizzle-orm";
 import { db, coldCampaignsTable } from "@workspace/db";
 import { logger } from "./logger";
+import { offerDeadline, offerDeadlineLabel } from "./foundingDeadline";
+
+/** Each cold-campaign batch promises the Founding rate through 7 days after it starts. */
+export const COLD_OFFER_DAYS = 7;
 
 const INSTANTLY_BASE = "https://api.instantly.ai/api/v2";
 const SENDING_ACCOUNTS = [
@@ -180,7 +184,7 @@ I'm running a Founding Member offer through ${dl}: subscribe by midnight Eastern
 
 I'll make the full case over the next few days. But if you already know what a two-week-old award list is worth to your pipeline, there's no reason to wait:
 
-https://hollywoodsaleswire.com/?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e1
+https://hollywoodsaleswire.com/founding-offer?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e1
 
 Karilyn Colegrove, Publisher
 Hollywood Sales Wire
@@ -221,7 +225,7 @@ The Requisition Read — careers pages as disclosure documents. The job titles t
 
 Subscribe by ${dl} — or right now — and all three are yours free, along with the Founding Member rate: $38 a week ($1,995 a year) instead of $77 ($3,995), locked for as long as you stay.
 
-https://hollywoodsaleswire.com/?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e2
+https://hollywoodsaleswire.com/founding-offer?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e2
 
 Tomorrow I'll show you the method working on a real example.
 
@@ -266,7 +270,7 @@ Reports teach you to fish. The Wire hands you fish every Tuesday — because you
 
 All three reports are free with a Founding Membership — $38 a week ($1,995 a year) instead of the regular $77 ($3,995) — if you subscribe by ${dl}.
 
-https://hollywoodsaleswire.com/?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e3
+https://hollywoodsaleswire.com/founding-offer?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e3
 
 Karilyn Colegrove, Publisher
 Hollywood Sales Wire`,
@@ -309,7 +313,7 @@ The deadline. This offer ends at midnight Eastern on ${dl}. After that, the Foun
 
 Subscribe now and the three Special Reports arrive immediately, with your first Wire the following Tuesday.
 
-https://hollywoodsaleswire.com/?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e4
+https://hollywoodsaleswire.com/founding-offer?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e4
 
 Karilyn Colegrove, Publisher
 Hollywood Sales Wire
@@ -340,7 +344,7 @@ The math one last time: $38 a week, against $1,985 in reports that are yours to 
 
 You risk nothing. The deadline is real. It's tonight.
 
-https://hollywoodsaleswire.com/?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e5
+https://hollywoodsaleswire.com/founding-offer?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e5
 
 Whatever you decide, thank you for reading this far. If the Wire isn't for you, I hope the last week at least changed how you look at a careers page.
 
@@ -646,6 +650,54 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
     "cold-campaigns: batch created and active",
   );
   return { campaignId, batchTag, deadline, contactCap };
+}
+
+export interface ColdOfferStatus {
+  active: boolean;
+  deadline: string; // ISO instant, or the most recent one if none is active
+  deadlineLabel: string;
+}
+
+/**
+ * Cold-campaign recipients are promised the Founding rate for
+ * COLD_OFFER_DAYS after their batch starts. Multiple batches run on a
+ * rolling schedule (Tue/Wed/Thu), so the offer is "active" as long as ANY
+ * recent batch's window is still open — this is what keeps the founding
+ * price genuinely live on the site for prospects clicking a cold email,
+ * instead of reverting to the regular rate while emails still promise the
+ * founding one. When several batches are active, we surface the latest
+ * (furthest-out) deadline.
+ */
+export async function getColdOfferStatus(): Promise<ColdOfferStatus> {
+  const rows = await db
+    .select({ createdAt: coldCampaignsTable.createdAt })
+    .from(coldCampaignsTable)
+    .orderBy(desc(coldCampaignsTable.createdAt))
+    .limit(20);
+
+  const now = Date.now();
+  let best: Date | null = null;
+  for (const row of rows) {
+    const deadline = offerDeadline(row.createdAt, COLD_OFFER_DAYS);
+    if (deadline.getTime() >= now && (!best || deadline.getTime() > best.getTime())) {
+      best = deadline;
+    }
+  }
+
+  if (best) {
+    return { active: true, deadline: best.toISOString(), deadlineLabel: offerDeadlineLabel(best) };
+  }
+
+  // No active batch — report the most recent batch's (expired) deadline so
+  // the page can still show a meaningful label instead of a blank state.
+  const mostRecentDeadline = rows.length
+    ? offerDeadline(rows[0].createdAt, COLD_OFFER_DAYS)
+    : new Date();
+  return {
+    active: false,
+    deadline: mostRecentDeadline.toISOString(),
+    deadlineLabel: offerDeadlineLabel(mostRecentDeadline),
+  };
 }
 
 /**

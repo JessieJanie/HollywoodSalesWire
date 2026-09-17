@@ -21,9 +21,9 @@ function etParts(d: Date): { y: number; m: number; d: number; hour: number } {
   return { y: get("year"), m: get("month"), d: get("day"), hour: get("hour") % 24 };
 }
 
-/** The instant the offer expires: 23:59:59 ET on the deadline day. */
-export function foundingDeadline(createdAt: Date): Date {
-  const target = new Date(createdAt.getTime() + OFFER_DAYS * 24 * 60 * 60 * 1000);
+/** The instant an N-day-out offer expires: 23:59:59 ET on the deadline day. */
+export function offerDeadline(createdAt: Date, days: number): Date {
+  const target = new Date(createdAt.getTime() + days * 24 * 60 * 60 * 1000);
   const { y, m, d } = etParts(target);
   // End of that ET day is 23:59:59 ET = 03:59:59 UTC next day (EDT, -4) or
   // 04:59:59 UTC (EST, -5). Try EDT first and verify.
@@ -36,13 +36,22 @@ export function foundingDeadline(createdAt: Date): Date {
   throw new Error("Could not resolve Eastern end-of-day");
 }
 
-/** Human label for the deadline day, e.g. "Tuesday, August 18". */
-export function deadlineLabel(createdAt: Date): string {
-  const deadline = foundingDeadline(createdAt);
+/** Human label for the deadline instant, e.g. "Tuesday, August 18". */
+export function offerDeadlineLabel(deadline: Date): string {
   return new Intl.DateTimeFormat("en-US", {
     timeZone: ET,
     weekday: "long",
     month: "long",
     day: "numeric",
   }).format(deadline);
+}
+
+/** The instant the offer expires: 23:59:59 ET on the deadline day. */
+export function foundingDeadline(createdAt: Date): Date {
+  return offerDeadline(createdAt, OFFER_DAYS);
+}
+
+/** Human label for the deadline day, e.g. "Tuesday, August 18". */
+export function deadlineLabel(createdAt: Date): string {
+  return offerDeadlineLabel(foundingDeadline(createdAt));
 }

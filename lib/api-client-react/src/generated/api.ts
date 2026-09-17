@@ -311,6 +311,83 @@ export function useFoundingOffer<TData = Awaited<ReturnType<typeof foundingOffer
 
 
 
+export const getColdOfferUrl = () => {
+
+
+
+
+  return `/api/cold-offer`
+}
+
+/**
+ * @summary Whether a cold-campaign Founding-rate window is currently open
+ */
+export const coldOffer = async ( options?: Parameters<typeof customFetch>[1]): Promise<FoundingOfferStatus> => {
+
+  return customFetch<FoundingOfferStatus>(getColdOfferUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getColdOfferQueryKey = () => {
+    return [
+    `/api/cold-offer`
+    ] as const;
+    }
+
+
+export const getColdOfferQueryOptions = <TData = Awaited<ReturnType<typeof coldOffer>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof coldOffer>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getColdOfferQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof coldOffer>>> = ({ signal }) => coldOffer({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof coldOffer>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ColdOfferQueryResult = NonNullable<Awaited<ReturnType<typeof coldOffer>>>
+export type ColdOfferQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Whether a cold-campaign Founding-rate window is currently open
+ */
+
+export function useColdOffer<TData = Awaited<ReturnType<typeof coldOffer>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof coldOffer>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getColdOfferQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getPublisherStatusUrl = (params: PublisherStatusParams,) => {
   const normalizedParams = new URLSearchParams();
 
