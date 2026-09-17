@@ -24,6 +24,7 @@ import { FROM_ADDRESS, SEQUENCE, SITE_URL } from "./emailSequence";
 import { deadlineLabel } from "./foundingDeadline";
 import { resendRequest } from "./resend";
 import { createColdBatch } from "./coldCampaigns";
+import { autoFillColdLeads } from "./apolloProspecting";
 import { logger } from "./logger";
 
 /**
@@ -694,11 +695,48 @@ async function tickColdCampaigns(): Promise<void> {
         deadline: result.deadline,
         contactCap: result.contactCap,
       },
-      "scheduler: cold campaign batch created and active — add leads in Instantly to begin sending",
+      "scheduler: cold campaign batch created and active",
     );
+
+    try {
+      const fill = await autoFillColdLeads(result.contactCap);
+      logger.info(
+        { batchTag: result.batchTag, ...fill, needed: result.contactCap },
+        "scheduler: Apollo auto-prospecting filled the new batch",
+      );
+      if (fill.uploaded < result.contactCap) {
+        await notifyColdPipelineIssue(
+          `Only found ${fill.uploaded} of ${result.contactCap} named contacts this week (searched ${fill.searched} companies). The target-company list may need expanding — the campaign is live but under-filled.`,
+        );
+      }
+    } catch (err) {
+      logger.error({ err, batchTag: result.batchTag }, "scheduler: Apollo auto-prospecting failed — campaign is live but empty");
+      await notifyColdPipelineIssue(
+        `The campaign was created, but automatic prospecting failed before any leads were uploaded: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   } catch (err) {
     lastColdBatchDay = null; // release so next tick retries
     logger.error({ err }, "scheduler: cold campaign batch creation failed — will retry next tick");
+    await notifyColdPipelineIssue(
+      `This week's cold campaign batch failed to create in Instantly: ${err instanceof Error ? err.message : String(err)}. It will retry automatically on the next check.`,
+    );
+  }
+}
+
+async function notifyColdPipelineIssue(reason: string): Promise<void> {
+  try {
+    await resendRequest("/emails", {
+      method: "POST",
+      body: {
+        from: FROM_ADDRESS,
+        to: ["hello@hollywoodsaleswire.com"],
+        subject: "Cold outreach pipeline needs a look",
+        text: `Karilyn,\n\n${reason}\n\nNo action needed unless you want to dig in — this is informational so nothing silently stays broken.\n\n— Hollywood Sales Wire research desk`,
+      },
+    });
+  } catch (err) {
+    logger.error({ err }, "scheduler: failed to send cold-pipeline notice");
   }
 }
 

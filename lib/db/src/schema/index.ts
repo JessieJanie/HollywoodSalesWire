@@ -28,3 +28,4 @@ export * from "./socialDrafts";
 export * from "./coldCampaigns";
 export * from "./projectSignals";
 export * from "./creatorJobSnapshots";
+export * from "./coldProspectContacts";
