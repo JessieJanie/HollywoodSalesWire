@@ -122,11 +122,16 @@ function formatDeadline(date: Date): string {
   });
 }
 
-/** Convert plain-text email body → HTML paragraphs (Instantly silently drops plain text). */
+/**
+ * Convert plain-text email body → HTML paragraphs (Instantly silently drops
+ * plain text). Explicit margin on each <p> — many email clients strip the
+ * browser default <p> margin, which collapses paragraphs together with no
+ * visible blank line between them or before the P.S.
+ */
 function toHtml(plain: string): string {
   return plain
     .split(/\n{2,}/)
-    .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
+    .map((p) => `<p style="margin:0 0 20px;">${p.replace(/\n/g, "<br>")}</p>`)
     .join("\n");
 }
 

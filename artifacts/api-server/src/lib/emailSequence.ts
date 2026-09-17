@@ -61,7 +61,10 @@ function utm(offerUrl: string, n: number): string {
   return `${offerUrl}${sep}utm_source=email&utm_medium=founding&utm_campaign=hsw-launch&utm_content=e${n}`;
 }
 
-const p = (s: string) => `<p>${s}</p>`;
+// Explicit margin — many email clients (Outlook, some webmail resets) strip
+// the browser default <p> margin, which collapses every paragraph together
+// with no visible blank line between them or before the P.S.
+const p = (s: string) => `<p style="margin:0 0 20px;">${s}</p>`;
 const sig = p("Karilyn Colegrove, Publisher<br />Hollywood Sales Wire");
 
 export const WELCOME_EMAIL = {
