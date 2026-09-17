@@ -28,7 +28,10 @@ interface TargetCompany {
 
 // Curated vendor pool — same categories used in prior manual prospecting runs
 // (payroll, equipment rental, post production, insurance, stage, catering,
-// production software). Expand this list over time as it depletes.
+// production software, plus transportation/location-support and camera/lens
+// added in the Sept 2026 expansion). Expand this list over time as it
+// depletes — each contacted person is permanently excluded, so the pool
+// must stay ahead of the weekly ramp (10-30 contacts/week).
 const TARGET_COMPANIES: TargetCompany[] = [
   // Payroll / production finance
   { company: "Sargent-Disc", location: "United Kingdom" },
@@ -38,6 +41,11 @@ const TARGET_COMPANIES: TargetCompany[] = [
   { company: "GreenSlate", location: "United States" },
   { company: "Media Services", location: "United States" },
   { company: "PSR Production Payroll", location: "United States" },
+  { company: "Assemble Payroll", location: "United States" },
+  { company: "CAPS Payroll", location: "United States" },
+  { company: "Track15", location: "United States" },
+  { company: "Centtrip", location: "United Kingdom" },
+  { company: "Digital Media Services", location: "Canada" },
   // Equipment rental / lighting
   { company: "Procam Take 2", location: "United Kingdom" },
   { company: "VFG UK", location: "United Kingdom" },
@@ -46,30 +54,76 @@ const TARGET_COMPANIES: TargetCompany[] = [
   { company: "Arc Lighting", location: "United Kingdom" },
   { company: "Panalux", location: "United Kingdom" },
   { company: "Bebob", location: "United Kingdom" },
+  { company: "Lee Lighting", location: "United Kingdom" },
+  { company: "Sunbelt Rentals Film & TV", location: "United Kingdom" },
   { company: "Panavision", location: "United States" },
   { company: "Keslow Camera", location: "United States" },
   { company: "ARRI Rental", location: "United States" },
+  { company: "MBS Equipment Company", location: "United States" },
+  { company: "Cinelease", location: "United States" },
+  { company: "PRG", location: "United States" },
+  { company: "Illumination Dynamics", location: "United States" },
+  { company: "Chapman/Leonard Studio Equipment", location: "United States" },
+  { company: "William F. White International", location: "Canada" },
+  { company: "Vistek", location: "Canada" },
+  { company: "Lemac Film & Digital", location: "Australia" },
+  // Camera & lens
+  { company: "Otto Nemenz International", location: "United States" },
+  { company: "AbelCine", location: "United States" },
+  { company: "Radiant Images", location: "United States" },
+  { company: "Vantage Film", location: "United States" },
   // Post production
   { company: "Molinare", location: "United Kingdom" },
   { company: "Halo Post", location: "United Kingdom" },
   { company: "Splice TV", location: "United Kingdom" },
   { company: "Sohonet", location: "United Kingdom" },
   { company: "Film Facilities", location: "United Kingdom" },
+  { company: "Envy Post Production", location: "United Kingdom" },
+  { company: "Goldcrest Films", location: "United Kingdom" },
+  { company: "Chainsaw Europe", location: "United Kingdom" },
+  { company: "Technicolor", location: "United States" },
+  { company: "Deluxe", location: "United States" },
+  { company: "Fin Design + Effects", location: "Australia" },
   // Insurance
   { company: "Front Row Insurance", location: "United Kingdom" },
   { company: "AIG Entertainment", location: "United Kingdom" },
+  { company: "Media Insurance Brokers", location: "United Kingdom" },
   { company: "DeWitt Stern", location: "United States" },
+  { company: "Aon Entertainment", location: "United States" },
+  { company: "Truman Van Dyke Company", location: "United States" },
+  { company: "Momentous Insurance Brokerage", location: "United States" },
   // Stage / studio
   { company: "3 Mills Studios", location: "United Kingdom" },
   { company: "Twickenham Studios", location: "United Kingdom" },
   { company: "The Film Group", location: "United Kingdom" },
+  { company: "Pinewood Studios", location: "United Kingdom" },
+  { company: "Shepperton Studios", location: "United Kingdom" },
+  { company: "Elstree Studios", location: "United Kingdom" },
+  { company: "Wolf Studios Wales", location: "United Kingdom" },
+  { company: "Trilith Studios", location: "United States" },
+  { company: "EUE/Screen Gems Studios", location: "United States" },
+  { company: "Sunset Studios", location: "United States" },
+  { company: "Radford Studio Center", location: "United States" },
+  { company: "Kaufman Astoria Studios", location: "United States" },
   // Catering
   { company: "Location Catering", location: "United Kingdom" },
   { company: "BS Film Catering", location: "United Kingdom" },
+  { company: "Studio Catering Company", location: "United States" },
+  // Transportation & on-set support
+  { company: "All Action Transportation", location: "United States" },
+  { company: "Set Medic", location: "United States" },
+  { company: "On Location Education", location: "United States" },
+  { company: "Aerial Filmworks", location: "United States" },
+  { company: "FilmLA", location: "United States" },
   // Production software / tech
   { company: "StudioBinder", location: "United States" },
   { company: "Yamdu", location: "United States" },
   { company: "Celtx", location: "United States" },
+  { company: "SetHero", location: "United States" },
+  { company: "Breakdown Services", location: "United States" },
+  { company: "ShotGrid", location: "United States" },
+  { company: "MASV", location: "Canada" },
+  { company: "ftrack", location: "United Kingdom" },
 ];
 
 const TITLE_RE =
