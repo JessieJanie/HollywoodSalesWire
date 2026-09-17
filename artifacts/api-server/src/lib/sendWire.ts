@@ -43,7 +43,7 @@ function paragraphsHtml(bodyText: string): string {
     .split(/\n\s*\n/)
     .map((s) => s.trim())
     .filter(Boolean)
-    .map((s) => `<p>${escapeHtml(s).replace(/\n/g, "<br />")}</p>`)
+    .map((s) => `<p style="margin:0 0 20px;">${escapeHtml(s).replace(/\n/g, "<br />")}</p>`)
     .join("\n");
 }
 
@@ -67,7 +67,7 @@ export function briefHtml(bodyText: string, unsubscribeUrl: string): string {
     .map((s) =>
       /^→\s*/.test(s)
         ? `<p style="margin:28px 0;"><a href="${ORDER_URL}" style="background:#1d5c3a;color:#ffffff;padding:12px 24px;text-decoration:none;font-family:Arial,sans-serif;font-size:15px;">${escapeHtml(s.replace(/^→\s*/, ""))} &rarr;</a></p>`
-        : `<p>${escapeHtml(s).replace(/\n/g, "<br />")}</p>`,
+        : `<p style="margin:0 0 20px;">${escapeHtml(s).replace(/\n/g, "<br />")}</p>`,
     )
     .join("\n");
   const hasCta = /(^|\n)→\s*/.test(bodyText);
@@ -99,9 +99,9 @@ export function paidWireHtml(bodyText: string, memberShelfUrl: string): string {
   <body style="margin:0;padding:0;background:#f6f5f2;">
     <div style="max-width:560px;margin:0 auto;padding:32px 24px;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;font-size:17px;line-height:1.6;background:#ffffff;">
       <p style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;color:#8a8577;text-transform:uppercase;">HSW Weekly Wire — Member Edition</p>
-      <p>Good morning — here's your HSW Weekly Wire.</p>
-      <p>This issue has also been placed in your <a href="${memberShelfUrl}" style="color:#1d5c3a;">HSW Shelf</a> on the website, where every issue and Special Report of yours is kept.</p>
-      <p>— Karilyn</p>
+      <p style="margin:0 0 20px;">Good morning — here's your HSW Weekly Wire.</p>
+      <p style="margin:0 0 20px;">This issue has also been placed in your <a href="${memberShelfUrl}" style="color:#1d5c3a;">HSW Shelf</a> on the website, where every issue and Special Report of yours is kept.</p>
+      <p style="margin:0 0 20px;">— Karilyn</p>
       <hr style="border:none;border-top:1px solid #e5e2da;margin:24px 0;" />
       ${paragraphsHtml(bodyText)}
       <hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />

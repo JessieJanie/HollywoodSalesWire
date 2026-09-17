@@ -359,9 +359,9 @@ router.post("/shelf/request-link", async (req, res): Promise<void> => {
         to: [email],
         subject: "Your HSW Shelf link",
         html:
-          `<p>Here&#8217;s your private HSW Shelf link — every issue and report we've sent you, yours to keep:</p>` +
-          `<p><a href="${link}">Open your HSW Shelf</a></p>` +
-          `<p>Once you open it, this browser will remember you — next time, just visit ` +
+          `<p style="margin:0 0 20px;">Here&#8217;s your private HSW Shelf link — every issue and report we've sent you, yours to keep:</p>` +
+          `<p style="margin:0 0 20px;"><a href="${link}">Open your HSW Shelf</a></p>` +
+          `<p style="margin:0 0 20px;">Once you open it, this browser will remember you — next time, just visit ` +
           `<a href="${SITE_URL}/shelf">${SITE_URL.replace("https://", "")}/shelf</a>.</p>`,
       },
     });

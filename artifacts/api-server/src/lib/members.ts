@@ -181,7 +181,7 @@ const WELCOME_REPORT_DESCRIPTIONS: Record<string, string> = {
 };
 
 function foundingRateLockHtml(amountCents: number | null): string {
-  const p = (s: string) => `<p>${s}</p>`;
+  const p = (s: string) => `<p style="margin:0 0 20px;">${s}</p>`;
   const h = (s: string) =>
     `<p style="font-family:Arial,sans-serif;font-size:12px;letter-spacing:2px;color:#8a8577;text-transform:uppercase;margin:32px 0 12px;">${s}</p>`;
   // Derive annual and weekly display from the actual checkout amount so this
@@ -204,7 +204,7 @@ function welcomeHtml(
   plan: string | null,
   amountCents: number | null,
 ): string {
-  const p = (s: string) => `<p>${s}</p>`;
+  const p = (s: string) => `<p style="margin:0 0 20px;">${s}</p>`;
   const h = (s: string) =>
     `<p style="font-family:Arial,sans-serif;font-size:12px;letter-spacing:2px;color:#8a8577;text-transform:uppercase;margin:32px 0 12px;">${s}</p>`;
   const shelfLink = shelfUrl(email, SITE_URL);
@@ -288,12 +288,12 @@ function specialReportsHtml(
 <html>
   <body style="margin:0;padding:0;background:#f6f5f2;">
     <div style="max-width:560px;margin:0 auto;padding:32px 24px;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;font-size:17px;line-height:1.6;background:#ffffff;">
-      <p>Your three Special Reports are ready. Click any title to download:</p>
+      <p style="margin:0 0 20px;">Your three Special Reports are ready. Click any title to download:</p>
       <ul style="padding-left:20px;margin:24px 0;">
         ${links}
       </ul>
-      <p>These links are yours and never expire — the reports are yours to keep. They also live on your HSW Shelf, linked in your welcome email.</p>
-      <p>Karilyn Colegrove, Publisher<br />Hollywood Sales Wire</p>
+      <p style="margin:0 0 20px;">These links are yours and never expire — the reports are yours to keep. They also live on your HSW Shelf, linked in your welcome email.</p>
+      <p style="margin:0 0 20px;">Karilyn Colegrove, Publisher<br />Hollywood Sales Wire</p>
       <hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />
       <p style="font-size:12px;color:#8a8577;font-family:Arial,sans-serif;">
         Hollywood Sales Wire &middot; <a href="${SITE_URL}" style="color:#8a8577;">hollywoodsaleswire.com</a>
