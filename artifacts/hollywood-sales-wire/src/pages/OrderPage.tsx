@@ -91,16 +91,16 @@ export function PricingContent({
               <h2 className="text-xl font-mono-data font-bold tracking-widest m-0">INDIVIDUAL</h2>
             </div>
             <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-5xl font-serif font-bold tracking-tight">${indWk}</span>
-              <span className="text-muted-foreground font-medium">/ week</span>
+              <span className="text-5xl font-serif font-bold tracking-tight">${indYr.toLocaleString()}</span>
+              <span className="text-muted-foreground font-medium">/ year</span>
             </div>
             <p className="text-sm font-mono-data text-muted-foreground mb-4">
-              BILLED ANNUALLY AS ${indYr.toLocaleString()}
+              BILLED ANNUALLY (${indWk}/WEEK)
             </p>
             {founding ? (
               <>
                 <div className="inline-block px-2 py-1 bg-muted text-xs font-medium text-muted-foreground line-through mb-1">
-                  Regular Rate: ${REGULAR_RATE_WK}/wk (${REGULAR_RATE_YR.toLocaleString()}/yr)
+                  Regular Rate: ${REGULAR_RATE_YR.toLocaleString()}/yr (${REGULAR_RATE_WK}/wk)
                 </div>
                 <p className="text-sm font-medium mt-2 text-primary">
                   Rate locked for as long as membership continues.
