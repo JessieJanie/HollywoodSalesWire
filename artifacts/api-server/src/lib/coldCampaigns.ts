@@ -47,10 +47,38 @@ const STEP_DELAYS = [0, 1, 1, 2, 3] as const;
  */
 const MAILBOX_DAILY_CAP = 50; // informational only — not sent to Instantly API
 
-/** Week 1 begins Tuesday, September 8, 2026; Week 5+ stays at 30 contacts. */
+/**
+ * Week 1 begins Tuesday, September 8, 2026, at the already-launched levels
+ * (10, then 15 contacts/campaign). From week 3 the ramp grows ~40%/week —
+ * in line with cold-domain scaling guidance — until it reaches a ceiling
+ * tied to real mailbox capacity, then holds there indefinitely.
+ *
+ * Ceiling derivation (set Sept 17, 2026 per Karilyn's decision to ramp as
+ * fast as the mailboxes can safely support): all 3 sending mailboxes were
+ * confirmed at 100% warmup health and cleared by Instantly for 50 sends/day
+ * each (150/day technical max). With 3 campaigns/week (Tue/Wed/Thu) and a
+ * 5-email sequence spread over ~7 days, steady-state volume works out to
+ * roughly 2.14x the per-campaign contact cap in emails/day. A ceiling of 40
+ * contacts/campaign lands around 85 emails/day — comfortably under the
+ * 150/day hard limit while matching the highest range mailbox health
+ * supports. Do not raise this ceiling without re-checking mailbox warmup
+ * health first — pushing past what's actually earned risks unnatural-ramp
+ * spam signals, and exceeding the 150/day mailbox limit doesn't add real
+ * throughput anyway since Instantly throttles at the mailbox level.
+ */
 const CONTACT_RAMP_START_UTC = Date.UTC(2026, 8, 8);
-const CONTACT_RAMP = [10, 15, 20, 25, 30] as const;
+const CONTACT_RAMP_ANCHORS = [10, 15] as const;
+const CONTACT_RAMP_GROWTH = 1.4;
+const CONTACT_RAMP_CEILING = 40;
 const DAY_MS = 24 * 60 * 60 * 1000;
+
+function contactCapForWeek(weekIndex: number): number {
+  if (weekIndex < CONTACT_RAMP_ANCHORS.length) return CONTACT_RAMP_ANCHORS[weekIndex];
+  const lastAnchor = CONTACT_RAMP_ANCHORS[CONTACT_RAMP_ANCHORS.length - 1];
+  const weeksBeyondAnchor = weekIndex - (CONTACT_RAMP_ANCHORS.length - 1);
+  const grown = lastAnchor * Math.pow(CONTACT_RAMP_GROWTH, weeksBeyondAnchor);
+  return Math.min(CONTACT_RAMP_CEILING, Math.round(grown));
+}
 
 const GENERIC_MAILBOX_NAMES = new Set([
   "accounts",
@@ -457,7 +485,7 @@ export function getColdCampaignContactCap(startDate: Date): number {
   const weekIndex = Math.floor(
     (campaignDateUtc - CONTACT_RAMP_START_UTC) / (7 * DAY_MS),
   );
-  return CONTACT_RAMP[Math.min(weekIndex, CONTACT_RAMP.length - 1)];
+  return contactCapForWeek(weekIndex);
 }
 
 /**
