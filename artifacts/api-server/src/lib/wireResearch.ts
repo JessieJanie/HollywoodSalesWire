@@ -61,6 +61,15 @@ export const RESEARCH_BEAT: { url: string; label: string }[] = [
     url: "https://www.georgiaentertainment.com/news/",
     label: "Georgia Entertainment — Georgia film/production news",
   },
+  {
+    // Added Sept 18, 2026 at Karilyn's request — Hollywood production is
+    // actively migrating to states competing for it on incentives and cost;
+    // Tennessee is the most active mover right now (Paramount-Skydance
+    // relocation reporting cites it directly). Track its incentive program
+    // and announcements the same way TX/GA/NM already are.
+    url: "https://www.tnentertainment.com/film/incentives",
+    label: "Tennessee Entertainment Commission — production incentives",
+  },
 ];
 
 const MAX_EXPLORE_URLS = 8;
