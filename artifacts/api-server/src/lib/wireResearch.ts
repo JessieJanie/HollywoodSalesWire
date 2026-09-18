@@ -75,6 +75,34 @@ export const RESEARCH_BEAT: { url: string; label: string }[] = [
     url: "https://www.tnentertainment.com/film/incentives",
     label: "Tennessee Entertainment Commission — production incentives",
   },
+  {
+    // Added Sept 18, 2026 — additional states actively courting production
+    // away from California, chosen for active momentum (new/expanding
+    // incentive programs or reported production relocation), not just any
+    // state with a film office.
+    url: "https://www.okfilmmusic.org/",
+    label: "Oklahoma Film + Music Office — incentives and production news",
+  },
+  {
+    // Netflix has been reported shifting production toward New Jersey;
+    // NJ's 30-35% credit is among the most aggressive in the country.
+    url: "https://www.njeda.gov/film",
+    label: "New Jersey Economic Development Authority — Film & Digital Media Tax Credit",
+  },
+  {
+    url: "https://www.louisianaentertainment.gov/film/motion-picture-production-program",
+    label: "Louisiana Entertainment — Motion Picture Production Program",
+  },
+  {
+    // Nevada passed AB 238 in 2025, a major incentive expansion aimed
+    // squarely at pulling production (and studio construction) from CA.
+    url: "https://film.nv.gov/",
+    label: "Nevada Film Office — permits, locations, and tax incentives",
+  },
+  {
+    url: "https://dceo.illinois.gov/whyillinois/film/filmtaxcredit.html",
+    label: "Illinois Dept. of Commerce — Film Production Tax Credit",
+  },
 ];
 
 const MAX_EXPLORE_URLS = 8;
