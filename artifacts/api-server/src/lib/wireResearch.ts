@@ -20,6 +20,11 @@ import {
   formatProjectStages,
   looksLikeProductionEntity,
 } from "./productionStage";
+import {
+  getPendingIndustryVoices,
+  markIndustryVoicesUsed,
+  formatIndustryVoicesForPrompt,
+} from "./industryVoices";
 
 const NOTIFY_EMAIL = "hello@hollywoodsaleswire.com";
 
@@ -113,7 +118,12 @@ Write this week's full Tuesday Wire draft in markdown. Non-negotiable rules:
       TIER 4: All other items, including any items sourced primarily from trade publications (Deadline, Variety, THR). These are valid but always appear last.
   (d) Each numbered item uses bold markdown for the number: **1.** **2.** etc. — not ### heading syntax.
   (e) Each item: WHO (named production/company), WHAT HAPPENED (award, filing, report, announcement — with figures), WHY MONEY MOVES (what they now must buy and roughly when the window is), WHO SHOULD CALL (which vendor categories this is a live prospect for). Keep each field tight — one short paragraph maximum. No meta-commentary about the research process (never mention "last week's feed flagged this" or internal notes about fetch attempts).
-  (f) A "Watch List — Check Next Week" section: tight one-liner bullets only.
+  (f) An "Industry Voices" section — ONLY when an INDUSTRY VOICES QUEUE is provided below the pages. Placed after the numbered signal items, before the Watch List. Rules for this section only:
+      - This is attributed opinion the publisher chose to share, not sourced research — keep it clearly boxed off from the numbered signal items above and never let it influence their claim discipline.
+      - One short entry per voice: name the person/source up front (e.g. "**Industry voice: Spencer Pratt**"), then 2-4 sentences in your own words describing what they argued and why it matters to a vendor reading this Wire. Do not reproduce inflammatory or partisan language verbatim — describe the substance of the argument plainly.
+      - Any specific dollar figure, jobs number, or study the voice cites gets "(unverified — single source, publisher-shared opinion)" appended the first time it's mentioned.
+      - End each entry with "Source: <name/handle>, <where>" — never a skim402.com or internal URL.
+  (g) A "Watch List — Check Next Week" section: tight one-liner bullets only.
 - The Wire's promise to subscribers is all three signal families every week where the evidence supports them: (a) production SPENDING signals (incentive awards, budgets, buildouts), (b) new ENTITY FORMATIONS (production companies/LLCs just created — early-stage leads), and (c) HIRING tells (job-posting patterns that reveal spend before it is announced). Draw items from each family the pages support; never fabricate one to fill a category. Entity formations and proprietary hiring data are HSW exclusives — always lead with them.
 - Scannability rules: short paragraphs, no dense walls of text. WHO SHOULD CALL is a list of vendor types, not an essay. If a WHO field lists more than five productions, name the top three by budget and summarize the rest in one line.
 - Voice: plain-spoken, direct, a working salesperson's respect for the reader's time. No hype words, no exclamation marks.
@@ -593,9 +603,11 @@ export async function runWeeklyResearch(
               .map((p) => `=== LAST WEEK: ${p.label}\nURL: ${p.url}\n---\n${p.markdown.slice(0, PREV_PAGE_CHARS)}`)
               .join("\n\n")}`
           : "\n\n(No previous week's pages available — this is the first run; treat everything as new but say so in the dateline.)";
+      const pendingVoices = await getPendingIndustryVoices();
+      const voicesBlock = formatIndustryVoicesForPrompt(pendingVoices);
       const wireMarkdown = await claude(
         WIRE_PROMPT,
-        `THIS WEEK'S PAGES:\n\n${pagesToPrompt(pages, PAGE_CHARS_IN_PROMPT)}${prevBlock}`,
+        `THIS WEEK'S PAGES:\n\n${pagesToPrompt(pages, PAGE_CHARS_IN_PROMPT)}${prevBlock}${voicesBlock}`,
         16000,
       );
       if (wireMarkdown.trim().length < 300) throw new Error("Wire draft came back too short to be usable.");
@@ -620,6 +632,10 @@ export async function runWeeklyResearch(
           })),
         })
         .where(eq(wireRunsTable.id, run.id));
+
+      if (pendingVoices.length > 0) {
+        await markIndustryVoicesUsed(pendingVoices.map((v) => v.id), weekKey);
+      }
 
       // Best-effort: schedule a LinkedIn + X version of the Brief in Typefully.
       // Never blocks or fails the run. The
