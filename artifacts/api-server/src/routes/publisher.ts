@@ -18,6 +18,7 @@ import { deliverReportsToPendingMembers } from "../lib/members";
 import {
   uploadColdLeads,
   getLatestColdCampaign,
+  getColdCampaignContactCap,
   validateColdLead,
   type ColdLead,
 } from "../lib/coldCampaigns";
@@ -108,6 +109,39 @@ router.post("/publisher/send", async (req, res): Promise<void> => {
     return;
   }
   res.json(PublisherSendResponse.parse({ sent: result.sent }));
+});
+
+/**
+ * POST /publisher/cold-campaigns/fill-now — manually run Apollo
+ * auto-prospecting against the latest cold campaign, filling any remaining
+ * slots up to its weekly contact cap. Used as a one-off backfill when the
+ * scheduled fill failed earlier (e.g. an expired/invalid Apollo key) and the
+ * next scheduled batch is still days away.
+ */
+router.post("/publisher/cold-campaigns/fill-now", async (req, res): Promise<void> => {
+  if (!keyOk(req.body?.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  try {
+    const campaign = await getLatestColdCampaign();
+    if (!campaign) {
+      res.status(404).json({ error: "No cold campaign found." });
+      return;
+    }
+    const contactCap = getColdCampaignContactCap(campaign.createdAt);
+    const needed = Math.max(0, contactCap - campaign.leadsUploaded);
+    if (needed === 0) {
+      res.json({ campaignId: campaign.campaignId, uploaded: 0, searched: 0, needed: 0, message: "Already at cap." });
+      return;
+    }
+    const { autoFillColdLeads } = await import("../lib/apolloProspecting");
+    const fill = await autoFillColdLeads(needed);
+    res.json({ campaignId: campaign.campaignId, ...fill, needed });
+  } catch (err) {
+    req.log?.error?.({ err }, "cold-campaigns fill-now failed");
+    res.status(502).json({ error: err instanceof Error ? err.message : "Fill failed." });
+  }
 });
 
 router.post("/publisher/paid-send", async (req, res): Promise<void> => {
