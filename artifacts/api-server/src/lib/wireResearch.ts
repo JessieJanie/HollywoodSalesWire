@@ -722,10 +722,21 @@ export async function runWeeklyResearch(
         `Ready to send: PENDING YOUR REVIEW — nothing goes out until you send it.`,
       ].join("\n");
 
-      await notify(
-        "Your Tuesday Wire draft is ready",
-        `Karilyn,\n\nThe Monday research run finished. This week's paid Wire draft and the Free Edition draft are waiting in your publisher console for review.\n\n${report}\n\nOpen your bookmarked publisher console link to review.\n\n— Hollywood Sales Wire research desk`,
-      );
+      // The draft is already saved and the run is already "ready" at this
+      // point. A failure sending the "it's ready" email must never flip a
+      // genuinely successful run back to "failed" and hide a good draft —
+      // so this is fenced off the same way the Typefully block is.
+      try {
+        await notify(
+          "Your Tuesday Wire draft is ready",
+          `Karilyn,\n\nThe Monday research run finished. This week's paid Wire draft and the Free Edition draft are waiting in your publisher console for review.\n\n${report}\n\nOpen your bookmarked publisher console link to review.\n\n— Hollywood Sales Wire research desk`,
+        );
+      } catch (notifyErr) {
+        logger.warn(
+          { err: notifyErr, runId: run.id },
+          "weekly research: ready-notification failed to send (draft itself is fine and saved as ready)",
+        );
+      }
       logger.info({ runId: run.id }, "weekly research: ready");
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
