@@ -23,6 +23,7 @@ timeoutMs = 20000
 
 [userenv.shared]
 PUBLISHER_KEY = "88e9fbe421aa2a142dd8cd38e112aba86ef15299f9971e1e"
+COLD_OUTREACH_PAUSED = "true"
 
 [nix]
 channel = "stable-25_05"

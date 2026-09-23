@@ -682,6 +682,10 @@ function ptDateString(now = new Date()): string {
 async function tickColdCampaigns(): Promise<void> {
   if (process.env.REPLIT_DEPLOYMENT !== "1") return;
   if (!process.env.INSTANTLY_API_KEY) return;
+  // Kill switch: set COLD_OUTREACH_PAUSED=true to stop new batches from being
+  // created/filled while the Instantly setup is being reviewed. Does not
+  // touch already-created campaigns — pause those directly in Instantly.
+  if (process.env.COLD_OUTREACH_PAUSED === "true") return;
   if (!isColdCampaignDue()) return;
   const today = ptDateString();
   if (lastColdBatchDay === today) return;
