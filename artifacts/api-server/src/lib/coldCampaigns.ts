@@ -19,10 +19,7 @@ import { randomUUID } from "node:crypto";
 import { and, desc, eq } from "drizzle-orm";
 import { db, coldCampaignsTable } from "@workspace/db";
 import { logger } from "./logger";
-import { offerDeadline, offerDeadlineLabel } from "./foundingDeadline";
-
-/** Each cold-campaign batch promises the Founding rate through 7 days after it starts. */
-export const COLD_OFFER_DAYS = 7;
+import { offerDeadlineLabel, nextMondayDeadline } from "./foundingDeadline";
 
 const INSTANTLY_BASE = "https://api.instantly.ai/api/v2";
 const SENDING_ACCOUNTS = [
@@ -687,50 +684,23 @@ export async function createColdBatch(startDate = new Date()): Promise<ColdBatch
 
 export interface ColdOfferStatus {
   active: boolean;
-  deadline: string; // ISO instant, or the most recent one if none is active
+  deadline: string; // ISO instant
   deadlineLabel: string;
 }
 
 /**
- * Cold-campaign recipients are promised the Founding rate for
- * COLD_OFFER_DAYS after their batch starts. Multiple batches run on a
- * rolling schedule (Tue/Wed/Thu), so the offer is "active" as long as ANY
- * recent batch's window is still open — this is what keeps the founding
- * price genuinely live on the site for prospects clicking a cold email,
- * instead of reverting to the regular rate while emails still promise the
- * founding one. When several batches are active, we surface the latest
- * (furthest-out) deadline.
+ * Cold-campaign recipients are promised the Founding rate through the end
+ * of the coming Monday (Eastern Time) — a rolling weekly cutoff, not a
+ * per-batch window. Viewed on a Monday, that Monday itself is the deadline
+ * (it doesn't roll to the following week). This is always "active" because
+ * the deadline is by definition never in the past; it resets to the next
+ * Monday right after the current one lapses. Used for both the display
+ * endpoint (GET /cold-offer) and checkout gating (GET /founding-checkout),
+ * so the two never disagree about when the offer ends.
  */
 export async function getColdOfferStatus(): Promise<ColdOfferStatus> {
-  const rows = await db
-    .select({ createdAt: coldCampaignsTable.createdAt })
-    .from(coldCampaignsTable)
-    .orderBy(desc(coldCampaignsTable.createdAt))
-    .limit(20);
-
-  const now = Date.now();
-  let best: Date | null = null;
-  for (const row of rows) {
-    const deadline = offerDeadline(row.createdAt, COLD_OFFER_DAYS);
-    if (deadline.getTime() >= now && (!best || deadline.getTime() > best.getTime())) {
-      best = deadline;
-    }
-  }
-
-  if (best) {
-    return { active: true, deadline: best.toISOString(), deadlineLabel: offerDeadlineLabel(best) };
-  }
-
-  // No active batch — report the most recent batch's (expired) deadline so
-  // the page can still show a meaningful label instead of a blank state.
-  const mostRecentDeadline = rows.length
-    ? offerDeadline(rows[0].createdAt, COLD_OFFER_DAYS)
-    : new Date();
-  return {
-    active: false,
-    deadline: mostRecentDeadline.toISOString(),
-    deadlineLabel: offerDeadlineLabel(mostRecentDeadline),
-  };
+  const deadline = nextMondayDeadline();
+  return { active: true, deadline: deadline.toISOString(), deadlineLabel: offerDeadlineLabel(deadline) };
 }
 
 /**

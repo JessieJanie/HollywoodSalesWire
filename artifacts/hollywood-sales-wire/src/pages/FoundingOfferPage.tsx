@@ -29,9 +29,10 @@ function useCountdown(deadlineIso: string | undefined) {
  * - Token link (warm-prospect welcome series): the subscriber's personal
  *   42-day window, verified via /api/founding-offer.
  * - No token (cold-outreach campaigns, which have no per-lead subscriber
- *   record): the current cold-campaign batch's 7-day window, verified via
- *   /api/cold-offer. This keeps the rate the cold email promised genuinely
- *   live on the page instead of silently reverting to the regular rate.
+ *   record): a rolling weekly deadline (the coming Monday, end of day
+ *   Eastern), verified via /api/cold-offer. This keeps the rate the cold
+ *   email promised genuinely live on the page instead of silently
+ *   reverting to the regular rate.
  */
 export default function FoundingOfferPage() {
   const token = new URLSearchParams(window.location.search).get("token") ?? "";
