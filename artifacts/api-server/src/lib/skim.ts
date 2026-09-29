@@ -152,11 +152,12 @@ export interface EntityFormationItem {
 
 /**
  * New film/TV-adjacent entity formations (LLCs etc.) from official registries.
- * Coverage: US state registries (NY/TX/NM observed) + UK Companies House as of
- * Aug 2026. Returns at most the ~100 newest items globally; jurisdiction query
- * params are ignored (verified) — high UK volume can crowd out US filings.
+ * Coverage: US state registries (NY/TX/NM) + UK Companies House + Canada (ON
+ * observed), rebalanced as of Sept 2026 — the ~100 newest items now split
+ * roughly evenly across jurisdictions instead of UK volume crowding out the
+ * rest. Jurisdiction query params are still ignored (verified).
  * (CA/GA are bot-walled — known gaps, not failures,
- * so crawl.status stays "ok"; degradedSources means NY or TX itself broke).
+ * so crawl.status stays "ok"; degradedSources means an existing source itself broke).
  * Keyword-filtered upstream with word boundaries; expect non-film noise —
  * caller must do second-pass relevance judgment. Dedupe is by registry ID.
  * Use payload.publishedAt for freshness (TX filingDate can be future-dated).

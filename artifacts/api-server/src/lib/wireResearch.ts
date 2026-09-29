@@ -502,7 +502,7 @@ export async function runWeeklyResearch(
           const md =
             `New business-entity formations from official registries, keyword-filtered for film/TV terms (Productions/Pictures/Films/Studios/Media/Entertainment/Post/VFX/Television).\n` +
             `CITE AS: each filing's own official registry page (the URL listed under the item) — never cite this feed's URL and never describe the keyword filter in the Wire.\n` +
-            `READING RULES: coverage is US state registries (NY, TX, NM observed) + UK Companies House ONLY (CA and GA are known gaps — never claim national coverage). The feed returns only the ~100 newest filings across ALL jurisdictions, and UK volume is high — if a US state shows few or no items, treat that as UNKNOWN (possibly crowded out), never as "no new filings there". Expect heavy non-film noise, especially from the UK feed ("AIMCREATIVE LTD", wellness/photo/generic media) — apply second-pass relevance judgment: keep only names suggesting a production entity, project LLC, or per-series vehicle (e.g. "...S2 LTD", "...PRODUCTION(S) LTD" with a title-like name); drop the rest. The UK is a major production hub — a fresh per-project or per-series company at Companies House is the same early buy-signal as a US production LLC (banking, insurance, payroll, legal, stage/vendor spend follow), and UK filings name incorporation dates and registered offices on the linked official page. TX filingDate can be future-dated (declared "responsibility beginning" date) — cite publishedAt for freshness.` +
+            `READING RULES: coverage is US state registries (NY, TX, NM) + UK Companies House + Canada (CA and GA are known gaps — never claim national coverage). As of Sept 2026 the ~100 newest filings split roughly evenly across jurisdictions instead of one crowding out the rest, but if a covered jurisdiction still shows few or no items in a given crawl, treat that as UNKNOWN, never as "no new filings there". Expect heavy non-film noise, especially from the UK feed ("AIMCREATIVE LTD", wellness/photo/generic media) — apply second-pass relevance judgment: keep only names suggesting a production entity, project LLC, or per-series vehicle (e.g. "...S2 LTD", "...PRODUCTION(S) LTD" with a title-like name); drop the rest. The UK and Canada are both production hubs — a fresh per-project or per-series company there is the same early buy-signal as a US production LLC (banking, insurance, payroll, legal, stage/vendor spend follow), and UK/Canadian filings name incorporation dates and registered addresses on the linked official page. TX filingDate can be future-dated (declared "responsibility beginning" date) — cite publishedAt for freshness.` +
             `${degradedSources?.length ? ` DEGRADED SOURCES (live source down this crawl): ${degradedSources.join(", ")}.` : ""} Crawl status: ${crawlStatus ?? "ok"}.\n\n` +
             fresh
               .map(
@@ -512,7 +512,7 @@ export async function runWeeklyResearch(
               .join("\n");
           pages.push({
             url: "https://skim402.com/api/v2/signal/entity-formations/latest",
-            label: "Skim Signal — new film/TV entity formations (US state registries + UK Companies House)",
+            label: "Skim Signal — new film/TV entity formations (US state registries + UK Companies House + Canada)",
             markdown: md,
             wordCount: md.split(/\s+/).filter(Boolean).length,
             status: "ok (structured signal)",
