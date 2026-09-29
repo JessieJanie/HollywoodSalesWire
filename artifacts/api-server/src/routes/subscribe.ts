@@ -1,7 +1,7 @@
 import { Router, type IRouter } from "express";
 import { randomBytes } from "node:crypto";
-import { eq } from "drizzle-orm";
-import { db, emailSubscribersTable, sequenceEmailsTable } from "@workspace/db";
+import { desc, eq } from "drizzle-orm";
+import { db, emailSubscribersTable, sequenceEmailsTable, weeklyPreviewsTable } from "@workspace/db";
 import { SubscribeBody, SubscribeResponse } from "@workspace/api-zod";
 import { resendRequest } from "../lib/resend";
 import { FROM_ADDRESS, SEQUENCE, SITE_URL, WELCOME_EMAIL } from "../lib/emailSequence";
@@ -73,6 +73,11 @@ router.post("/subscribe", async (req, res): Promise<void> => {
   // Send a single immediate welcome email; the subscriber is now on the warm
   // prospect list. Campaigns to this list are sent manually later.
   const unsubscribeUrl = `${SITE_URL}/api/unsubscribe?token=${token}`;
+  const [latestBrief] = await db
+    .select({ subject: weeklyPreviewsTable.subject, bodyText: weeklyPreviewsTable.bodyText })
+    .from(weeklyPreviewsTable)
+    .orderBy(desc(weeklyPreviewsTable.sentAt))
+    .limit(1);
   try {
     const sent = await resendRequest<{ id: string }>("/emails", {
       method: "POST",
@@ -80,7 +85,7 @@ router.post("/subscribe", async (req, res): Promise<void> => {
         from: FROM_ADDRESS,
         to: [email],
         subject: WELCOME_EMAIL.subject,
-        html: WELCOME_EMAIL.body({ unsubscribeUrl }),
+        html: WELCOME_EMAIL.body({ unsubscribeUrl, latestBrief }),
       },
     });
     await db.insert(sequenceEmailsTable).values({

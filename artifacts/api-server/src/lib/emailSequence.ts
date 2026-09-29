@@ -56,6 +56,29 @@ function cta(label: string, url: string): string {
   return `<p style="margin:28px 0;"><a href="${url}" style="background:#1d5c3a;color:#ffffff;padding:12px 24px;text-decoration:none;font-family:Arial,sans-serif;font-size:15px;">${label}</a></p>`;
 }
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/**
+ * Renders a Weekly Brief's plain-text body as HTML paragraphs, same
+ * convention as sendWire.ts's briefHtml: a line starting with "→ " becomes
+ * a link-button rather than a paragraph. Kept independent from sendWire.ts
+ * (no shared import) to avoid a cross-module coupling for one small helper.
+ */
+function briefBodyHtml(bodyText: string, ctaUrl: string): string {
+  return bodyText
+    .split(/\n\s*\n/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((s) =>
+      /^→\s*/.test(s)
+        ? `<p style="margin:20px 0;"><a href="${ctaUrl}" style="background:#1d5c3a;color:#ffffff;padding:10px 20px;text-decoration:none;font-family:Arial,sans-serif;font-size:14px;">${escapeHtml(s.replace(/^→\s*/, ""))} &rarr;</a></p>`
+        : `<p style="margin:0 0 16px;">${escapeHtml(s).replace(/\n/g, "<br />")}</p>`,
+    )
+    .join("\n");
+}
+
 function utm(offerUrl: string, n: number): string {
   const sep = offerUrl.includes("?") ? "&" : "?";
   return `${offerUrl}${sep}utm_source=email&utm_medium=founding&utm_campaign=hsw-launch&utm_content=e${n}`;
@@ -67,12 +90,29 @@ function utm(offerUrl: string, n: number): string {
 const p = (s: string) => `<p style="margin:0 0 20px;">${s}</p>`;
 const sig = p("Karilyn Colegrove, Publisher<br />Hollywood Sales Wire");
 
+export interface WelcomeEmailOpts {
+  unsubscribeUrl: string;
+  /** Most recently sent HSW Weekly Brief, if one exists yet, so new
+   * subscribers get an issue right away instead of waiting for next Tuesday. */
+  latestBrief?: { subject: string; bodyText: string } | null;
+}
+
 export const WELCOME_EMAIL = {
   subject: "You're on the list — Hollywood Sales Wire",
-  body: ({ unsubscribeUrl }: { unsubscribeUrl: string }) =>
+  body: ({ unsubscribeUrl, latestBrief }: WelcomeEmailOpts) =>
     wrap(
       `${p("Hello Reader,")}
 ${p("You're on the Hollywood Sales Wire list. Every week you'll get the free edition of the Wire — the shape of the week's buying signals, so you can see how the system works. You'll also hear from us with occasional offers — and nothing else. We never rent or share this list.")}
+${
+  latestBrief
+    ? `${p("Here's the most recent issue, so you don't have to wait until Tuesday for your first one:")}
+<hr style="border:none;border-top:1px solid #e5e2da;margin:24px 0;" />
+<p style="font-family:Arial,sans-serif;font-size:11px;letter-spacing:2px;color:#8a8577;text-transform:uppercase;margin:0 0 8px;">HSW Weekly Brief</p>
+<p style="font-weight:bold;margin:0 0 16px;">${escapeHtml(latestBrief.subject)}</p>
+${briefBodyHtml(latestBrief.bodyText, `${SITE_URL}/order?utm_source=email&utm_medium=welcome&utm_campaign=weekly-brief`)}
+<hr style="border:none;border-top:1px solid #e5e2da;margin:24px 0;" />`
+    : `${p("Your first issue arrives this coming Tuesday.")}`
+}
 ${p("In the meantime, you can learn more about the Wire and membership here:")}
 ${cta("Visit Hollywood Sales Wire", SITE_URL)}
 ${sig}`,
