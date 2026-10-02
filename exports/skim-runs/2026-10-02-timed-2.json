@@ -1,0 +1,72 @@
+[
+  {
+    "email": "strategy@shadowboxstudios.com",
+    "first_name": "",
+    "last_name": "",
+    "source_label": "Shadowbox/Blackhall",
+    "source_url": "https://shadowboxstudios.com/contact/"
+  },
+  {
+    "email": "thomas@shadowboxstudios.com",
+    "first_name": "Thomas",
+    "last_name": "Laub",
+    "source_label": "Shadowbox/Blackhall",
+    "source_url": "https://shadowboxstudios.com/contact/"
+  },
+  {
+    "email": "gear@gearheadgrip.com",
+    "first_name": "",
+    "last_name": "",
+    "source_label": "Gearhead",
+    "source_url": "https://www.gearheadgrip.com/"
+  },
+  {
+    "email": "hrdept@steinerstudios.com",
+    "first_name": "",
+    "last_name": "",
+    "source_label": "Steiner",
+    "source_url": "https://www.steinerstudios.com/contact-us/"
+  },
+  {
+    "email": "barbara@bwagnerpr.com",
+    "first_name": "Barbara",
+    "last_name": "Wagner Communications",
+    "source_label": "Steiner",
+    "source_url": "https://www.steinerstudios.com/contact-us/"
+  },
+  {
+    "email": "_contactus@pinewoodgroup.com",
+    "first_name": "Canadian",
+    "last_name": "Sales",
+    "source_label": "Pinewood",
+    "source_url": "https://pinewoodgroup.com/contact/"
+  },
+  {
+    "email": "pts_contactus@pinewoodgroup.com",
+    "first_name": "Canadian",
+    "last_name": "Sales",
+    "source_label": "Pinewood",
+    "source_url": "https://pinewoodgroup.com/contact/"
+  },
+  {
+    "email": "productions@halo.co.uk",
+    "first_name": "",
+    "last_name": "",
+    "source_label": "Halo",
+    "source_url": "https://www.halo.co.uk/"
+  },
+  {
+    "email": "hires@halo.co.uk",
+    "first_name": "",
+    "last_name": "",
+    "source_label": "Halo",
+    "source_url": "https://www.halo.co.uk/"
+  },
+  {
+    "email": "scenechronizesupport@ep.com",
+    "first_name": "",
+    "last_name": "",
+    "source_label": "Scenechronize",
+    "source_url": "https://www.scenechronize.com/"
+  }
+]

@@ -21,3 +21,5 @@
 - [Cold-email campaign format](cold-email-campaign-format.md) — HSW cold outreach always uses five-email campaigns; never draft or launch a three-email sequence.
 - [Production-stage timing model calibration](production-stage-timing-model.md) — entity_formation and incentive_award triggers need separate STAGE_SCHEDULEs; award-to-shoot gap runs far later than formation-to-shoot.
 - [Instantly campaign bulk cleanup](instantly-campaign-cleanup.md) — diff by campaign ID against cold_campaigns table, not by name; orphans only ever got the monitor lead, never real prospects.
+- [Skim prospecting](skim-prospecting.md) — vendor contact pages give info@ only; directory pages with named booking contacts work; pool drains before Apollo, never into a mid-send campaign.
+- [Special Report ideas](special-report-ideas.md) — candidate topics pitched for future reports ("The Stages of a Production").

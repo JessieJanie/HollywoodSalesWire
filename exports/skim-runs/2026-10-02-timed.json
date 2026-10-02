@@ -1,0 +1,415 @@
+[
+  {
+    "email": "cnadal@mbseco.com",
+    "first_name": "Chris",
+    "last_name": "Nadal",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "dbromley@mbsmediacampus.com",
+    "first_name": "Dana",
+    "last_name": "Bromley",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "macosta@mbsmediacampus.com",
+    "first_name": "Manny",
+    "last_name": "Acosta",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "ilyanna_hernandez@theculverstudios.com",
+    "first_name": "Ilyanna",
+    "last_name": "Hernandez",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "dhwang@mbseco.com",
+    "first_name": "Danny",
+    "last_name": "Hwang",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "bookla@eastendstudios.com",
+    "first_name": "East",
+    "last_name": "End Studios",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "jeremy@lahangar.com",
+    "first_name": "Jeremy",
+    "last_name": "Jacobs",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "dazzoto@mbseco.com",
+    "first_name": "Dave",
+    "last_name": "Azzoto",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "jramos@mbseco.com",
+    "first_name": "Joseph",
+    "last_name": "Ramos",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "nigel.alandy@viacomcbs.com",
+    "first_name": "Radford",
+    "last_name": "Studio Center",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "arucho@raleighstudios.com",
+    "first_name": "Adam",
+    "last_name": "Rucho",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "idepaz@mbseco.com",
+    "first_name": "Izzy",
+    "last_name": "DePaz",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "timothy.wong@tvcityla.com",
+    "first_name": "Television",
+    "last_name": "City Studios",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "golaverri@mbseco.com",
+    "first_name": "Gustavo",
+    "last_name": "Olaverri",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "jmemovich@mbseco.com",
+    "first_name": "Justin",
+    "last_name": "Memovich",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "nick@roadtownenterprises.com",
+    "first_name": "Atlanta",
+    "last_name": "Metro Studios",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "sabby@mbseco.com",
+    "first_name": "Sabby",
+    "last_name": "Fernandez",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "billy.stoll@cinespace.com",
+    "first_name": "Billy",
+    "last_name": "Stoll",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "lcrumpton@mbseco.com",
+    "first_name": "Lindsay",
+    "last_name": "Crumpton",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "dan@electricowlstudios.com",
+    "first_name": "Dan",
+    "last_name": "Rosenfelt",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "john@raulet.com",
+    "first_name": "Mailing",
+    "last_name": "Avenue Stageworks",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "mfischer@mbseco.com",
+    "first_name": "Michael",
+    "last_name": "Fischer",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "atlexpendables@mbseco.com",
+    "first_name": "MBSE",
+    "last_name": "Southeast HQ",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "mreams@ofsoptics.com",
+    "first_name": "Mike",
+    "last_name": "Reams",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "michael@techopolycap.com",
+    "first_name": "Michael",
+    "last_name": "Greenberg",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "dirwin@mbseco.com",
+    "first_name": "David",
+    "last_name": "Irwin",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "dsimonton@the-mbsgroup.com",
+    "first_name": "Dawn",
+    "last_name": "Simonton",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "arojas@mbseco.com",
+    "first_name": "Aurelio",
+    "last_name": "Rojas",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "john@chicagostudiocity.com",
+    "first_name": "John",
+    "last_name": "Crededio",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "bburns@mbseco.com",
+    "first_name": "Brett",
+    "last_name": "Burns",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "nick.pissios@cinespace.com",
+    "first_name": "Nick",
+    "last_name": "Pissios",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "rosemary@knickpt.com",
+    "first_name": "RoseMary",
+    "last_name": "Prodonovich",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "chiexpendables@mbseco.com",
+    "first_name": "",
+    "last_name": "",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "ddouglas@mbseco.com",
+    "first_name": "Dave",
+    "last_name": "Douglas",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "metexp@mbseco.com",
+    "first_name": "MBSE",
+    "last_name": "Metairie",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "frontdesk@secondlinestages.com",
+    "first_name": "Second",
+    "last_name": "Line Stages",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "mark@redsky-studios.com",
+    "first_name": "Mark",
+    "last_name": "Sacco",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "mdavis@mbseco.com",
+    "first_name": "Mark",
+    "last_name": "Davis",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "nsabqstages@netflix.com",
+    "first_name": "Netflix",
+    "last_name": "Studios Albuquerque",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "james_arata@insightequipment.com",
+    "first_name": "James",
+    "last_name": "Arata",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "pete@kaufmanastoria.com",
+    "first_name": "Kaufman",
+    "last_name": "Astoria Studios",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "lisa@silvercup.nyc",
+    "first_name": "Lisa",
+    "last_name": "Sanchez",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "jcressey@mbseco.com",
+    "first_name": "Jan",
+    "last_name": "Cressey",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "nyexpendables@mbseco.com",
+    "first_name": "",
+    "last_name": "",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "amanda.starr@worldwidestages.com",
+    "first_name": "Amanda",
+    "last_name": "Starr",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "megan.guy@cinespace.com",
+    "first_name": "Megan",
+    "last_name": "Guy",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "stevehancock@mbseco.ca",
+    "first_name": "Steve",
+    "last_name": "Hancock",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "studios.info@mbseco.ca",
+    "first_name": "McConnell",
+    "last_name": "Studios",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "billtmorgan@shaw.ca",
+    "first_name": "Surrey",
+    "last_name": "Studio City",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "peter@tribrostudios.com",
+    "first_name": "Peter",
+    "last_name": "Apostolopoulos",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "nadal@mbseco.com",
+    "first_name": "Chris",
+    "last_name": "Nadal",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "info.de@mbsecoeurope.com",
+    "first_name": "Branch",
+    "last_name": "Office Austria",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "justin.bennett@mbseco.uk",
+    "first_name": "Justin",
+    "last_name": "Bennett",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "bbissette@the-mbsgroup.com",
+    "first_name": "Brantley",
+    "last_name": "Bissette",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "dsmith@the-mbsgroup.com",
+    "first_name": "Darren",
+    "last_name": "Smith",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "dhodgkinson@the-mbsgroup.com",
+    "first_name": "Easter",
+    "last_name": "Inch Steadings",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "sarah-jane.hawkins@mbseco.uk",
+    "first_name": "Sarah-Jane",
+    "last_name": "Hawkins",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "ilm@ardmore.ie",
+    "first_name": "Bray",
+    "last_name": "Co Wicklow",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  },
+  {
+    "email": "mark@teachsolais.com",
+    "first_name": "",
+    "last_name": "",
+    "source_label": "MBS Group services",
+    "source_url": "https://the-mbsgroup.com/services"
+  }
+]

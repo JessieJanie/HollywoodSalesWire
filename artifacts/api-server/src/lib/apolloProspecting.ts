@@ -18,6 +18,7 @@ import { eq, inArray } from "drizzle-orm";
 import { db, coldProspectContactsTable } from "@workspace/db";
 import { logger } from "./logger";
 import { uploadColdLeads, validateColdLead, type ColdLead } from "./coldCampaigns";
+import { SKIM_PROSPECTS } from "./skimProspects";
 
 const APOLLO_BASE = "https://api.apollo.io";
 
@@ -194,10 +195,65 @@ function rotationStart(): number {
 const MAX_COMPANIES_PER_RUN = 20;
 
 /**
+ * Claims each lead in cold_prospect_contacts and uploads it to the current
+ * campaign, stopping at `needed`. Returns how many were uploaded and whether
+ * the campaign's contact cap was hit (caller should stop entirely).
+ */
+async function claimAndUpload(
+  found: ColdLead[],
+  needed: number,
+  source: string,
+): Promise<{ uploaded: number; capReached: boolean }> {
+  if (found.length === 0 || needed <= 0) return { uploaded: 0, capReached: false };
+
+  const emails = found.map((l) => l.email.trim().toLowerCase());
+  const already = await db
+    .select({ email: coldProspectContactsTable.email })
+    .from(coldProspectContactsTable)
+    .where(inArray(coldProspectContactsTable.email, emails));
+  const alreadySet = new Set(already.map((r) => r.email));
+
+  let uploaded = 0;
+  for (const lead of found) {
+    if (uploaded >= needed) break;
+    const email = lead.email.trim().toLowerCase();
+    if (alreadySet.has(email)) continue;
+    if (validateColdLead(lead)) continue; // not a named person / generic mailbox
+
+    // Claim the email BEFORE uploading so a crash mid-loop can never
+    // re-contact the same person on the next run.
+    const claimed = await db
+      .insert(coldProspectContactsTable)
+      .values({ email, company: lead.company })
+      .onConflictDoNothing({ target: coldProspectContactsTable.email })
+      .returning({ email: coldProspectContactsTable.email });
+    if (claimed.length === 0) continue; // another run claimed it concurrently
+
+    try {
+      const result = await uploadColdLeads([lead]);
+      if (result.uploaded > 0) {
+        uploaded++;
+      } else {
+        // Ramp cap reached — stop trying, leave the claim in place (this
+        // person is still "contacted" in intent; the campaign is just full).
+        logger.info({ email, source }, "cold-prospecting: contact cap reached — stopping this run");
+        return { uploaded, capReached: true };
+      }
+    } catch (err) {
+      logger.error({ err, email, source }, "cold-prospecting: Instantly upload failed for claimed contact");
+    }
+  }
+  return { uploaded, capReached: false };
+}
+
+/**
  * Finds up to `needed` fresh (never-before-contacted, title-matched, real
- * email) leads by rotating through the target company list, then uploads
- * them to the current cold campaign via uploadColdLeads() and records them
- * in cold_prospect_contacts so they are never targeted again.
+ * email) leads and uploads them to the current cold campaign via
+ * uploadColdLeads(), recording each in cold_prospect_contacts so they are
+ * never targeted again.
+ *
+ * Order: the curated Skim-sourced pool (SKIM_PROSPECTS) is drained first,
+ * then Apollo company searches fill whatever is still needed.
  *
  * Non-fatal: any failure is logged and surfaced to the caller as a thrown
  * error so the scheduler can email Karilyn — it never leaves leads
@@ -206,10 +262,19 @@ const MAX_COMPANIES_PER_RUN = 20;
 export async function autoFillColdLeads(needed: number): Promise<{ uploaded: number; searched: number }> {
   if (needed <= 0) return { uploaded: 0, searched: 0 };
 
-  const start = rotationStart();
   let uploaded = 0;
   let searched = 0;
 
+  // 1. Curated Skim-sourced prospects first (already deduped via claims).
+  const curated = await claimAndUpload(SKIM_PROSPECTS, needed, "skim-pool");
+  uploaded += curated.uploaded;
+  if (curated.uploaded > 0) {
+    logger.info({ uploaded: curated.uploaded, needed }, "cold-prospecting: filled from Skim-sourced pool");
+  }
+  if (curated.capReached || uploaded >= needed) return { uploaded, searched };
+
+  // 2. Apollo searches for the remainder.
+  const start = rotationStart();
   for (let i = 0; i < TARGET_COMPANIES.length && searched < MAX_COMPANIES_PER_RUN && uploaded < needed; i++) {
     const target = TARGET_COMPANIES[(start + i) % TARGET_COMPANIES.length];
     searched++;
@@ -220,44 +285,9 @@ export async function autoFillColdLeads(needed: number): Promise<{ uploaded: num
       logger.error({ err, company: target.company }, "apollo-prospecting: company search failed — skipping");
       continue;
     }
-    if (found.length === 0) continue;
-
-    const emails = found.map((l) => l.email.trim().toLowerCase());
-    const already = await db
-      .select({ email: coldProspectContactsTable.email })
-      .from(coldProspectContactsTable)
-      .where(inArray(coldProspectContactsTable.email, emails));
-    const alreadySet = new Set(already.map((r) => r.email));
-
-    for (const lead of found) {
-      if (uploaded >= needed) break;
-      const email = lead.email.trim().toLowerCase();
-      if (alreadySet.has(email)) continue;
-      if (validateColdLead(lead)) continue; // not a named person / generic mailbox
-
-      // Claim the email BEFORE uploading so a crash mid-loop can never
-      // re-contact the same person on the next run.
-      const claimed = await db
-        .insert(coldProspectContactsTable)
-        .values({ email, company: lead.company })
-        .onConflictDoNothing({ target: coldProspectContactsTable.email })
-        .returning({ email: coldProspectContactsTable.email });
-      if (claimed.length === 0) continue; // another run claimed it concurrently
-
-      try {
-        const result = await uploadColdLeads([lead]);
-        if (result.uploaded > 0) {
-          uploaded++;
-        } else {
-          // Ramp cap reached — stop trying, leave the claim in place (this
-          // person is still "contacted" in intent; the campaign is just full).
-          logger.info({ email }, "apollo-prospecting: contact cap reached — stopping this run");
-          return { uploaded, searched };
-        }
-      } catch (err) {
-        logger.error({ err, email }, "apollo-prospecting: Instantly upload failed for claimed contact");
-      }
-    }
+    const batch = await claimAndUpload(found, needed - uploaded, `apollo:${target.company}`);
+    uploaded += batch.uploaded;
+    if (batch.capReached) return { uploaded, searched };
   }
 
   logger.info({ uploaded, searched, needed }, "apollo-prospecting: run complete");
