@@ -1,39 +1,40 @@
 import { Header, Footer } from "@/components/layout/Shell";
 import {
   CHECKOUT_LINKS,
-  FOUNDING_RATE_WK,
   FOUNDING_RATE_YR,
-  REGULAR_RATE_WK,
   REGULAR_RATE_YR,
   TEAM_FOUNDING_RATE_YR,
   TEAM_REGULAR_RATE_YR
 } from "@/lib/constants";
+import { preserveDeadlineOnUrl, type FoundingDeadline } from "@/lib/foundingDeadline";
+import { useFoundingDeadline } from "@/lib/useFoundingDeadline";
+import { withClientReference } from "@/lib/traffic";
 import { motion } from "framer-motion";
 import { ArrowRight, CheckCircle2, Lock, ShieldCheck, Users, User } from "lucide-react";
 
 /**
- * Pricing content shared between the public order page (regular rate) and the
- * private founding-offer page (founding rate, reached only from email links
- * while the subscriber's personal deadline is still open).
+ * Pricing content shared between the public order page (regular annual rate)
+ * and the founding-offer page (founding annual rate, while the shared deadline
+ * is still open).
  */
 export function PricingContent({
   founding,
-  deadlineLabel,
-  token,
+  deadline,
 }: {
   founding: boolean;
-  deadlineLabel?: string;
-  token?: string;
+  deadline?: FoundingDeadline | null;
 }) {
-  const indWk = founding ? FOUNDING_RATE_WK : REGULAR_RATE_WK;
   const indYr = founding ? FOUNDING_RATE_YR : REGULAR_RATE_YR;
   const teamYr = founding ? TEAM_FOUNDING_RATE_YR : TEAM_REGULAR_RATE_YR;
-  // Founding checkout is never linked directly — the server re-verifies the
-  // subscriber's deadline before redirecting to Stripe.
-  const foundingCheckout = (plan: string) =>
-    `${import.meta.env.BASE_URL}api/founding-checkout?token=${encodeURIComponent(token ?? "")}&plan=${plan}`;
-  const indLink = founding ? foundingCheckout("individual") : CHECKOUT_LINKS.INDIVIDUAL_REGULAR;
-  const teamLink = founding ? foundingCheckout("team") : CHECKOUT_LINKS.TEAM_REGULAR;
+  const overrideDate = deadline?.overrideDate ?? null;
+  const indLink = preserveDeadlineOnUrl(
+    withClientReference(founding ? CHECKOUT_LINKS.INDIVIDUAL_FOUNDING : CHECKOUT_LINKS.INDIVIDUAL_REGULAR),
+    overrideDate,
+  );
+  const teamLink = preserveDeadlineOnUrl(
+    withClientReference(founding ? CHECKOUT_LINKS.TEAM_FOUNDING : CHECKOUT_LINKS.TEAM_REGULAR),
+    overrideDate,
+  );
 
   const individualFeatures = founding
     ? [
@@ -56,9 +57,9 @@ export function PricingContent({
   return (
     <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
       <div className="text-center max-w-3xl mx-auto mb-16">
-        {founding && deadlineLabel && (
-          <span className="inline-block px-3 py-1 bg-accent text-accent-foreground text-xs font-mono-data font-bold tracking-widest mb-6 shadow-sm">
-            YOUR FOUNDING OFFER CLOSES MIDNIGHT ET, {deadlineLabel.toUpperCase()}
+        {founding && deadline && (
+          <span className="inline-block px-3 py-1 bg-accent text-accent-foreground text-sm font-medium mb-6 shadow-sm" data-testid="founding-deadline-badge">
+            This offer {deadline.endsPhrase} — {deadline.daysLeftLabel}
           </span>
         )}
         <h1 className="text-4xl sm:text-5xl font-serif font-bold tracking-tight mb-6 text-balance">
@@ -84,17 +85,14 @@ export function PricingContent({
               <User className="w-5 h-5" />
               <h2 className="text-xl font-mono-data font-bold tracking-widest m-0">INDIVIDUAL</h2>
             </div>
-            <div className="flex items-baseline gap-2 mb-2">
-              <span className="text-5xl font-serif font-bold tracking-tight">${indWk}</span>
-              <span className="text-muted-foreground font-medium">/ week</span>
+            <div className="flex items-baseline gap-2 mb-4">
+              <span className="text-5xl font-serif font-bold tracking-tight">${indYr.toLocaleString()}</span>
+              <span className="text-muted-foreground font-medium">/ year</span>
             </div>
-            <p className="text-sm font-mono-data text-muted-foreground mb-4">
-              BILLED ANNUALLY AS ${indYr.toLocaleString()}
-            </p>
             {founding ? (
               <>
                 <div className="inline-block px-2 py-1 bg-muted text-xs font-medium text-muted-foreground line-through mb-1">
-                  Regular Rate: ${REGULAR_RATE_WK}/wk (${REGULAR_RATE_YR.toLocaleString()}/yr)
+                  Regular rate: ${REGULAR_RATE_YR.toLocaleString()}/year
                 </div>
                 <p className="text-sm font-medium mt-2 text-primary">
                   Rate locked for as long as membership continues.
@@ -215,10 +213,11 @@ export function PricingContent({
 }
 
 export default function OrderPage() {
+  const deadline = useFoundingDeadline();
   return (
     <div className="min-h-screen flex flex-col font-sans text-foreground bg-[#F6F5F2]">
       <Header />
-      <PricingContent founding={false} />
+      <PricingContent founding={false} deadline={deadline} />
       <Footer />
     </div>
   );

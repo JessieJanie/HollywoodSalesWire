@@ -7,7 +7,8 @@
     "dev": "vite --host 0.0.0.0 --port 5000",
     "build": "vite build",
     "preview": "vite preview --host 0.0.0.0 --port 5000",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --experimental-strip-types --test src/lib/foundingDeadline.test.ts"
   },
   "dependencies": {
     "@radix-ui/react-toast": "^1.2.7",
