@@ -1,6 +1,8 @@
 import { Link } from "wouter";
 import { Header, Footer } from "@/components/layout/Shell";
-import { FOUNDING_RATE_WK, FOUNDING_RATE_YR, REGULAR_RATE_WK, REGULAR_RATE_YR } from "@/lib/constants";
+import { FOUNDING_RATE_YR, REGULAR_RATE_YR } from "@/lib/constants";
+import { orderPath } from "@/lib/foundingDeadline";
+import { useFoundingDeadline } from "@/lib/useFoundingDeadline";
 import { motion } from "framer-motion";
 import { ArrowRight, FileText, TrendingUp, ShieldCheck } from "lucide-react";
 import PreviewSignup from "@/components/PreviewSignup";
@@ -17,6 +19,8 @@ const FadeIn = ({ children, delay = 0 }: { children: React.ReactNode, delay?: nu
 );
 
 export default function SalesPage() {
+  const deadline = useFoundingDeadline();
+  const orderHref = orderPath(deadline?.overrideDate ?? null);
   return (
     <div className="min-h-screen flex flex-col font-sans text-foreground selection:bg-primary/20">
       <Header />
@@ -179,12 +183,16 @@ export default function SalesPage() {
           <FadeIn>
             <h2 className="text-3xl mt-16 mb-6">The Math & The Guarantee</h2>
             <p>
-              The regular rate for Hollywood Sales Wire is ${REGULAR_RATE_WK} a week (${REGULAR_RATE_YR.toLocaleString()} a year). One closed deal sourced from one issue pays for years of it.
+              The regular rate for Hollywood Sales Wire is ${REGULAR_RATE_YR.toLocaleString()} a year. One closed deal sourced from one issue pays for years of it.
             </p>
             <div className="bg-primary text-primary-foreground p-8 my-10 shadow-xl relative overflow-hidden">
               <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.05\'/%3E%3C/svg%3E')] opacity-50 mix-blend-overlay"></div>
               <p className="font-serif text-xl sm:text-2xl leading-relaxed m-0 relative z-10 text-balance">
-                On our email list, invited readers get the Founding Member rate instead: <strong>${FOUNDING_RATE_WK} a week — ${FOUNDING_RATE_YR.toLocaleString()} a year — locked in for as long as you stay a member.</strong> Join the list below and your invitation follows.
+                {deadline?.closed ? (
+                  <>The founding offer {deadline.endedPhrase}. Membership is ${REGULAR_RATE_YR.toLocaleString()} a year.</>
+                ) : (
+                  <>On our email list, invited readers get the Founding Member rate instead: <strong>${FOUNDING_RATE_YR.toLocaleString()} a year — locked in for as long as you stay a member.</strong> Join the list below and your invitation follows.</>
+                )}
               </p>
             </div>
             <p>
@@ -204,17 +212,25 @@ export default function SalesPage() {
 
           <FadeIn>
             <h2 className="text-3xl mt-16 mb-6">How the Founding Offer Works</h2>
-            <p>
-              The Founding Member rate isn't on this website's order page — it comes by invitation through our email list, and every invitation has a real deadline: your personal offer closes at midnight Eastern, and the clock is enforced. After your deadline, membership is ${REGULAR_RATE_WK} a week like everyone else.
+            <p data-testid="homepage-deadline">
+              {deadline?.closed ? (
+                <>The Founding Member rate isn't on this website's order page. This founding offer {deadline.endedPhrase}. Membership is ${REGULAR_RATE_YR.toLocaleString()} a year.</>
+              ) : deadline ? (
+                <>The Founding Member rate isn't on this website's order page — it comes by invitation through our email list, and every invitation has a real deadline: this offer {deadline.endsPhrase} — {deadline.daysLeftLabel}. After that deadline, membership is ${REGULAR_RATE_YR.toLocaleString()} a year like everyone else.</>
+              ) : (
+                <>The Founding Member rate isn't on this website's order page — it comes by invitation through our email list, and every invitation has a real deadline at 11:59 PM ET. After that deadline, membership is ${REGULAR_RATE_YR.toLocaleString()} a year like everyone else.</>
+              )}
             </p>
-            <p>
-              Subscribe before your deadline and everything is immediate: the three Special Reports in your inbox tonight, your first issue of the Wire this Tuesday.
-            </p>
+            {!deadline?.closed && (
+              <p>
+                Subscribe before that deadline and everything is immediate: the three Special Reports in your inbox tonight, your first issue of the Wire this Tuesday.
+              </p>
+            )}
           </FadeIn>
 
           <FadeIn delay={0.1}>
             <div className="mt-16 mb-16 not-prose flex flex-col items-center">
-              <Link href="/order" className="group relative inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-8 sm:px-12 py-5 sm:py-6 text-xl font-serif font-bold hover:bg-primary/90 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 w-full sm:w-auto text-center overflow-hidden">
+              <Link href={orderHref} className="group relative inline-flex items-center justify-center gap-3 bg-primary text-primary-foreground px-8 sm:px-12 py-5 sm:py-6 text-xl font-serif font-bold hover:bg-primary/90 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 w-full sm:w-auto text-center overflow-hidden">
                 <span className="absolute inset-0 w-full h-full -mt-1 rounded-lg opacity-30 bg-gradient-to-b from-transparent via-transparent to-black"></span>
                 <span className="relative flex items-center gap-3">
                   Become a Member <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -222,10 +238,10 @@ export default function SalesPage() {
               </Link>
               <div className="mt-6 flex flex-col items-center text-center">
                 <span className="text-sm font-mono-data text-muted-foreground font-bold tracking-widest uppercase">
-                  ${REGULAR_RATE_WK} / WEEK
+                  ${REGULAR_RATE_YR.toLocaleString()} / YEAR
                 </span>
                 <span className="text-xs text-muted-foreground mt-1">
-                  Billed annually. Rate lock guaranteed.
+                  Rate lock guaranteed.
                 </span>
               </div>
             </div>

@@ -12,6 +12,8 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["src/**/*.test.{ts,tsx}"],
+    // Imported upstream suite uses node:test; run it via test:founding-deadline.
+    exclude: ["src/lib/foundingDeadline.test.ts"],
     setupFiles: ["./src/test/setup.ts"],
   },
 });

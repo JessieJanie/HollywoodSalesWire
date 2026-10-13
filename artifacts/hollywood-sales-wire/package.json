@@ -11,7 +11,8 @@
     "test:crawler-check": "node --experimental-strip-types --test scripts/check-production-pages.test.mts",
     "serve": "node --experimental-strip-types scripts/serve-and-check-production.mts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run"
+    "test": "vitest run && pnpm run test:founding-deadline",
+    "test:founding-deadline": "node --experimental-strip-types --test src/lib/foundingDeadline.test.ts"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",

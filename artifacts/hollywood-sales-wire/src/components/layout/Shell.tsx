@@ -1,7 +1,11 @@
 import { Link } from "wouter";
 import { SUPPORT_EMAIL } from "@/lib/constants";
+import { orderPath } from "@/lib/foundingDeadline";
+import { useFoundingDeadline } from "@/lib/useFoundingDeadline";
 
 export function Header() {
+  const deadline = useFoundingDeadline();
+  const orderHref = orderPath(deadline?.overrideDate ?? null);
   return (
     <header className="w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 sticky top-0 z-50">
       <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
@@ -19,7 +23,7 @@ export function Header() {
           <Link href="/faq" className="hidden sm:inline hover:text-foreground transition-colors" data-testid="link-nav-faq">FAQ</Link>
           <Link href="/support" className="hidden sm:inline hover:text-foreground transition-colors">Support</Link>
           <Link
-            href="/order"
+            href={orderHref}
             className="bg-primary text-primary-foreground px-4 py-2 font-medium hover:opacity-90 transition-opacity"
           >
             Become a Member
@@ -31,6 +35,8 @@ export function Header() {
 }
 
 export function Footer() {
+  const deadline = useFoundingDeadline();
+  const orderHref = orderPath(deadline?.overrideDate ?? null);
   return (
     <footer className="w-full border-t border-border bg-background py-12 mt-24">
       <div className="max-w-4xl mx-auto px-4 flex flex-col md:flex-row items-start justify-between gap-8">
@@ -54,7 +60,7 @@ export function Footer() {
           <a href="/briefs" className="hover:text-foreground transition-colors">Weekly Brief Archive</a>
           <Link href="/press" className="hover:text-foreground transition-colors">Press Releases</Link>
           <Link href="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
-          <Link href="/order" className="hover:text-foreground transition-colors">Become a Member</Link>
+          <Link href={orderHref} className="hover:text-foreground transition-colors">Become a Member</Link>
         </div>
         <div className="flex flex-col gap-2 text-sm text-muted-foreground">
           <span className="font-medium text-foreground mb-1">Legal</span>
