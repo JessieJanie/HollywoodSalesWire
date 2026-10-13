@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
-import { useFoundingOffer, useColdOffer } from "@workspace/api-client-react";
+import { useFoundingOffer } from "@workspace/api-client-react";
 import { Header, Footer } from "@/components/layout/Shell";
+import { orderPath } from "@/lib/foundingDeadline";
+import { useFoundingDeadline } from "@/lib/useFoundingDeadline";
 import { PricingContent } from "./OrderPage";
 
 function useCountdown(deadlineIso: string | undefined) {
@@ -21,68 +23,98 @@ function useCountdown(deadlineIso: string | undefined) {
 }
 
 /**
- * Private page reached from the email series. Shows the Founding rate while
- * the offer window is open; after the deadline (midnight Eastern) it
- * genuinely flips to the regular rate.
- *
- * Two entry paths share this page:
+ * Two entry paths:
  * - Token link (warm-prospect welcome series): the subscriber's personal
- *   42-day window, verified via /api/founding-offer.
- * - No token (cold-outreach campaigns, which have no per-lead subscriber
- *   record): a rolling weekly deadline (the coming Monday, end of day
- *   Eastern), verified via /api/cold-offer. This keeps the rate the cold
- *   email promised genuinely live on the page instead of silently
- *   reverting to the regular rate.
+ *   window, verified via /api/founding-offer, then checkout re-checks it.
+ * - No token (the public founding offer and cold campaigns): the shared
+ *   client deadline from ?d=YYYY-MM-DD, or the next Monday at least 7 days
+ *   out at 11:59 PM ET. After that instant, regular rates are shown.
  */
 export default function FoundingOfferPage() {
   const token = new URLSearchParams(window.location.search).get("token") ?? "";
+  const deadline = useFoundingDeadline();
   const tokenOffer = useFoundingOffer(
     { token },
     { query: { queryKey: ["founding-offer", token], enabled: token !== "", retry: false } },
   );
-  const coldOffer = useColdOffer({ query: { queryKey: ["cold-offer"], enabled: token === "", retry: false } });
+  const countdown = useCountdown(token !== "" ? tokenOffer.data?.deadline : undefined);
 
-  const offer = token !== "" ? tokenOffer : coldOffer;
-  const countdown = useCountdown(offer.data?.deadline);
+  if (token !== "") {
+    const invalid = tokenOffer.isError;
+    const isLoading = tokenOffer.isLoading && !invalid;
+    const expired = tokenOffer.data ? !tokenOffer.data.active || countdown === null : false;
+    const founding = Boolean(tokenOffer.data && tokenOffer.data.active && countdown !== null);
+    const orderHref = orderPath(deadline?.overrideDate ?? null);
 
-  const invalid = token !== "" && offer.isError;
-  const isLoading = offer.isLoading && !invalid;
-  const expired = offer.data ? !offer.data.active || countdown === null : false;
-  const founding = Boolean(offer.data && offer.data.active && countdown !== null);
-  const checkoutSource = token !== "" ? { token } : { source: "cold" as const };
+    return (
+      <div className="min-h-screen flex flex-col font-sans text-foreground bg-[#F6F5F2]">
+        <Header />
+        {isLoading ? (
+          <main className="flex-1 flex items-center justify-center py-32">
+            <p className="text-muted-foreground font-mono-data text-sm tracking-widest">CHECKING YOUR OFFER…</p>
+          </main>
+        ) : invalid ? (
+          <main className="flex-1 w-full max-w-2xl mx-auto px-4 py-24 text-center">
+            <h1 className="text-3xl font-serif font-bold mb-4">This offer link isn't valid</h1>
+            <p className="text-muted-foreground mb-8">
+              The link may be incomplete — try clicking it again from your email. Membership is always
+              available at the regular rate.
+            </p>
+            <Link href={orderHref} className="inline-block bg-primary text-primary-foreground px-6 py-3 font-serif font-bold">
+              See Membership Options
+            </Link>
+          </main>
+        ) : (
+          <>
+            {founding && countdown && (
+              <div className="bg-primary text-primary-foreground py-3 px-4 text-center font-mono-data text-sm tracking-widest">
+                YOUR FOUNDING RATE ENDS IN {countdown.d}D {countdown.h}H {countdown.m}M {countdown.s}S — MIDNIGHT ET,{" "}
+                {tokenOffer.data?.deadlineLabel?.toUpperCase()}
+              </div>
+            )}
+            {expired && (
+              <div className="bg-muted text-muted-foreground py-3 px-4 text-center font-mono-data text-xs tracking-widest">
+                YOUR FOUNDING OFFER CLOSED AT MIDNIGHT ET, {tokenOffer.data?.deadlineLabel?.toUpperCase()} — REGULAR RATES BELOW
+              </div>
+            )}
+            <PricingContent
+              founding={founding}
+              deadline={deadline}
+              deadlineLabel={tokenOffer.data?.deadlineLabel}
+              checkoutSource={{ token }}
+            />
+          </>
+        )}
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-foreground bg-[#F6F5F2]">
       <Header />
-      {isLoading ? (
+      {!deadline ? (
         <main className="flex-1 flex items-center justify-center py-32">
-          <p className="text-muted-foreground font-mono-data text-sm tracking-widest">CHECKING YOUR OFFER…</p>
-        </main>
-      ) : invalid ? (
-        <main className="flex-1 w-full max-w-2xl mx-auto px-4 py-24 text-center">
-          <h1 className="text-3xl font-serif font-bold mb-4">This offer link isn't valid</h1>
-          <p className="text-muted-foreground mb-8">
-            The link may be incomplete — try clicking it again from your email. Membership is always
-            available at the regular rate.
-          </p>
-          <Link href="/order" className="inline-block bg-primary text-primary-foreground px-6 py-3 font-serif font-bold">
-            See Membership Options
-          </Link>
+          <p className="text-muted-foreground font-mono-data text-sm tracking-widest">CHECKING THE OFFER DATE…</p>
         </main>
       ) : (
         <>
-          {founding && countdown && (
-            <div className="bg-primary text-primary-foreground py-3 px-4 text-center font-mono-data text-sm tracking-widest">
-              YOUR FOUNDING RATE ENDS IN {countdown.d}D {countdown.h}H {countdown.m}M {countdown.s}S — MIDNIGHT ET,{" "}
-              {offer.data?.deadlineLabel?.toUpperCase()}
+          {deadline.closed ? (
+            <div
+              className="bg-muted text-muted-foreground py-3 px-4 text-center text-sm"
+              data-testid="founding-deadline"
+            >
+              This founding offer {deadline.endedPhrase}. Regular rates are below.
+            </div>
+          ) : (
+            <div
+              className="bg-primary text-primary-foreground py-3 px-4 text-center text-sm"
+              data-testid="founding-deadline"
+            >
+              This offer {deadline.endsPhrase} — {deadline.daysLeftLabel}
             </div>
           )}
-          {expired && (
-            <div className="bg-muted text-muted-foreground py-3 px-4 text-center font-mono-data text-xs tracking-widest">
-              YOUR FOUNDING OFFER CLOSED AT MIDNIGHT ET, {offer.data?.deadlineLabel?.toUpperCase()} — REGULAR RATES BELOW
-            </div>
-          )}
-          <PricingContent founding={founding} deadlineLabel={offer.data?.deadlineLabel} checkoutSource={checkoutSource} />
+          <PricingContent founding={!deadline.closed} deadline={deadline} />
         </>
       )}
       <Footer />

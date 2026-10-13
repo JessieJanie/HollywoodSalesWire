@@ -31,7 +31,7 @@ export function getPrerenderRoutes(): PrerenderRoute[] {
       path: '/order',
       title: `Subscribe — ${SITE_TITLE}`,
       description:
-        'Subscribe to Hollywood Sales Wire — a weekly sales-intelligence briefing for vendors selling into the entertainment industry. Monthly and annual plans.',
+        'Subscribe to Hollywood Sales Wire — a weekly sales-intelligence briefing for vendors selling into the entertainment industry. Annual membership.',
     },
     {
       path: '/articles',

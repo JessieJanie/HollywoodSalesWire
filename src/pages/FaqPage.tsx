@@ -2,7 +2,6 @@ import { Header, Footer } from "@/components/layout/Shell";
 import {
   SUPPORT_EMAIL,
   REGULAR_RATE_YR,
-  REGULAR_RATE_WK,
   TEAM_REGULAR_RATE_YR,
   REPORTS_VALUE,
 } from "@/lib/constants";
@@ -21,7 +20,7 @@ const FAQS: Faq[] = [
   },
   {
     q: "How much does Hollywood Sales Wire cost?",
-    a: `An individual membership is $${REGULAR_RATE_YR.toLocaleString()} per year — about $${REGULAR_RATE_WK} a week. A team membership (up to five readers) is $${TEAM_REGULAR_RATE_YR.toLocaleString()} per year. Every new membership is covered by a 90-day money-back guarantee.`,
+    a: `An individual membership is $${REGULAR_RATE_YR.toLocaleString()} per year. A team membership (up to five readers) is $${TEAM_REGULAR_RATE_YR.toLocaleString()} per year. Every new membership is covered by a 90-day money-back guarantee.`,
   },
   {
     q: "Where do the leads come from?",
