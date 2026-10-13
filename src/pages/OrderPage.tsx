@@ -20,21 +20,39 @@ import { ArrowRight, CheckCircle2, Lock, ShieldCheck, Users, User } from "lucide
 export function PricingContent({
   founding,
   deadline,
+  deadlineLabel,
+  checkoutSource,
 }: {
   founding: boolean;
   deadline?: FoundingDeadline | null;
+  /** Server label for a token offer. The public offer uses `deadline` instead. */
+  deadlineLabel?: string;
+  /** Set for a subscriber's personal token. The public offer links straight to Stripe. */
+  checkoutSource?: { token: string };
 }) {
   const indYr = founding ? FOUNDING_RATE_YR : REGULAR_RATE_YR;
   const teamYr = founding ? TEAM_FOUNDING_RATE_YR : TEAM_REGULAR_RATE_YR;
   const overrideDate = deadline?.overrideDate ?? null;
-  const indLink = preserveDeadlineOnUrl(
-    withClientReference(founding ? CHECKOUT_LINKS.INDIVIDUAL_FOUNDING : CHECKOUT_LINKS.INDIVIDUAL_REGULAR),
-    overrideDate,
-  );
-  const teamLink = preserveDeadlineOnUrl(
-    withClientReference(founding ? CHECKOUT_LINKS.TEAM_FOUNDING : CHECKOUT_LINKS.TEAM_REGULAR),
-    overrideDate,
-  );
+  // A token offer is re-checked on the server before Stripe. The public
+  // founding offer uses the client deadline and the Payment Link directly.
+  const foundingCheckout = (plan: string) => {
+    const params = new URLSearchParams({ plan });
+    if (checkoutSource) params.set("token", checkoutSource.token);
+    if (overrideDate) params.set("d", overrideDate);
+    return `${import.meta.env.BASE_URL}api/founding-checkout?${params.toString()}`;
+  };
+  const indBase = founding
+    ? checkoutSource
+      ? foundingCheckout("individual")
+      : withClientReference(CHECKOUT_LINKS.INDIVIDUAL_FOUNDING)
+    : withClientReference(CHECKOUT_LINKS.INDIVIDUAL_REGULAR);
+  const teamBase = founding
+    ? checkoutSource
+      ? foundingCheckout("team")
+      : withClientReference(CHECKOUT_LINKS.TEAM_FOUNDING)
+    : withClientReference(CHECKOUT_LINKS.TEAM_REGULAR);
+  const indLink = checkoutSource ? indBase : preserveDeadlineOnUrl(indBase, overrideDate);
+  const teamLink = checkoutSource ? teamBase : preserveDeadlineOnUrl(teamBase, overrideDate);
 
   const individualFeatures = founding
     ? [
@@ -57,7 +75,12 @@ export function PricingContent({
   return (
     <main className="flex-1 w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20">
       <div className="text-center max-w-3xl mx-auto mb-16">
-        {founding && deadline && (
+        {founding && checkoutSource && deadlineLabel && (
+          <span className="inline-block px-3 py-1 bg-accent text-accent-foreground text-xs font-mono-data font-bold tracking-widest mb-6 shadow-sm">
+            YOUR FOUNDING OFFER CLOSES MIDNIGHT ET, {deadlineLabel.toUpperCase()}
+          </span>
+        )}
+        {founding && !checkoutSource && deadline && (
           <span className="inline-block px-3 py-1 bg-accent text-accent-foreground text-sm font-medium mb-6 shadow-sm" data-testid="founding-deadline-badge">
             This offer {deadline.endsPhrase} — {deadline.daysLeftLabel}
           </span>
