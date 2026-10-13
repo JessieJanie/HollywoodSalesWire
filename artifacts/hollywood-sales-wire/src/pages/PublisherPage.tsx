@@ -441,6 +441,7 @@ export default function PublisherPage() {
                           {
                             onSuccess: () => {
                               void wire.refetch();
+                              setWireEditText(null);
                               setWireSaved(true);
                               setTimeout(() => setWireSaved(false), 3000);
                             },

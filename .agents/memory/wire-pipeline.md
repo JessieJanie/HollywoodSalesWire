@@ -27,3 +27,11 @@ description: How the weekly paid Wire + Free Edition auto-drafting works, its sa
 - Seeds only go out after a Republish puts the code in prod; boot tick catches up if autoscale was asleep at send time.
 - Every step after the draft is already saved "ready" (Typefully push, the "ready" notify email) must be in its own try/catch that never rewrites `wire_runs.status`. A transient Resend hiccup on the ready-email once fell through to the outer catch and flipped an already-successful ready draft back to "failed" (content stayed in the row, just hidden from the console) — fixed Sept 2026, but re-check this fencing after any refactor of that function.
 - Production DB access via executeSql is read-only; recovering a stuck production run requires POSTing to the deployed `/api/publisher/wire/run` endpoint with `PUBLISHER_KEY` (shared env var), not a direct SQL fix.
+
+## Issue dateline ownership
+
+The publication dateline must be calculated as Tuesday following the issue's Monday week key, never inferred by the drafting model or from the machine's current date. Correct only the masthead, not dates inside reporting.
+
+**Why:** The model paired “Tuesday” with Wednesday's calendar date in consecutive October 2026 drafts. A late or early drafting run must still use the intended issue week.
+
+**How to apply:** Supply the calculated date during drafting and enforce it before saving and before freezing a new paid-send claim. Never modify an already-frozen retry payload; preserving email idempotency takes precedence.

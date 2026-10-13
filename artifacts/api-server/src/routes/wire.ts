@@ -3,6 +3,7 @@ import { desc, eq } from "drizzle-orm";
 import { timingSafeEqual } from "node:crypto";
 import { db, wireRunsTable } from "@workspace/db";
 import { runWeeklyResearch } from "../lib/wireResearch";
+import { normalizeWireDateline } from "../lib/wireDateline";
 
 const router: IRouter = Router();
 
@@ -62,7 +63,7 @@ router.patch("/publisher/wire/save", async (req, res): Promise<void> => {
   }
   await db
     .update(wireRunsTable)
-    .set({ wireMarkdown })
+    .set({ wireMarkdown: normalizeWireDateline(wireMarkdown, run.weekKey) })
     .where(eq(wireRunsTable.weekKey, run.weekKey));
   res.json({ weekKey: run.weekKey, saved: true });
 });

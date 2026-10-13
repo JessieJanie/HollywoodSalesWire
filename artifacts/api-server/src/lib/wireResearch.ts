@@ -2,6 +2,7 @@ import { desc, eq, and, ne, sql } from "drizzle-orm";
 import { db, wireRunsTable, researchPagesTable, socialDraftsTable } from "@workspace/db";
 import { skimRead, skimReadJs, skimFilmIncentives, skimStudioJobs, skimEntityFormations } from "./skim";
 import { draftFreeEdition } from "./freeEdition";
+import { normalizeWireDateline, wirePublicationDate } from "./wireDateline";
 import { pushBriefToTypefully } from "./typefully";
 import { claimSocialDraft } from "./socialDrafts";
 import { resendRequest } from "./resend";
@@ -633,12 +634,13 @@ export async function runWeeklyResearch(
           : "\n\n(No previous week's pages available — this is the first run; treat everything as new but say so in the dateline.)";
       const pendingVoices = await getPendingIndustryVoices();
       const voicesBlock = formatIndustryVoicesForPrompt(pendingVoices);
-      const wireMarkdown = await claude(
+      const generatedWire = await claude(
         WIRE_PROMPT,
-        `THIS WEEK'S PAGES:\n\n${pagesToPrompt(pages, PAGE_CHARS_IN_PROMPT)}${prevBlock}${voicesBlock}`,
+        `PUBLICATION DATE: ${wirePublicationDate(weekKey)}. Use this exact date in the issue masthead; do not infer it from source dates.\n\nTHIS WEEK'S PAGES:\n\n${pagesToPrompt(pages, PAGE_CHARS_IN_PROMPT)}${prevBlock}${voicesBlock}`,
         16000,
       );
-      if (wireMarkdown.trim().length < 300) throw new Error("Wire draft came back too short to be usable.");
+      if (generatedWire.trim().length < 300) throw new Error("Wire draft came back too short to be usable.");
+      const wireMarkdown = normalizeWireDateline(generatedWire, weekKey);
 
       // 6. Draft the free edition from the paid draft.
       const free = await draftFreeEdition(wireMarkdown);

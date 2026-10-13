@@ -29,6 +29,7 @@ import {
 } from "./paidWire";
 import { shelfUrl } from "../routes/reports";
 import { logger } from "./logger";
+import { normalizeWireDateline } from "./wireDateline";
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -228,7 +229,9 @@ export async function executePaidSend(
         .values({
           weekKey,
           subject,
-          bodyText,
+          // Normalize only NEW claims. Never change a retry's frozen payload:
+          // Resend idempotency requires identical content for the same key.
+          bodyText: normalizeWireDateline(bodyText, weekKey),
           status: "sending",
           recipientEmails: recipients.map((r) => r.email),
           recipientCount: 0,
