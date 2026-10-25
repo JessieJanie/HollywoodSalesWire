@@ -210,7 +210,7 @@ That's the entire idea behind Hollywood Sales Wire: I read the filings, the awar
 
 Cold leads are a commodity. Hot leads are an edge.
 
-I'm running a Founding Member offer through ${dl}: subscribe by midnight Eastern that night and you're in at $38 a week ($1,995/year) instead of the regular $77 ($3,995). Three Special Reports — worth $1,985 — arrive free the moment you join.
+I'm running a Founding Member offer through ${dl}: subscribe using a valid offer link and an individual membership is $599/year or $64.99/month, instead of the regular $1,150/year. Team membership for up to five seats is $1,198/year or $129.98/month, instead of the regular $2,300/year. Three Special Reports worth $357 arrive free when you join.
 
 I'll make the full case over the next few days. But if you already know what a two-week-old award list is worth to your pipeline, there's no reason to wait:
 
@@ -253,7 +253,7 @@ The $6.6 Billion Greenlight Window — the state tax-credit system decoded as a 
 
 The Requisition Read — careers pages as disclosure documents. The job titles that mean "a budget just landed here," the posting patterns that reveal a buildout weeks before any purchase order.
 
-Subscribe by ${dl} — or right now — and all three are yours free, along with the Founding Member rate: $38 a week ($1,995 a year) instead of $77 ($3,995), locked for as long as you stay.
+Subscribe through a valid offer link by ${dl} — or right now — and all three are yours free, along with the Founding Member rate: $599/year or $64.99/month for an individual, or $1,198/year or $129.98/month for a Team of up to five. Regular rates are $1,150/year for an individual and $2,300/year for a Team.
 
 https://hollywoodsaleswire.com/founding-offer?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e2
 
