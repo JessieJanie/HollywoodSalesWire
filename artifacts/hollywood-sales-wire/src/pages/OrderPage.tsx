@@ -4,7 +4,9 @@ import {
   FOUNDING_RATE_YR,
   REGULAR_RATE_YR,
   TEAM_FOUNDING_RATE_YR,
-  TEAM_REGULAR_RATE_YR
+  TEAM_REGULAR_RATE_YR,
+  FOUNDING_RATE_MONTHLY,
+  TEAM_FOUNDING_RATE_MONTHLY
 } from "@/lib/constants";
 import { preserveDeadlineOnUrl, type FoundingDeadline } from "@/lib/foundingDeadline";
 import { useFoundingDeadline } from "@/lib/useFoundingDeadline";
@@ -53,6 +55,8 @@ export function PricingContent({
     : withClientReference(CHECKOUT_LINKS.TEAM_REGULAR);
   const indLink = checkoutSource ? indBase : preserveDeadlineOnUrl(indBase, overrideDate);
   const teamLink = checkoutSource ? teamBase : preserveDeadlineOnUrl(teamBase, overrideDate);
+  const indMonthlyLink = preserveDeadlineOnUrl(withClientReference(CHECKOUT_LINKS.INDIVIDUAL_FOUNDING_MONTHLY), overrideDate);
+  const teamMonthlyLink = preserveDeadlineOnUrl(withClientReference(CHECKOUT_LINKS.TEAM_FOUNDING_MONTHLY), overrideDate);
 
   const individualFeatures = founding
     ? [
@@ -146,6 +150,16 @@ export function PricingContent({
             >
               Join as Individual <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </a>
+            {founding && (
+              <a
+                href={indMonthlyLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 w-full inline-flex items-center justify-center text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80"
+              >
+                or ${FOUNDING_RATE_MONTHLY}/month
+              </a>
+            )}
             <div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground font-mono-data opacity-80">
               <Lock className="w-3 h-3" /> SECURE STRIPE CHECKOUT
             </div>
@@ -205,6 +219,16 @@ export function PricingContent({
             >
               Join as Team <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </a>
+            {founding && (
+              <a
+                href={teamMonthlyLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-3 w-full inline-flex items-center justify-center text-sm font-medium text-foreground underline underline-offset-4 hover:text-foreground/80"
+              >
+                or ${TEAM_FOUNDING_RATE_MONTHLY}/month
+              </a>
+            )}
             <div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground font-mono-data opacity-60">
               <Lock className="w-3 h-3" /> SECURE STRIPE CHECKOUT
             </div>
@@ -237,10 +261,13 @@ export function PricingContent({
 
 export default function OrderPage() {
   const deadline = useFoundingDeadline();
+  // Founding pricing only for a visitor who arrived with a valid ?d= offer link
+  // whose deadline has not passed. Everyone else sees regular pricing.
+  const founding = !!deadline && deadline.overrideDate !== null && !deadline.closed;
   return (
     <div className="min-h-screen flex flex-col font-sans text-foreground bg-[#F6F5F2]">
       <Header />
-      <PricingContent founding={false} deadline={deadline} />
+      <PricingContent founding={founding} deadline={deadline} />
       <Footer />
     </div>
   );

@@ -14,8 +14,8 @@ const router: IRouter = Router();
  * tokens/sources land on the public (regular-rate) order page.
  */
 const FOUNDING_CHECKOUT = {
-  individual: "https://buy.stripe.com/7sYeV70l5bT5bDz47t1VK04",
-  team: "https://buy.stripe.com/5kQfZb2td4qD373dI31VK05",
+  individual: "https://buy.stripe.com/aFa9AScCF163d3h5Db3ks06",
+  team: "https://buy.stripe.com/bJe00i7ilaGD8N1e9H3ks08",
 } as const;
 
 router.get("/founding-checkout", async (req, res): Promise<void> => {
