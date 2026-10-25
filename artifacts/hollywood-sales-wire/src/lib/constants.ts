@@ -23,4 +23,4 @@ export const TEAM_REGULAR_RATE_YR = 2300;
 export const TEAM_FOUNDING_RATE_YR = 1198;
 export const TEAM_FOUNDING_RATE_MONTHLY = 129.98;
 
-export const REPORTS_VALUE = 1985;
+export const REPORTS_VALUE = 357;

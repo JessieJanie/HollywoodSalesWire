@@ -62,17 +62,17 @@ export function PricingContent({
     ? [
         "52 issues of the Tuesday Wire",
         "12 issues of The Divergence Report",
-        <span key="1"><strong>Bonus:</strong> Under the Hood: The WBD AI Buildout ($795 value)</span>,
-        <span key="2"><strong>Bonus:</strong> The $6.6 Billion Greenlight Window ($695 value)</span>,
-        <span key="3"><strong>Bonus:</strong> Help-Wanted Pages Are Purchase Orders ($495 value)</span>,
+        <span key="1"><strong>Bonus:</strong> The Spend Map ($119 value)</span>,
+        <span key="2"><strong>Bonus:</strong> The $6.6 Billion Greenlight Window ($119 value)</span>,
+        <span key="3"><strong>Bonus:</strong> The Requisition Read ($119 value)</span>,
         "90-day money-back guarantee"
       ]
     : [
         "52 issues of the Tuesday Wire",
         "12 issues of The Divergence Report",
-        <span key="1"><strong>Bonus:</strong> Under the Hood: The WBD AI Buildout ($795 value)</span>,
-        <span key="2"><strong>Bonus:</strong> The $6.6 Billion Greenlight Window ($695 value)</span>,
-        <span key="3"><strong>Bonus:</strong> Help-Wanted Pages Are Purchase Orders ($495 value)</span>,
+        <span key="1"><strong>Bonus:</strong> The Spend Map ($119 value)</span>,
+        <span key="2"><strong>Bonus:</strong> The $6.6 Billion Greenlight Window ($119 value)</span>,
+        <span key="3"><strong>Bonus:</strong> The Requisition Read ($119 value)</span>,
         "90-day money-back guarantee"
       ];
 
@@ -94,8 +94,8 @@ export function PricingContent({
         </h1>
         <p className="text-lg text-muted-foreground leading-relaxed text-balance max-w-2xl mx-auto">
           {founding
-            ? "Lock in the half-price rate for as long as your membership continues. Get the three Special Reports ($1,985 value) immediately, free to keep forever. Backed by a 90-day money-back guarantee."
-            : "Every Tuesday: the week's live buying signals — who just got funded, what they're about to buy, and when the window closes. Plus three Special Reports ($1,985 value) free with your membership. Backed by a 90-day money-back guarantee."}
+            ? "Lock in your founding rate for as long as your membership continues. Get three Special Reports ($357 total value) immediately, free to keep forever. Backed by a 90-day money-back guarantee."
+            : "Every Tuesday: the week's live buying signals — who just got funded, what they're about to buy, and when the window closes. Plus three Special Reports ($357 total value) free with your membership. Backed by a 90-day money-back guarantee."}
         </p>
       </div>
 
@@ -250,8 +250,8 @@ export function PricingContent({
           <h3 className="text-2xl font-serif font-bold mb-3">The 90-Day Money-Back Guarantee</h3>
           <p className="text-muted-foreground leading-relaxed text-base">
             {founding
-              ? "If Hollywood Sales Wire hasn't put live, workable prospects in front of you within 90 days, we'll refund every penny of your membership. You keep the three Special Reports ($1,985 value) and every issue delivered as a professional courtesy. The risk is entirely on our side of the table."
-              : "If Hollywood Sales Wire hasn't put live, workable prospects in front of you within 90 days, we'll refund every penny of your membership. You keep the three Special Reports ($1,985 value) and every issue delivered as a professional courtesy. The risk is entirely on our side of the table."}
+              ? "If Hollywood Sales Wire hasn't put live, workable prospects in front of you within 90 days, we'll refund every penny of your membership. You keep the three Special Reports ($357 total value) and every issue delivered as a professional courtesy. The risk is entirely on our side of the table."
+              : "If Hollywood Sales Wire hasn't put live, workable prospects in front of you within 90 days, we'll refund every penny of your membership. You keep the three Special Reports ($357 total value) and every issue delivered as a professional courtesy. The risk is entirely on our side of the table."}
           </p>
         </div>
       </motion.div>

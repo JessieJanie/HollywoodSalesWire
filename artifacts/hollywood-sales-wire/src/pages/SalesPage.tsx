@@ -1,6 +1,6 @@
 import { Link } from "wouter";
 import { Header, Footer } from "@/components/layout/Shell";
-import { FOUNDING_RATE_YR, REGULAR_RATE_YR } from "@/lib/constants";
+import { REGULAR_RATE_YR, TEAM_REGULAR_RATE_YR } from "@/lib/constants";
 import { orderPath } from "@/lib/foundingDeadline";
 import { useFoundingDeadline } from "@/lib/useFoundingDeadline";
 import { motion } from "framer-motion";
@@ -133,24 +133,24 @@ export default function SalesPage() {
           <FadeIn>
             <h2 className="text-3xl mt-16 mb-8">Everything a Member Gets</h2>
             <p className="mb-10">
-              Hollywood Sales Wire is a weekly intelligence briefing. Every Tuesday, you get the week's live buying signals. The system behind it is documented in three Special Reports — <strong>free and immediately</strong> with your membership. Founding Memberships, at half the regular rate, are offered exclusively through our email list.
+              Hollywood Sales Wire is a weekly intelligence briefing. Every Tuesday, you get the week's live buying signals. The system behind it is documented in three Special Reports, valued at <strong>$357 total</strong> — included immediately with your membership. Founding Membership invitations are available through a valid offer link.
             </p>
 
             <div className="space-y-6 not-prose mb-12">
               {[
                 {
-                  title: "Under the Hood: The WBD AI Buildout",
-                  value: "$795 value",
+                  title: "The Spend Map",
+                  value: "$119 value",
                   desc: "How Warner Bros. Discovery is actually building its AI capability, 8,700 miles from Burbank — who is hired, where, at what cost, and for what work, drawn from job postings, government records, corporate filings, and salary data on two continents. Not a scandal; a map."
                 },
                 {
                   title: "The $6.6 Billion Greenlight Window",
-                  value: "$695 value",
+                  value: "$119 value",
                   desc: "The state tax-credit system decoded. Which states publish lists, on what calendar, and the narrow window between greenlight and spend when a production buys everything."
                 },
                 {
-                  title: "Help-Wanted Pages Are Purchase Orders",
-                  value: "$495 value",
+                  title: "The Requisition Read",
+                  value: "$119 value",
                   desc: "Careers pages as disclosure documents. The job-title tells, the posting patterns that reveal a buildout weeks before any purchase order, and a full named walkthrough of a nine-figure streaming-sports buildout."
                 }
               ].map((report, i) => (
@@ -173,7 +173,7 @@ export default function SalesPage() {
 
           <FadeIn>
             <p>
-              That's <strong>$1,985 in Special Reports</strong> — a crash course in producing your own hot leads that the $15,000-a-year databases will never reveal. Free with your membership, and yours to keep forever.
+              The three Special Reports are valued at <strong>$357 total</strong> — a crash course in producing your own hot leads that the $15,000-a-year databases will never reveal. Included with your membership, and yours to keep forever.
             </p>
             <p>
               Plus, once a month, subscribers receive <strong>The Divergence Report</strong> — the strategic layer on top of the HSW Weekly Wire. It's the deeper monthly read on where the money is moving <em>next quarter</em>, so you're positioned before the crowd shows up. The HSW Weekly Wire is your calls for the week; the Divergence Report is your plan for the season. Both come with the subscription.
@@ -183,20 +183,20 @@ export default function SalesPage() {
           <FadeIn>
             <h2 className="text-3xl mt-16 mb-6">The Math & The Guarantee</h2>
             <p>
-              The regular rate for Hollywood Sales Wire is ${REGULAR_RATE_YR.toLocaleString()} a year. One closed deal sourced from one issue pays for years of it.
+              The regular rate is ${REGULAR_RATE_YR.toLocaleString()} per year for an individual or ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for a Team of up to five. One closed deal sourced from one issue pays for years of it.
             </p>
             <div className="bg-primary text-primary-foreground p-8 my-10 shadow-xl relative overflow-hidden">
               <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.05\'/%3E%3C/svg%3E')] opacity-50 mix-blend-overlay"></div>
               <p className="font-serif text-xl sm:text-2xl leading-relaxed m-0 relative z-10 text-balance">
                 {deadline?.closed ? (
-                  <>The founding offer {deadline.endedPhrase}. Membership is ${REGULAR_RATE_YR.toLocaleString()} a year.</>
+                  <>The founding offer {deadline.endedPhrase}. Individual membership is ${REGULAR_RATE_YR.toLocaleString()} per year; Team membership is ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for up to five seats.</>
                 ) : (
-                  <>On our email list, invited readers get the Founding Member rate instead: <strong>${FOUNDING_RATE_YR.toLocaleString()} a year — locked in for as long as you stay a member.</strong> Join the list below and your invitation follows.</>
+                  <>Founding prices are shown only through a valid offer link. Regular membership is ${REGULAR_RATE_YR.toLocaleString()} per year for an individual or ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for a Team of up to five.</>
                 )}
               </p>
             </div>
             <p>
-              Notice the math: the Special Reports alone ($1,985) are worth the Founding Membership fee ($1,995). The fifty-two weekly issues and twelve Divergence Reports are, in effect, thrown in.
+              Membership includes the weekly Wire, twelve Divergence Reports, and all three Special Reports.
             </p>
 
             <div className="flex flex-col sm:flex-row items-start gap-6 p-8 border border-border mt-10 bg-card">
@@ -214,11 +214,11 @@ export default function SalesPage() {
             <h2 className="text-3xl mt-16 mb-6">How the Founding Offer Works</h2>
             <p data-testid="homepage-deadline">
               {deadline?.closed ? (
-                <>The Founding Member rate isn't on this website's order page. This founding offer {deadline.endedPhrase}. Membership is ${REGULAR_RATE_YR.toLocaleString()} a year.</>
+                <>The Founding Member rate is available only through a valid offer link. This offer {deadline.endedPhrase}. Individual membership is ${REGULAR_RATE_YR.toLocaleString()} per year; Team membership is ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for up to five seats.</>
               ) : deadline ? (
-                <>The Founding Member rate isn't on this website's order page — it comes by invitation through our email list, and every invitation has a real deadline: this offer {deadline.endsPhrase} — {deadline.daysLeftLabel}. After that deadline, membership is ${REGULAR_RATE_YR.toLocaleString()} a year like everyone else.</>
+                <>The Founding Member rate is available only through a valid offer link. This offer {deadline.endsPhrase} — {deadline.daysLeftLabel}. Regular membership is ${REGULAR_RATE_YR.toLocaleString()} per year for an individual or ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for a Team of up to five.</>
               ) : (
-                <>The Founding Member rate isn't on this website's order page — it comes by invitation through our email list, and every invitation has a real deadline at 11:59 PM ET. After that deadline, membership is ${REGULAR_RATE_YR.toLocaleString()} a year like everyone else.</>
+                <>The Founding Member rate is available only through a valid offer link with a real deadline. Regular membership is ${REGULAR_RATE_YR.toLocaleString()} per year for an individual or ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for a Team of up to five.</>
               )}
             </p>
             {!deadline?.closed && (

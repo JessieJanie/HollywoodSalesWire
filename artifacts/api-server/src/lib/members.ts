@@ -16,9 +16,9 @@ import { logger } from "./logger";
 const NOTIFY_EMAIL = "hello@hollywoodsaleswire.com";
 
 const REPORT_SLUGS = [
-  { slug: "spend-map", title: "Under the Hood: The WBD AI Buildout" },
+  { slug: "spend-map", title: "The Spend Map" },
   { slug: "greenlight-window", title: "The $6.6 Billion Greenlight Window" },
-  { slug: "requisition-read", title: "Help-Wanted Pages Are Purchase Orders" },
+  { slug: "requisition-read", title: "The Requisition Read" },
 ] as const;
 
 const VALID_PLANS = new Set([
@@ -150,13 +150,13 @@ function planFromAmount(amountCents: number | null | undefined): string {
 function planLabel(plan: string): string {
   switch (plan) {
     case "founding-individual":
-      return "Founding Member — Individual ($1,995/yr)";
+      return "Founding Member — Individual ($599/yr)";
     case "founding-team":
-      return "Founding Member — Team ($4,995/yr)";
+      return "Founding Member — Team ($1,198/yr)";
     case "individual":
-      return "Member — Individual ($3,995/yr)";
+      return "Member — Individual ($1,150/yr)";
     case "team":
-      return "Member — Team ($9,995/yr)";
+      return "Member — Team ($2,300/yr)";
     default:
       return "Member";
   }
@@ -172,28 +172,19 @@ export function isFoundingPlan(plan: string): boolean {
  */
 /** One-line descriptions for the welcome email, keyed by slug. */
 const WELCOME_REPORT_DESCRIPTIONS: Record<string, string> = {
-  "spend-map":
-    "How Warner Bros. Discovery is actually building its AI capability, 8,700 miles from Burbank — who is hired, where, at what cost, and for what work, drawn from job postings, government records, corporate filings, and salary data on two continents. Not a scandal; a map.",
+    "spend-map":
+    "A sourced map of where production-economy spending is moving, including physical production, sports rights, localization, and AI.",
   "greenlight-window":
     "The state-by-state award-list calendar and the spend window when a production does nearly all of its buying — so you arrive while the budget is still being spent, not after.",
   "requisition-read":
     "Careers pages as disclosure documents: the job-title tells, the posting patterns that reveal a buildout weeks before any purchase order, and a full named walkthrough of a nine-figure streaming-sports buildout.",
 };
 
-function foundingRateLockHtml(amountCents: number | null): string {
+function foundingRateLockHtml(): string {
   const p = (s: string) => `<p style="margin:0 0 20px;">${s}</p>`;
   const h = (s: string) =>
     `<p style="font-family:Arial,sans-serif;font-size:12px;letter-spacing:2px;color:#8a8577;text-transform:uppercase;margin:32px 0 12px;">${s}</p>`;
-  // Derive annual and weekly display from the actual checkout amount so this
-  // is always accurate regardless of plan variant or future pricing changes.
-  let rateHtml: string;
-  if (amountCents && amountCents > 0) {
-    const annual = (amountCents / 100).toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
-    const weekly = Math.round(amountCents / 52 / 100);
-    rateHtml = `${p(`Your Founding Member rate is <strong>$${weekly} a week (${annual} a year, billed annually)</strong>. This rate is locked for the life of your membership — it will never increase as long as you remain a member. When Hollywood Sales Wire raises prices for new members, your rate stays exactly where it is today.`)}`;
-  } else {
-    rateHtml = `${p("Your Founding Member rate is locked for the life of your membership — it will never increase as long as you remain a member. When Hollywood Sales Wire raises prices for new members, your rate stays exactly where it is today.")}`;
-  }
+  const rateHtml = p("Your Founding Member rate is locked for the life of your membership — it will never increase as long as you remain a member. When Hollywood Sales Wire raises prices for new members, your rate stays exactly where it is today.");
   return `${h("Your Founding Member rate — locked for life")}${rateHtml}`;
 }
 
@@ -236,7 +227,7 @@ function welcomeHtml(
     <div style="max-width:560px;margin:0 auto;padding:32px 24px;font-family:Georgia,'Times New Roman',serif;color:#1a1a1a;font-size:17px;line-height:1.6;background:#ffffff;">
       ${p(greeting)}
       ${p("Thank you for choosing Hollywood Sales Wire, and welcome. Your membership is now active, and everything that comes with your subscription is below.")}
-      ${plan?.startsWith("founding") ? foundingRateLockHtml(amountCents) : ""}
+      ${plan?.startsWith("founding") ? foundingRateLockHtml() : ""}
       ${reportsSection}
       ${h("The latest issue of the HSW Weekly Wire")}
       ${p(`<a href="${shelfLink}" style="color:#1d5c3a;font-weight:bold;">Click here</a> for the latest issue of the HSW Weekly Wire. Your subscription will actually start with next Tuesday's issue. It will arrive in your inbox here as well.`)}

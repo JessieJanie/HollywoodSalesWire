@@ -26,9 +26,9 @@ import {
 const router: IRouter = Router();
 
 const REPORT_DEFINITIONS = [
-  { slug: "spend-map", title: "Under the Hood: The WBD AI Buildout" },
+  { slug: "spend-map", title: "The Spend Map" },
   { slug: "greenlight-window", title: "The $6.6 Billion Greenlight Window" },
-  { slug: "requisition-read", title: "Help-Wanted Pages Are Purchase Orders" },
+  { slug: "requisition-read", title: "The Requisition Read" },
 ] as const;
 
 const storageService = new ObjectStorageService();
