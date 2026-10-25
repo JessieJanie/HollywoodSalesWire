@@ -137,9 +137,9 @@ ${p("And it's worse than stale: the list companies rent those same names out, ov
 ${p("Meanwhile the hot list — who got money this month and has to spend it — sits in public filings that almost nobody in sales reads, because reading them is a genuinely tedious skill.")}
 ${p("That's the entire idea behind Hollywood Sales Wire: I read the filings, the award lists, the requisitions, and the money flows every week, and every Tuesday you get the names — who just got funded, what they're about to buy, and when the window closes.")}
 ${p("Cold leads are a commodity. Hot leads are an edge.")}
-${p(`The offer is live right now: subscribe by midnight Eastern on ${deadlineLabel} — or better, today — and you're a Founding Member at $38 a week instead of the regular $77, locked in for as long as you stay. Three Special Reports arrive free and immediately with your membership, alongside your first issue of the Wire this coming Tuesday.`)}
+${p(`The offer is live right now: use your valid offer link by midnight Eastern on ${deadlineLabel} — or better, today — to join at the Founding Member rate: $599/year or $64.99/month individual; $1,198/year or $129.98/month Team (up to five seats). Regular rates are $1,150/year individual and $2,300/year Team. Your rate is locked in for as long as you stay. Three Special Reports, valued at $357 total, arrive free and immediately with your membership, alongside your first issue of the Wire this coming Tuesday.`)}
 ${p("I'll make the full case over the next few weeks. But if you already know what a two-week-old award list is worth to your pipeline, there's no reason to wait:")}
-${cta("Become a Founding Member — $38/week", utm(offerUrl, 1))}
+${cta("View the Founding Member offer", utm(offerUrl, 1))}
 ${sig}
 ${p("P.S. One question worth sitting with: when a state publishes a list of 170 funded productions worth $6.6 billion, who in your company is assigned to call those productions first? If the answer is &ldquo;nobody,&rdquo; that's fixable — by " + deadlineLabel + ".")}`,
         unsubscribeUrl,
