@@ -261,12 +261,20 @@ export function PricingContent({
 
 export default function OrderPage() {
   const deadline = useFoundingDeadline();
-  // Founding pricing only for a visitor who arrived with a valid ?d= offer link
-  // whose deadline has not passed. Everyone else sees regular pricing.
+  // Founding pricing requires an explicit valid Monday ?d= deadline that has
+  // not passed. A missing or expired date shows regular rates.
   const founding = !!deadline && deadline.overrideDate !== null && !deadline.closed;
   return (
     <div className="min-h-screen flex flex-col font-sans text-foreground bg-[#F6F5F2]">
       <Header />
+      {(!deadline || deadline.closed) && (
+        <div
+          className="bg-muted text-muted-foreground py-3 px-4 text-center text-sm"
+          data-testid="order-deadline"
+        >
+          This founding offer has ended. Regular rates and checkout are below.
+        </div>
+      )}
       <PricingContent founding={founding} deadline={deadline} />
       <Footer />
     </div>

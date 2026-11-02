@@ -15,17 +15,13 @@ const OCT_19_DEADLINE_MS = Date.parse("2026-10-20T03:59:59.000Z");
 /** 11:59:59.000 PM EST on Monday, November 9, 2026 (after DST ends). */
 const NOV_9_DEADLINE_MS = Date.parse("2026-11-10T04:59:59.000Z");
 
-test("default on Monday Oct 12 2026 is Monday Oct 19 at 11:59 PM ET", () => {
+test("a missing deadline is closed and does not invent a date", () => {
   const deadline = resolveFoundingDeadline(MON_OCT_12, null);
-  assert.equal(deadline.date, "2026-10-19");
-  assert.equal(deadline.label, "Monday, October 19, 2026");
-  assert.equal(deadline.endsPhrase, "ends Monday, October 19, 2026 at 11:59 PM ET");
-  assert.equal(deadline.endedPhrase, "ended Monday, October 19, 2026 at 11:59 PM ET");
-  assert.equal(deadline.daysLeft, 7);
-  assert.equal(deadline.daysLeftLabel, "7 days left");
-  assert.equal(deadline.closed, false);
+  assert.equal(deadline.date, null);
+  assert.equal(deadline.label, null);
+  assert.equal(deadline.endsAtMs, null);
+  assert.equal(deadline.closed, true);
   assert.equal(deadline.overrideDate, null);
-  assert.equal(deadline.endsAtMs, OCT_19_DEADLINE_MS);
 });
 
 test("the same instant always resolves to the same deadline", () => {
@@ -34,62 +30,33 @@ test("the same instant always resolves to the same deadline", () => {
   assert.deepEqual(a, b);
 });
 
-test("Tuesday rolls to the Monday that is at least 7 days out", () => {
+test("a missing date remains closed on every weekday", () => {
   const deadline = resolveFoundingDeadline(TUE_OCT_13, undefined);
-  assert.equal(deadline.date, "2026-10-26");
-  assert.equal(deadline.daysLeft, 13);
-  assert.equal(deadline.endsPhrase, "ends Monday, October 26, 2026 at 11:59 PM ET");
-});
-
-test("each weekday maps to a Monday at least 7 days ahead", () => {
-  const cases: Array<[string, string, number]> = [
-    ["2026-10-12T15:00:00.000Z", "2026-10-19", 7], // Mon
-    ["2026-10-13T15:00:00.000Z", "2026-10-26", 13], // Tue
-    ["2026-10-14T15:00:00.000Z", "2026-10-26", 12], // Wed
-    ["2026-10-15T15:00:00.000Z", "2026-10-26", 11], // Thu
-    ["2026-10-16T15:00:00.000Z", "2026-10-26", 10], // Fri
-    ["2026-10-17T15:00:00.000Z", "2026-10-26", 9], // Sat
-    ["2026-10-18T15:00:00.000Z", "2026-10-26", 8], // Sun
-  ];
-  for (const [iso, date, daysLeft] of cases) {
-    const deadline = resolveFoundingDeadline(new Date(iso), null);
-    assert.equal(deadline.date, date, iso);
-    assert.equal(deadline.daysLeft, daysLeft, iso);
-    assert.equal(deadline.closed, false);
-  }
-});
-
-test("year boundary still lands on a Monday", () => {
-  // Friday, December 25, 2026, 3:00 PM EST → +7 days is Friday Jan 1, next Monday Jan 4.
-  const now = new Date("2026-12-25T20:00:00.000Z");
-  const deadline = resolveFoundingDeadline(now, null);
-  assert.equal(deadline.date, "2027-01-04");
-  assert.equal(deadline.label, "Monday, January 4, 2027");
-  assert.equal(deadline.daysLeft, 10);
-  assert.equal(deadline.endsAtMs, Date.parse("2027-01-05T04:59:59.000Z"));
+  assert.equal(deadline.date, null);
+  assert.equal(deadline.closed, true);
 });
 
 test("deadline after DST ends is 11:59:59 PM Eastern Standard Time", () => {
   // Monday, November 2, 2026, 11:00 AM EST. DST ended November 1.
   const now = new Date("2026-11-02T16:00:00.000Z");
-  const deadline = resolveFoundingDeadline(now, null);
+  const deadline = resolveFoundingDeadline(now, "2026-11-09");
   assert.equal(deadline.date, "2026-11-09");
   assert.equal(deadline.endsAtMs, NOV_9_DEADLINE_MS);
   assert.equal(deadline.daysLeft, 7);
 });
 
-test("a real date inside the 14-day window overrides the default", () => {
-  const deadline = resolveFoundingDeadline(MON_OCT_12, "2026-10-20");
-  assert.equal(deadline.date, "2026-10-20");
-  assert.equal(deadline.label, "Tuesday, October 20, 2026");
-  assert.equal(deadline.daysLeft, 8);
-  assert.equal(deadline.daysLeftLabel, "8 days left");
-  assert.equal(deadline.overrideDate, "2026-10-20");
+test("a future Monday date is the exact offer deadline", () => {
+  const deadline = resolveFoundingDeadline(MON_OCT_12, "2026-10-19");
+  assert.equal(deadline.date, "2026-10-19");
+  assert.equal(deadline.label, "Monday, October 19, 2026");
+  assert.equal(deadline.daysLeft, 7);
+  assert.equal(deadline.daysLeftLabel, "7 days left");
+  assert.equal(deadline.overrideDate, "2026-10-19");
   assert.equal(deadline.closed, false);
-  assert.equal(deadline.endsPhrase, "ends Tuesday, October 20, 2026 at 11:59 PM ET");
+  assert.equal(deadline.endsPhrase, "ends Monday, October 19, 2026 at 11:59 PM ET");
 });
 
-test("today and exactly 14 days ahead are accepted", () => {
+test("today and a later Monday are accepted", () => {
   const today = resolveFoundingDeadline(MON_OCT_12, "2026-10-12");
   assert.equal(today.date, "2026-10-12");
   assert.equal(today.daysLeft, 0);
@@ -97,27 +64,22 @@ test("today and exactly 14 days ahead are accepted", () => {
   assert.equal(today.overrideDate, "2026-10-12");
   assert.equal(today.closed, false);
 
-  const edge = resolveFoundingDeadline(MON_OCT_12, "2026-10-26");
-  assert.equal(edge.date, "2026-10-26");
-  assert.equal(edge.daysLeft, 14);
-  assert.equal(edge.overrideDate, "2026-10-26");
+  const later = resolveFoundingDeadline(MON_OCT_12, "2026-11-02");
+  assert.equal(later.date, "2026-11-02");
+  assert.equal(later.overrideDate, "2026-11-02");
+  assert.equal(later.closed, false);
 });
 
-test("one day left is singular", () => {
-  const deadline = resolveFoundingDeadline(MON_OCT_12, "2026-10-13");
-  assert.equal(deadline.daysLeftLabel, "1 day left");
-});
-
-test("past, too far, and unreal dates are ignored", () => {
+test("missing, malformed, non-Monday, and unreal dates are closed", () => {
   const ignored = [
-    "2026-10-11",
-    "2026-10-27",
+    "",
     "2026-02-29",
     "2026-04-31",
     "2026-13-01",
     "2026-00-10",
     "2026-10-00",
     "2023-02-29",
+    "2026-10-20",
     "2026-10-1",
     "10-19-2026",
     "2026-10-19T00:00:00Z",
@@ -127,18 +89,20 @@ test("past, too far, and unreal dates are ignored", () => {
   ];
   for (const raw of ignored) {
     const deadline = resolveFoundingDeadline(MON_OCT_12, raw);
-    assert.equal(deadline.date, "2026-10-19", raw);
+    assert.equal(deadline.date, null, raw);
+    assert.equal(deadline.closed, true, raw);
     assert.equal(deadline.overrideDate, null, raw);
   }
 });
 
-test("a real leap day is accepted when it falls inside the window", () => {
-  const now = new Date("2028-02-20T15:00:00.000Z");
-  const deadline = resolveFoundingDeadline(now, "2028-02-29");
-  assert.equal(deadline.date, "2028-02-29");
-  assert.equal(deadline.label, "Tuesday, February 29, 2028");
-  assert.equal(deadline.overrideDate, "2028-02-29");
-  assert.equal(deadline.daysLeft, 9);
+test("a passed deadline stays closed instead of rolling forward", () => {
+  const afterMidnight = new Date("2026-10-20T04:00:00.000Z");
+  const deadline = resolveFoundingDeadline(afterMidnight, "2026-10-19");
+  assert.equal(deadline.date, "2026-10-19");
+  assert.equal(deadline.label, "Monday, October 19, 2026");
+  assert.equal(deadline.overrideDate, null);
+  assert.equal(deadline.closed, true);
+  assert.equal(deadline.endedPhrase, "ended Monday, October 19, 2026 at 11:59 PM ET");
 });
 
 test("the offer closes after 11:59:59 PM ET and stays open at that instant", () => {
@@ -156,17 +120,12 @@ test("the offer closes after 11:59:59 PM ET and stays open at that instant", () 
   assert.equal(closed.endedPhrase, "ended Monday, October 19, 2026 at 11:59 PM ET");
 });
 
-test("a passed calendar date is ignored instead of shown as closed", () => {
-  // Tuesday, October 20, 2026, 12:00 AM EDT. Oct 19 is yesterday, so ?d= is ignored.
-  // The default Monday at least 7 days out is November 2 (Oct 26 is only 6 days away).
+test("a passed calendar date does not silently roll forward", () => {
   const afterMidnight = new Date("2026-10-20T04:00:00.000Z");
   const deadline = resolveFoundingDeadline(afterMidnight, "2026-10-19");
+  assert.equal(deadline.date, "2026-10-19");
   assert.equal(deadline.overrideDate, null);
-  assert.equal(deadline.date, "2026-11-02");
-  assert.equal(deadline.label, "Monday, November 2, 2026");
-  assert.equal(deadline.daysLeft, 13);
-  assert.equal(deadline.closed, false);
-  assert.equal(deadline.endsAtMs, Date.parse("2026-11-03T04:59:59.000Z"));
+  assert.equal(deadline.closed, true);
 });
 
 test("Eastern Standard Time close uses the UTC-5 instant", () => {
@@ -178,10 +137,10 @@ test("Eastern Standard Time close uses the UTC-5 instant", () => {
   assert.equal(closed.endsAtMs, NOV_9_DEADLINE_MS);
 });
 
-test("NY date is taken from the Eastern calendar, not the host timezone", () => {
+test("a valid deadline uses Eastern time rather than the host timezone", () => {
   // 03:30 UTC Oct 13 is still Monday Oct 12, 11:30 PM EDT.
   const late = new Date("2026-10-13T03:30:00.000Z");
-  const deadline = resolveFoundingDeadline(late, null);
+  const deadline = resolveFoundingDeadline(late, "2026-10-19");
   assert.equal(deadline.date, "2026-10-19");
   assert.equal(deadline.daysLeft, 7);
 });
