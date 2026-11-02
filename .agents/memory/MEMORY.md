@@ -12,6 +12,7 @@
 - [Evergreen founding funnel](email-sequence.md) — signup → welcome, 1–2 Free Editions first, then weekly founding series days 14–42 to token-gated offer page; pending-row handoff for >28d; copy publisher-locked.
 - [Shelf & publisher access](shelf-access.md) — magic link + 1-yr remember-me cookie, "email me my link" form; canceled members keep access by design; dev/prod share SESSION_SECRET.
 - [Site prerendering for AI crawlers](site-prerender.md) — public pages prerendered to static HTML (GEO); new public pages must join the prerender list + sitemap; prod file-vs-rewrite precedence unverified.
+- [Public founding deadlines](founding-deadlines.md) — public `?d=` links use their explicit Monday date; missing or past dates close rather than rolling forward.
 - [Press releases as proofs](press-releases.md) — dated releases (/press + ProductionHUB) prove HSW finds news before the trades; never reveal research methods; "first" claims verified literally.
 - [Typefully social publishing](typefully-linkedin.md) — real auto-publishing requires `publish_at`; X must stay URL-free while LinkedIn may retain its link.
 - [Instantly cold campaign](instantly-cold-campaign.md) — rolling deadline = Day 7 from lead-add; HTML bodies required; account-level ramp must not be overridden; CTAs must land on the founding-verified offer page, never the bare homepage.

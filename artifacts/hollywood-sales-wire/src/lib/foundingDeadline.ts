@@ -1,22 +1,12 @@
 /**
  * Founding-offer deadline.
  *
- * One pure function of (current instant, optional ?d=YYYY-MM-DD). Nothing is
- * stored per visitor: the same instant and the same query produce the same
- * deadline for everyone.
- *
- * Default: the next Monday that is at least 7 days after the current
- * America/New_York calendar date, ending at 11:59:59 PM Eastern.
- *
- * ?d= is used only when it is a real calendar date, not before that NY date,
- * and at most 14 days ahead. Anything else is ignored and the default is used.
- * After 11:59:59 PM ET on the resolved date, the offer is closed.
+ * One pure function of (current instant, ?d=YYYY-MM-DD). No deadline is
+ * inferred when the parameter is missing or invalid. A valid Monday deadline
+ * closes at 11:59:59 PM Eastern on that date.
  */
 
 export const NY_TIME_ZONE = "America/New_York";
-export const MIN_LEAD_DAYS = 7;
-export const MAX_OVERRIDE_DAYS = 14;
-
 const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 const WEEKDAYS = [
@@ -51,27 +41,24 @@ export type NyDate = {
 };
 
 export type FoundingDeadline = {
-  /** YYYY-MM-DD in America/New_York. */
-  date: string;
-  /** "Monday, October 19, 2026" */
-  label: string;
-  /** "ends Monday, October 19, 2026 at 11:59 PM ET" */
-  endsPhrase: string;
-  /** "ended Monday, October 19, 2026 at 11:59 PM ET" */
-  endedPhrase: string;
-  /** Whole NY calendar days from `now` until `date`. 0 on the deadline date. */
-  daysLeft: number;
-  /** "7 days left" or "1 day left". */
-  daysLeftLabel: string;
-  /** True once 11:59:59 PM America/New_York on `date` has passed. */
+  /** YYYY-MM-DD in America/New_York, or null when no valid date was supplied. */
+  date: string | null;
+  /** "Monday, October 19, 2026", or null without a valid date. */
+  label: string | null;
+  /** Human-readable deadline copy, or null without a valid date. */
+  endsPhrase: string | null;
+  endedPhrase: string | null;
+  /** Whole NY calendar days from `now` until the date. */
+  daysLeft: number | null;
+  daysLeftLabel: string | null;
+  /** True when there is no valid deadline or its closing instant has passed. */
   closed: boolean;
   /**
-   * The accepted ?d= value. Null when the param was missing or ignored.
-   * Checkout links preserve this and do not invent a param for the default.
+   * The valid ?d= value while the offer remains open. Never invent a date.
    */
   overrideDate: string | null;
-  /** 11:59:59.000 PM America/New_York on `date`, as a UTC epoch milliseconds. */
-  endsAtMs: number;
+  /** Deadline instant in UTC milliseconds, or null without a valid date. */
+  endsAtMs: number | null;
 };
 
 export function resolveFoundingDeadline(
@@ -79,20 +66,21 @@ export function resolveFoundingDeadline(
   rawParam: string | null | undefined,
 ): FoundingDeadline {
   const today = nyDateFromInstant(now);
-  const override = parseOverride(rawParam, today);
-  const date = override ?? defaultMonday(today);
-  const endsAtMs = nyDeadlineMs(date);
-  const daysLeft = diffDays(today, date);
-  const label = formatLabel(date);
+  const date = parseDeadline(rawParam);
+  const endsAtMs = date ? nyDeadlineMs(date) : null;
+  const daysLeft = date ? diffDays(today, date) : null;
+  const label = date ? formatLabel(date) : null;
+  const closed = endsAtMs === null || now.getTime() > endsAtMs;
   return {
-    date: formatIso(date),
+    date: date ? formatIso(date) : null,
     label,
-    endsPhrase: `ends ${label} at 11:59 PM ET`,
-    endedPhrase: `ended ${label} at 11:59 PM ET`,
+    endsPhrase: label ? `ends ${label} at 11:59 PM ET` : null,
+    endedPhrase: label ? `ended ${label} at 11:59 PM ET` : null,
     daysLeft,
-    daysLeftLabel: daysLeft === 1 ? "1 day left" : `${daysLeft} days left`,
-    closed: now.getTime() > endsAtMs,
-    overrideDate: override ? formatIso(override) : null,
+    daysLeftLabel:
+      daysLeft === null ? null : daysLeft === 1 ? "1 day left" : `${daysLeft} days left`,
+    closed,
+    overrideDate: date && !closed ? formatIso(date) : null,
     endsAtMs,
   };
 }
@@ -108,7 +96,7 @@ export function orderPath(overrideDate: string | null): string {
   return preserveDeadlineOnUrl("/order", overrideDate);
 }
 
-function parseOverride(raw: string | null | undefined, today: NyDate): NyDate | null {
+function parseDeadline(raw: string | null | undefined): NyDate | null {
   if (raw == null || raw === "") return null;
   const match = DATE_RE.exec(raw);
   if (!match) return null;
@@ -117,16 +105,8 @@ function parseOverride(raw: string | null | undefined, today: NyDate): NyDate | 
   const day = Number(match[3]);
   if (!isRealDate(year, month, day)) return null;
   const date = { year, month, day };
-  const ahead = diffDays(today, date);
-  if (ahead < 0 || ahead > MAX_OVERRIDE_DAYS) return null;
+  if (weekdayIndex(date) !== 1) return null;
   return date;
-}
-
-/** Soonest Monday on or after today + 7 days. */
-function defaultMonday(today: NyDate): NyDate {
-  const earliest = addDays(today, MIN_LEAD_DAYS);
-  const daysToMonday = (8 - weekdayIndex(earliest)) % 7;
-  return addDays(earliest, daysToMonday);
 }
 
 function isRealDate(year: number, month: number, day: number): boolean {
@@ -155,11 +135,6 @@ function diffDays(from: NyDate, to: NyDate): number {
 
 function utcDayNumber(date: NyDate): number {
   return Math.round(Date.UTC(date.year, date.month - 1, date.day) / 86_400_000);
-}
-
-function addDays(date: NyDate, days: number): NyDate {
-  const utc = new Date(Date.UTC(date.year, date.month - 1, date.day) + days * 86_400_000);
-  return { year: utc.getUTCFullYear(), month: utc.getUTCMonth() + 1, day: utc.getUTCDate() };
 }
 
 function nyDateFromInstant(instant: Date): NyDate {

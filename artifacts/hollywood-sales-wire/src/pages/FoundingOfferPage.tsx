@@ -26,9 +26,9 @@ function useCountdown(deadlineIso: string | undefined) {
  * Two entry paths:
  * - Token link (warm-prospect welcome series): the subscriber's personal
  *   window, verified via /api/founding-offer, then checkout re-checks it.
- * - No token (the public founding offer and cold campaigns): the shared
- *   client deadline from ?d=YYYY-MM-DD, or the next Monday at least 7 days
- *   out at 11:59 PM ET. After that instant, regular rates are shown.
+ * - No token (the public founding offer and cold campaigns): ?d=YYYY-MM-DD
+ *   is the exact Monday deadline at 11:59 PM ET. Missing or expired dates
+ *   show regular rates.
  */
 export default function FoundingOfferPage() {
   const token = new URLSearchParams(window.location.search).get("token") ?? "";
@@ -104,14 +104,14 @@ export default function FoundingOfferPage() {
               className="bg-muted text-muted-foreground py-3 px-4 text-center text-sm"
               data-testid="founding-deadline"
             >
-              This founding offer {deadline.endedPhrase}. Regular rates are below.
+              This founding offer has ended. Regular rates are below.
             </div>
           ) : (
             <div
               className="bg-primary text-primary-foreground py-3 px-4 text-center text-sm"
               data-testid="founding-deadline"
             >
-              This offer {deadline.endsPhrase} — {deadline.daysLeftLabel}
+              This offer {deadline.endsPhrase ?? "has ended"} — {deadline.daysLeftLabel}
             </div>
           )}
           <PricingContent founding={!deadline.closed} deadline={deadline} />
