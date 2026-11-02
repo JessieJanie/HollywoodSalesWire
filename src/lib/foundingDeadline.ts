@@ -2,8 +2,8 @@
  * Founding-offer deadline.
  *
  * One pure function of (current instant, ?d=YYYY-MM-DD). No deadline is
- * inferred when the parameter is missing or invalid. A valid Monday deadline
- * closes at 11:59:59 PM Eastern on that date.
+ * inferred when the parameter is missing or invalid. A valid date on any
+ * weekday closes at 11:59:59 PM Eastern on that date.
  */
 
 export const NY_TIME_ZONE = "America/New_York";
@@ -105,7 +105,6 @@ function parseDeadline(raw: string | null | undefined): NyDate | null {
   const day = Number(match[3]);
   if (!isRealDate(year, month, day)) return null;
   const date = { year, month, day };
-  if (weekdayIndex(date) !== 1) return null;
   return date;
 }
 

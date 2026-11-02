@@ -261,7 +261,7 @@ export function PricingContent({
 
 export default function OrderPage() {
   const deadline = useFoundingDeadline();
-  // Founding pricing requires an explicit valid Monday ?d= deadline that has
+  // Founding pricing requires an explicit valid ?d= deadline that has
   // not passed. A missing or expired date shows regular rates.
   const founding = !!deadline && deadline.overrideDate !== null && !deadline.closed;
   return (
