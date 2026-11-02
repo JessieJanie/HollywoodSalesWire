@@ -190,15 +190,18 @@ export default function SalesPage() {
           <FadeIn>
             <h2 className="text-3xl mt-16 mb-6">The Math & The Guarantee</h2>
             <p>
-              The regular rate is ${REGULAR_RATE_YR.toLocaleString()} per year for an individual or ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for a Team of up to five. One closed deal sourced from one issue pays for years of it.
+              Regular annual pricing is ${REGULAR_RATE_YR.toLocaleString()}/year for an individual and ${TEAM_REGULAR_RATE_YR.toLocaleString()}/year for a Team of up to five seats. One closed deal sourced from one issue pays for years of it.
             </p>
             <p data-testid="homepage-pricing">
-              Founding members can choose ${FOUNDING_RATE_YR.toLocaleString()}/year or ${FOUNDING_RATE_MONTHLY}/month for an individual, or ${TEAM_FOUNDING_RATE_YR.toLocaleString()}/year or ${TEAM_FOUNDING_RATE_MONTHLY}/month for a Team of up to five, through a valid offer link.{" "}
-              <Link href={orderHref} className="font-semibold text-primary underline underline-offset-4">
-                View membership options
-              </Link>
-              .
+              Founding pricing, available through a valid offer link: Individual ${FOUNDING_RATE_YR.toLocaleString()}/year or ${FOUNDING_RATE_MONTHLY}/month; Team (up to five seats) ${TEAM_FOUNDING_RATE_YR.toLocaleString()}/year or ${TEAM_FOUNDING_RATE_MONTHLY}/month.
             </p>
+            <Link
+              href={orderHref}
+              data-testid="homepage-pricing-order"
+              className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-6 py-3 mt-4 font-semibold transition-opacity hover:opacity-90"
+            >
+              See founding membership options <ArrowRight className="w-4 h-4" aria-hidden="true" />
+            </Link>
             <div className="bg-primary text-primary-foreground p-8 my-10 shadow-xl relative overflow-hidden">
               <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.05\'/%3E%3C/svg%3E')] opacity-50 mix-blend-overlay"></div>
               <p className="font-serif text-xl sm:text-2xl leading-relaxed m-0 relative z-10 text-balance">
