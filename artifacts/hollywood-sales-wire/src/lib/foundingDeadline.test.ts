@@ -28,6 +28,9 @@ test("the same instant always resolves to the same deadline", () => {
   const a = resolveFoundingDeadline(MON_OCT_12, "2026-10-20");
   const b = resolveFoundingDeadline(MON_OCT_12, "2026-10-20");
   assert.deepEqual(a, b);
+  assert.equal(a.date, "2026-10-20");
+  assert.equal(a.label, "Tuesday, October 20, 2026");
+  assert.equal(a.closed, false);
 });
 
 test("a missing date remains closed on every weekday", () => {
@@ -56,7 +59,7 @@ test("a future Monday date is the exact offer deadline", () => {
   assert.equal(deadline.endsPhrase, "ends Monday, October 19, 2026 at 11:59 PM ET");
 });
 
-test("today and a later Monday are accepted", () => {
+test("today and later dates on any weekday are accepted", () => {
   const today = resolveFoundingDeadline(MON_OCT_12, "2026-10-12");
   assert.equal(today.date, "2026-10-12");
   assert.equal(today.daysLeft, 0);
@@ -64,13 +67,14 @@ test("today and a later Monday are accepted", () => {
   assert.equal(today.overrideDate, "2026-10-12");
   assert.equal(today.closed, false);
 
-  const later = resolveFoundingDeadline(MON_OCT_12, "2026-11-02");
-  assert.equal(later.date, "2026-11-02");
-  assert.equal(later.overrideDate, "2026-11-02");
+  const later = resolveFoundingDeadline(MON_OCT_12, "2026-11-03");
+  assert.equal(later.date, "2026-11-03");
+  assert.equal(later.label, "Tuesday, November 3, 2026");
+  assert.equal(later.overrideDate, "2026-11-03");
   assert.equal(later.closed, false);
 });
 
-test("missing, malformed, non-Monday, and unreal dates are closed", () => {
+test("missing, malformed, and unreal dates are closed", () => {
   const ignored = [
     "",
     "2026-02-29",
@@ -79,7 +83,6 @@ test("missing, malformed, non-Monday, and unreal dates are closed", () => {
     "2026-00-10",
     "2026-10-00",
     "2023-02-29",
-    "2026-10-20",
     "2026-10-1",
     "10-19-2026",
     "2026-10-19T00:00:00Z",
@@ -103,6 +106,20 @@ test("a passed deadline stays closed instead of rolling forward", () => {
   assert.equal(deadline.overrideDate, null);
   assert.equal(deadline.closed, true);
   assert.equal(deadline.endedPhrase, "ended Monday, October 19, 2026 at 11:59 PM ET");
+});
+
+test("a future Tuesday stays open through 11:59 PM Eastern", () => {
+  const tuesday = resolveFoundingDeadline(MON_OCT_12, "2026-10-20");
+  assert.equal(tuesday.closed, false);
+  assert.equal(tuesday.endsAtMs, Date.parse("2026-10-21T03:59:59.000Z"));
+  assert.equal(tuesday.endsPhrase, "ends Tuesday, October 20, 2026 at 11:59 PM ET");
+
+  const justAfterTuesdayDeadline = resolveFoundingDeadline(
+    new Date(Date.parse("2026-10-21T03:59:59.001Z")),
+    "2026-10-20",
+  );
+  assert.equal(justAfterTuesdayDeadline.closed, true);
+  assert.equal(justAfterTuesdayDeadline.date, "2026-10-20");
 });
 
 test("the offer closes after 11:59:59 PM ET and stays open at that instant", () => {

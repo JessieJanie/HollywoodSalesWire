@@ -27,7 +27,7 @@ function useCountdown(deadlineIso: string | undefined) {
  * - Token link (warm-prospect welcome series): the subscriber's personal
  *   window, verified via /api/founding-offer, then checkout re-checks it.
  * - No token (the public founding offer and cold campaigns): ?d=YYYY-MM-DD
- *   is the exact Monday deadline at 11:59 PM ET. Missing or expired dates
+ *   is the exact deadline on any weekday at 11:59 PM ET. Missing or expired dates
  *   show regular rates.
  */
 export default function FoundingOfferPage() {
