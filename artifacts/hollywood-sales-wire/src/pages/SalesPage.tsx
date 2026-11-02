@@ -205,11 +205,7 @@ export default function SalesPage() {
             <div className="bg-primary text-primary-foreground p-8 my-10 shadow-xl relative overflow-hidden">
               <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'0.05\'/%3E%3C/svg%3E')] opacity-50 mix-blend-overlay"></div>
               <p className="font-serif text-xl sm:text-2xl leading-relaxed m-0 relative z-10 text-balance">
-                {deadline?.closed ? (
-                  <>The founding offer has ended. Individual membership is ${REGULAR_RATE_YR.toLocaleString()} per year; Team membership is ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for up to five seats.</>
-                ) : (
-                  <>Founding prices are shown only through a valid offer link. Regular membership is ${REGULAR_RATE_YR.toLocaleString()} per year for an individual or ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for a Team of up to five.</>
-                )}
+                Founding prices are shown only through a valid offer link. Regular membership is ${REGULAR_RATE_YR.toLocaleString()} per year for an individual or ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for a Team of up to five.
               </p>
             </div>
             <p>
@@ -230,15 +226,9 @@ export default function SalesPage() {
           <FadeIn>
             <h2 className="text-3xl mt-16 mb-6">How the Founding Offer Works</h2>
             <p data-testid="homepage-deadline">
-              {deadline?.closed ? (
-                <>The Founding Member rate is available only through a valid offer link. This founding offer has ended. Individual membership is ${REGULAR_RATE_YR.toLocaleString()} per year; Team membership is ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for up to five seats.</>
-              ) : deadline ? (
-                <>The Founding Member rate is available only through a valid offer link. This offer {deadline.endsPhrase ?? "has ended"} — {deadline.daysLeftLabel}. Regular membership is ${REGULAR_RATE_YR.toLocaleString()} per year for an individual or ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for a Team of up to five.</>
-              ) : (
-                <>The Founding Member rate is available only through a valid offer link with a real deadline. Regular membership is ${REGULAR_RATE_YR.toLocaleString()} per year for an individual or ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for a Team of up to five.</>
-              )}
+              The Founding Member rate is available only through a valid offer link with a real deadline. Regular membership is ${REGULAR_RATE_YR.toLocaleString()} per year for an individual or ${TEAM_REGULAR_RATE_YR.toLocaleString()} per year for a Team of up to five.
             </p>
-            {!deadline?.closed && (
+            {deadline && !deadline.closed && (
               <p>
                 Subscribe before that deadline and everything is immediate: the three Special Reports in your inbox tonight, your first issue of the Wire this Tuesday.
               </p>
