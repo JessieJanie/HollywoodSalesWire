@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq } from "drizzle-orm";
 import { db, emailSubscribersTable } from "@workspace/db";
+import { CHECKOUT_LINKS } from "../../../hollywood-sales-wire/src/lib/constants.ts";
 import { foundingDeadline } from "../lib/foundingDeadline";
 import { getColdOfferStatus } from "../lib/coldCampaigns";
 import { SITE_URL } from "../lib/emailSequence";
@@ -14,8 +15,8 @@ const router: IRouter = Router();
  * tokens/sources land on the public (regular-rate) order page.
  */
 const FOUNDING_CHECKOUT = {
-  individual: "https://buy.stripe.com/aFa9AScCF163d3h5Db3ks06",
-  team: "https://buy.stripe.com/bJe00i7ilaGD8N1e9H3ks08",
+  individual: CHECKOUT_LINKS.INDIVIDUAL_FOUNDING,
+  team: CHECKOUT_LINKS.TEAM_FOUNDING,
 } as const;
 
 router.get("/founding-checkout", async (req, res): Promise<void> => {

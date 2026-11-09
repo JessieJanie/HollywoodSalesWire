@@ -14,6 +14,9 @@ export const CHECKOUT_LINKS = {
   TEAM_FOUNDING_MONTHLY: "https://buy.stripe.com/9B6fZg1Y1cOL2oD3v33ks09",
 };
 
+export const FOUNDING_OFFER_PATH = "/founding-offer";
+export const FOUNDING_DEADLINE_PARAM = "d";
+
 export const SUPPORT_EMAIL = "hello@hollywoodsaleswire.com";
 export const REGULAR_RATE_YR = 1150;
 export const FOUNDING_RATE_YR = 599;
@@ -24,3 +27,4 @@ export const TEAM_FOUNDING_RATE_YR = 1198;
 export const TEAM_FOUNDING_RATE_MONTHLY = 129.98;
 
 export const REPORTS_VALUE = 357;
+export const SPECIAL_REPORT_VALUE = REPORTS_VALUE / 3;

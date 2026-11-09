@@ -3,7 +3,9 @@ import { Header, Footer } from "@/components/layout/Shell";
 import {
   FOUNDING_RATE_MONTHLY,
   FOUNDING_RATE_YR,
+  REPORTS_VALUE,
   REGULAR_RATE_YR,
+  SPECIAL_REPORT_VALUE,
   TEAM_FOUNDING_RATE_MONTHLY,
   TEAM_FOUNDING_RATE_YR,
   TEAM_REGULAR_RATE_YR,
@@ -140,24 +142,24 @@ export default function SalesPage() {
           <FadeIn>
             <h2 className="text-3xl mt-16 mb-8">Everything a Member Gets</h2>
             <p className="mb-10">
-              Hollywood Sales Wire is a weekly intelligence briefing. Every Tuesday, you get the week's live buying signals. The system behind it is documented in three Special Reports, valued at <strong>$357 total</strong> — included immediately with your membership. Founding Membership invitations are available through a valid offer link.
+              Hollywood Sales Wire is a weekly intelligence briefing. Every Tuesday, you get the week's live buying signals. The system behind it is documented in three Special Reports, valued at <strong>${REPORTS_VALUE.toLocaleString()} total</strong> — included immediately with your membership. Founding Membership invitations are available through a valid offer link.
             </p>
 
             <div className="space-y-6 not-prose mb-12">
               {[
                 {
                   title: "The Spend Map",
-                  value: "$119 value",
+                  value: `$${SPECIAL_REPORT_VALUE.toLocaleString()} value`,
                   desc: "How Warner Bros. Discovery is actually building its AI capability, 8,700 miles from Burbank — who is hired, where, at what cost, and for what work, drawn from job postings, government records, corporate filings, and salary data on two continents. Not a scandal; a map."
                 },
                 {
                   title: "The $6.6 Billion Greenlight Window",
-                  value: "$119 value",
+                  value: `$${SPECIAL_REPORT_VALUE.toLocaleString()} value`,
                   desc: "The state tax-credit system decoded. Which states publish lists, on what calendar, and the narrow window between greenlight and spend when a production buys everything."
                 },
                 {
                   title: "The Requisition Read",
-                  value: "$119 value",
+                  value: `$${SPECIAL_REPORT_VALUE.toLocaleString()} value`,
                   desc: "Careers pages as disclosure documents. The job-title tells, the posting patterns that reveal a buildout weeks before any purchase order, and a full named walkthrough of a nine-figure streaming-sports buildout."
                 }
               ].map((report, i) => (
@@ -180,7 +182,7 @@ export default function SalesPage() {
 
           <FadeIn>
             <p>
-              The three Special Reports are valued at <strong>$357 total</strong> — a crash course in producing your own hot leads that the $15,000-a-year databases will never reveal. Included with your membership, and yours to keep forever.
+              The three Special Reports are valued at <strong>${REPORTS_VALUE.toLocaleString()} total</strong> — a crash course in producing your own hot leads that the $15,000-a-year databases will never reveal. Included with your membership, and yours to keep forever.
             </p>
             <p>
               Plus, once a month, subscribers receive <strong>The Divergence Report</strong> — the strategic layer on top of the HSW Weekly Wire. It's the deeper monthly read on where the money is moving <em>next quarter</em>, so you're positioned before the crowd shows up. The HSW Weekly Wire is your calls for the week; the Divergence Report is your plan for the season. Both come with the subscription.
