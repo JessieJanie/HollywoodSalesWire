@@ -1,4 +1,5 @@
 import { useSyncExternalStore } from "react";
+import { FOUNDING_DEADLINE_PARAM } from "./constants";
 import { resolveFoundingDeadline, type FoundingDeadline } from "./foundingDeadline";
 
 let snapshot: FoundingDeadline | null = null;
@@ -14,7 +15,7 @@ function sameDeadline(a: FoundingDeadline, b: FoundingDeadline): boolean {
 }
 
 function compute(): FoundingDeadline {
-  const raw = new URLSearchParams(window.location.search).get("d");
+  const raw = new URLSearchParams(window.location.search).get(FOUNDING_DEADLINE_PARAM);
   return resolveFoundingDeadline(new Date(), raw);
 }
 

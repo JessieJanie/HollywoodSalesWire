@@ -6,6 +6,8 @@
  * weekday closes at 11:59:59 PM Eastern on that date.
  */
 
+import { FOUNDING_DEADLINE_PARAM } from "./constants.ts";
+
 export const NY_TIME_ZONE = "America/New_York";
 const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -89,7 +91,7 @@ export function resolveFoundingDeadline(
 export function preserveDeadlineOnUrl(url: string, overrideDate: string | null): string {
   if (!overrideDate) return url;
   const sep = url.includes("?") ? "&" : "?";
-  return `${url}${sep}d=${encodeURIComponent(overrideDate)}`;
+  return `${url}${sep}${FOUNDING_DEADLINE_PARAM}=${encodeURIComponent(overrideDate)}`;
 }
 
 export function orderPath(overrideDate: string | null): string {

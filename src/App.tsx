@@ -16,6 +16,7 @@ import ShelfPage from '@/pages/ShelfPage';
 import ArticlesPage from '@/pages/ArticlesPage';
 import ArticlePage from '@/pages/ArticlePage';
 import FaqPage from '@/pages/FaqPage';
+import { FOUNDING_OFFER_PATH } from '@/lib/constants';
 import PressPage from '@/pages/PressPage';
 import PressReleasePage from '@/pages/PressReleasePage';
 
@@ -34,7 +35,7 @@ function Router() {
     <Switch>
       <Route path="/" component={SalesPage} />
       <Route path="/order" component={OrderPage} />
-      <Route path="/founding-offer" component={FoundingOfferPage} />
+      <Route path={FOUNDING_OFFER_PATH} component={FoundingOfferPage} />
       <Route path="/publisher" component={PublisherPage} />
       <Route path="/thanks" component={ThanksPage} />
       <Route path="/terms" component={TermsPage} />
