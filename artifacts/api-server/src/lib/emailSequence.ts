@@ -11,8 +11,9 @@
  *    deadline — midnight Eastern at the end of day 42. Each email links to the
  *    /founding-offer page, which enforces that deadline for real.
  *
- * COPY IS PUBLISHER-LOCKED. Do not rewrite claims, pricing, or phrasing.
- * Only the mechanical substitutions below were made:
+ * COPY IS PUBLISHER-LOCKED. Keep claims and phrasing unchanged; all pricing
+ * values below are rendered from the shared website constants.
+ * Mechanical substitutions also include:
  *   - "Hello [FIRST NAME]," → "Hello Reader," (her stated ESP fallback)
  *   - [SIGNUP LINK] → personal /founding-offer?token=… link with her UTM params
  *   - "Tuesday, August 4" / deadline references → the subscriber's deadline date
@@ -182,7 +183,7 @@ ${p("And to hand you the system itself, three Special Reports come free with you
 <li><strong>The $6.6 Billion Greenlight Window</strong> — the state tax-credit system, decoded as a prospecting machine. Which states publish award lists, on what calendar, where to find them — and the window between greenlight and spend, when a production hires, books, and buys nearly everything it will ever buy. Get the calendar right and you're calling the week the money lands, not the quarter after it's spent.</li>
 <li><strong>The Requisition Read</strong> — careers pages as disclosure documents: job-title signals, posting patterns that reveal a buildout before a purchase order, and a full named walkthrough of a nine-figure case.</li>
 </ul>
-${p(`Use your valid offer link by ${deadlineLabel} — or right now — and all three reports, valued at $357 total, are yours immediately. The Founding Member rate is $599/year or $64.99/month individual, or $1,198/year or $129.98/month Team (up to five seats). Regular rates are $1,150/year individual and $2,300/year Team.`)}
+${p(`Use your valid offer link by ${deadlineLabel} — or right now — and all three reports, valued at $357 total, are yours immediately. The Founding Member rate is ${INDIVIDUAL_FOUNDING_PRICES} individual, or ${TEAM_FOUNDING_PRICES} Team (up to five seats). Regular rates are ${INDIVIDUAL_REGULAR_PRICE} individual and ${TEAM_REGULAR_PRICE} Team.`)}
 ${cta("View the Founding Member offer", utm(offerUrl, 2))}
 ${p("Next week I'll show you the method working on a real example.")}
 ${sig}`,

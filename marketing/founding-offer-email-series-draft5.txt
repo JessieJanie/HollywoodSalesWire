@@ -1,20 +1,20 @@
 Hollywood Sales Wire — Founding-Offer Email Series (5 efforts)
-Status: DRAFT 5 (Ziggy, 2026-07-28 — Draft 3 restored, reviewer-notes-only polish applied; Draft 4 heat layer reverted per K) DRAFT 5 CHANGES: reverted all Draft 4 launch-heat additions (brand-new/ first-time-ever/chance-of-a-lifetime/soggy-cereal). Applied the Draft 3 reviewer's remaining notes: E1 offer paragraph lightened (link kept, full rate-stack language softened); E2 exclusivity paragraph and E4 stack trimmed a few words each; fact-check flags unchanged and still gating send. Offer: Founding Membership, $38/week billed annually ($1,995/yr); regular $77/week ($3,995/yr). Annual billing only. Guarantee: 90 days, full refund, keep all three Special Reports. Cadence: E1 Tue Jul 29, E2 Wed Jul 30, E3 Thu Jul 31, E4 Sat Aug 1, E5 Tue Aug 4 (deadline day — moved from Monday so every "tonight" in the close copy is literally true). Deadline: midnight Eastern, Tuesday, August 4. Sign-off: Karilyn Colegrove, Publisher. Salutation: Hello [FIRST NAME], — ESP merge tag, fallback "Reader" set in ESP. Placeholders: [SIGNUP LINK], Tuesday, August 4, [FIRST NAME]. UTM: append ?utm_source=email&utm_medium=founding&utm_campaign=hsw-launch&utm_content=e1 (…e2–e5) to every link.
+Status: DRAFT 5 (Ziggy, 2026-07-28 — Draft 3 restored, reviewer-notes-only polish applied; Draft 4 heat layer reverted per K) DRAFT 5 CHANGES: reverted all Draft 4 launch-heat additions (brand-new/ first-time-ever/chance-of-a-lifetime/soggy-cereal). Applied the Draft 3 reviewer's remaining notes: E1 offer paragraph lightened (link kept, full rate-stack language softened); E2 exclusivity paragraph and E4 stack trimmed a few words each; fact-check flags unchanged and still gating send. Current pricing: Founding individual $299/year or $32.50/month; Team $599/year or $64.99/month. Regular individual $575/year; Team $1,150/year. No weekly subscription price. Guarantee: 90 days, full refund, keep all three Special Reports. Cadence: E1 Tue Jul 29, E2 Wed Jul 30, E3 Thu Jul 31, E4 Sat Aug 1, E5 Tue Aug 4 (deadline day — moved from Monday so every "tonight" in the close copy is literally true). Deadline: midnight Eastern, Tuesday, August 4. Sign-off: Karilyn Colegrove, Publisher. Salutation: Hello [FIRST NAME], — ESP merge tag, fallback "Reader" set in ESP. Placeholders: [SIGNUP LINK], Tuesday, August 4, [FIRST NAME]. UTM: append ?utm_source=email&utm_medium=founding&utm_campaign=hsw-launch&utm_content=e1 (…e2–e5) to every link.
 
 DRAFT 3 CHANGES (per K + reviewer):
 
 "Founding Member" / "Founding Membership" initial-capped throughout.
 BUY NOW from E1 onward: the offer is open the moment the series starts. "Doors open [LAUNCH DATE]" language removed everywhere. Standing CTA: subscribe by Tuesday, August 4 or sooner, get the three Special Reports immediately and your first issue of the Wire this coming Tuesday. Every email now carries a signup link.
-LTO is the urgency engine, not "never again at this price." Removed over-claims; what's true and pushed hard: this offer — half price locked + $1,985 in free Special Reports — ends at midnight Eastern Tuesday, August 4.
-Weekly rate now leads everywhere: "$38 a week ($1,995 a year)".
+LTO is the urgency engine, not "never again at this price." Removed over-claims; what's true and pushed hard: this offer — founding rates locked for as long as membership continues, plus $357 in Special Reports — ends at midnight Eastern Tuesday, August 4.
+Current annual and monthly prices replace the former weekly-rate copy throughout.
 Exclusivity claim corrected: subscribers all get the leads; the point is we never rent the list — your prospects aren't hammered, and your name isn't either.
 Name-drops added for insider credibility (see FACT-CHECK note).
 E3: concrete anonymized requisition micro-example added to the body.
 PS added to E1, E4, E5.
 Long paragraphs in E2/E4 broken for mobile scanning.
-PRICING LOCK: regular $3,995/yr ($77/wk); Founding $1,995/yr ($38/wk), locked for as long as membership continues. Report values: Spend Map $795, Greenlight Window $695, Requisition Read $495 = $1,985. Change any number EVERYWHERE — the math is spoken in E4 and E5.
+PRICING LOCK: regular individual $575/year and Team $1,150/year; Founding individual $299/year or $32.50/month and Team $599/year or $64.99/month, locked for as long as membership continues. Report values: Spend Map $119, Greenlight Window $119, Requisition Read $119 = $357. Change any number EVERYWHERE — pricing appears in E4 and E5.
 
-FACT-CHECK CLEARED (Ziggy, 2026-07-28) — all name-drops verified current: Netflix live NFL (extended through 2029, May 2026); Amazon NBA (11-yr deal, NBA on Prime live since Oct 2025); Ellison-Paramount (merger closed Aug 2025); California $750M/yr expanded credit; Georgia uncapped. TWO CORRECTIONS APPLIED: (1) $6.6B reframed — it is California's FULL FIRST YEAR of Program 4.0 (170 projects, announced 2026-07-07), not "state film offices last month"; E1 opening, preview text, and P.S. rewritten to the true fact. (2) WBD "split itself in two" was OVERTAKEN BY EVENTS — since Feb 2026 the story is Paramount Skydance's all-cash bid for WBD (paused in antitrust litigation to as late as June 2027); E3 now says "Ellison's Paramount circle Warner Bros. Discovery." Remaining gates: Tuesday, August 4, [SIGNUP LINK], $38-vs-$39 decision.
+FACT-CHECK CLEARED (Ziggy, 2026-07-28) — all name-drops verified current: Netflix live NFL (extended through 2029, May 2026); Amazon NBA (11-yr deal, NBA on Prime live since Oct 2025); Ellison-Paramount (merger closed Aug 2025); California $750M/yr expanded credit; Georgia uncapped. TWO CORRECTIONS APPLIED: (1) $6.6B reframed — it is California's FULL FIRST YEAR of Program 4.0 (170 projects, announced 2026-07-07), not "state film offices last month"; E1 opening, preview text, and P.S. rewritten to the true fact. (2) WBD "split itself in two" was OVERTAKEN BY EVENTS — since Feb 2026 the story is Paramount Skydance's all-cash bid for WBD (paused in antitrust litigation to as late as June 2027); E3 now says "Ellison's Paramount circle Warner Bros. Discovery." Remaining gates: Tuesday, August 4, [SIGNUP LINK].
 
 EMAIL 1 — Tuesday — The Wedge (opportunity)
 Subject: The lead list your competitors bought is already dead
@@ -41,11 +41,11 @@ That's the entire idea behind Hollywood Sales Wire: I read the filings, the awar
 
 Cold leads are a commodity. Hot leads are an edge.
 
-The offer is live right now: subscribe by midnight Eastern on Tuesday, August 4 — or better, today — and you're a Founding Member at $38 a week instead of the regular $77, locked in for as long as you stay. Three Special Reports arrive free and immediately, with your first issue of the Wire this coming Tuesday.
+The offer is live right now: subscribe by midnight Eastern on Tuesday, August 4 — or better, today — and you're a Founding Member at $299/year or $32.50/month for an individual, or $599/year or $64.99/month for a Team of up to five, locked in for as long as you stay. Three Special Reports arrive free and immediately, with your first issue of the Wire this coming Tuesday.
 
 I'll make the full case over the next few days. But if you already know what a two-week-old award list is worth to your pipeline, there's no reason to wait:
 
-[Become a Founding Member — $38/week]([SIGNUP LINK])
+[Become a Founding Member — $299/year or $32.50/month]([SIGNUP LINK])
 
 Karilyn Colegrove, Publisher Hollywood Sales Wire
 
@@ -83,9 +83,9 @@ And to hand you the system itself, three Special Reports come free with a Foundi
 The Spend Map — the honest map of where money actually moves in the production economy. It is not where the headlines say. The real oceans are physical production, sports rights, and localization — each walked with receipts: who's spending, through what channels, and where a seller gets a grip. AI spend is in there too — real, growing, and honestly sized fourth — so you stop mistaking press volume for budget volume.
 The $6.6 Billion Greenlight Window — the state tax-credit system, decoded as a prospecting machine. Which states publish award lists, on what calendar, where to find them — and the window between greenlight and spend, when a production hires, books, and buys nearly everything it will ever buy. Get the calendar right and you're calling the week the money lands, not the quarter after it's spent.
 The Requisition Read — careers pages as disclosure documents. The job titles that mean "a budget just landed here," the posting patterns that reveal a buildout weeks before any purchase order, and a glossary of the tells — walked through on a real nine-figure case you'll recognize.
-Subscribe by Tuesday, August 4 — or right now — and all three are yours free, immediately, along with the Founding Member rate: $38 a week ($1,995 a year) instead of $77 ($3,995), locked for as long as you stay.
+Subscribe by Tuesday, August 4 — or right now — and all three are yours free, immediately, along with the Founding Member rate: $299/year or $32.50/month individual, or $599/year or $64.99/month Team (up to five seats), instead of the regular $575/year individual or $1,150/year Team, locked for as long as you stay.
 
-[Become a Founding Member — $38/week]([SIGNUP LINK])
+[Become a Founding Member — $299/year or $32.50/month]([SIGNUP LINK])
 
 Tomorrow I'll show you the method working on a real example.
 
@@ -118,17 +118,17 @@ The full walkthrough of that live-sports buildout, named, dated, requisition by 
 The glossary of job-title tells: which titles reliably mean money has landed, ranked by how early they show up in a buildout — and the ones that look promising but mean nothing.
 The rights-deal-to-requisition timeline, so you know when to start watching a target account.
 How to run a requisition sweep on any account in about twenty minutes a week, with nothing but public pages.
-On its own I'd price it at $495, and I'd be underpricing it: this is the kind of thing you could sit through a $2,000 sales conference and never hear, because the people who know it are using it, not teaching it.
+On its own I'd value it at $119: this is the kind of thing you could sit through a $2,000 sales conference and never hear, because the people who know it are using it, not teaching it.
 
-The other two reports do the same for the other two signal sources. The Spend Map ($795 value) hands you the territory — the three oceans of spend the trade press barely covers, from the sports-rights buildouts to the localization wave to where the money actually pools while everyone watches Ellison's Paramount circle Warner Bros. Discovery. The $6.6 Billion Greenlight Window ($695 value) hands you the calendar — the state-by-state award-list schedule and the spend window when a production does nearly all of its buying.
+The other two reports do the same for the other two signal sources. The Spend Map ($119 value) hands you the territory — the three oceans of spend the trade press barely covers, from the sports-rights buildouts to the localization wave to where the money actually pools while everyone watches Ellison's Paramount circle Warner Bros. Discovery. The $6.6 Billion Greenlight Window ($119 value) hands you the calendar — the state-by-state award-list schedule and the spend window when a production does nearly all of its buying.
 
 Map, calendar, craft. A complete prospecting system — and the fountainhead of the numbers the $15K databases keep promising and keep not delivering.
 
 Reports teach you to fish. The Wire hands you fish every Tuesday — because you have a quota, and the filings don't read themselves.
 
-All three reports are free with a Founding Membership — $38 a week ($1,995 a year) instead of the regular $77 ($3,995) — if you subscribe by Tuesday, August 4. Subscribe today and the reports hit your inbox today, with your first Wire this Tuesday.
+All three reports are free with a Founding Membership if you subscribe by Tuesday, August 4. Founding rates are $299/year or $32.50/month individual, and $599/year or $64.99/month Team; regular rates are $575/year individual and $1,150/year Team. Subscribe today and the reports hit your inbox today, with your first Wire this Tuesday.
 
-[Become a Founding Member — $38/week]([SIGNUP LINK])
+[Become a Founding Member — $299/year or $32.50/month]([SIGNUP LINK])
 
 Karilyn Colegrove, Publisher Hollywood Sales Wire
 
@@ -151,26 +151,26 @@ The wire is your calls for the week. The Divergence Report is your plan for the 
 
 What Founding Members get on top — the three Special Reports. These are different: one-time bonuses, free when you join during this launch offer, delivered immediately, and yours to keep forever.
 
-The Spend Map ($795 value) — the honest map of the production economy's money. Three oceans the headlines ignore — physical production, sports rights, localization — each walked with receipts. Plus the truth about AI spend: real, growing, honestly sized fourth.
-The $6.6 Billion Greenlight Window ($695 value) — the tax-credit award system as a prospecting machine: which states publish award lists, on what calendar, and the greenlight-to-spend window when a production does nearly all of its buying. The report that turns a government filing into a call sheet.
-The Requisition Read ($495 value) — careers pages as buying signals: the job-title tells glossary, the posting patterns that announce a landed budget before any purchase order, and the full named walkthrough of a nine-figure streaming-sports buildout.
-That's $1,985 in Special Reports — a crash course in producing your own hot leads that the $15,000-a-year databases don't teach, because their business is renting the same tired names to everyone.
+The Spend Map ($119 value) — the honest map of the production economy's money. Three oceans the headlines ignore — physical production, sports rights, localization — each walked with receipts. Plus the truth about AI spend: real, growing, honestly sized fourth.
+The $6.6 Billion Greenlight Window ($119 value) — the tax-credit award system as a prospecting machine: which states publish award lists, on what calendar, and the greenlight-to-spend window when a production does nearly all of its buying. The report that turns a government filing into a call sheet.
+The Requisition Read ($119 value) — careers pages as buying signals: the job-title tells glossary, the posting patterns that announce a landed budget before any purchase order, and the full named walkthrough of a nine-figure streaming-sports buildout.
+That's $357 in Special Reports — a crash course in producing your own hot leads that the $15,000-a-year databases don't teach, because their business is renting the same tired names to everyone.
 
 (And no — I will never rent this subscriber list to anyone, for any purpose. Your prospects stay fresh and so does your inbox.)
 
-The price. The regular rate for Hollywood Sales Wire is $77 a week — $3,995 a year, billed annually. One closed deal sourced from one issue pays for years of it.
+The price. The regular rate for Hollywood Sales Wire is $575/year for an individual or $1,150/year for a Team of up to five. One closed deal sourced from one issue pays for years of it.
 
-Subscribe during this launch offer and you pay the Founding Member rate instead: $38 a week — $1,995 a year — locked in for as long as you stay a member. Half the regular rate, and when rates rise for everyone who comes after you, yours never moves.
+Subscribe during this launch offer and pay the Founding Member rate: $299/year or $32.50/month for an individual, or $599/year or $64.99/month for a Team of up to five. Your selected rate is locked in for as long as you stay a member.
 
-Notice the math: the Special Reports alone ($1,985) are worth the Founding Membership fee ($1,995). The fifty-two weekly issues and twelve Divergence Reports are, in effect, thrown in.
+The three Special Reports, valued at $357 total, are included with membership.
 
 The guarantee — you risk nothing. Take 90 days — roughly thirteen issues of the Wire and three Divergence Reports. If it hasn't put live, workable prospects in front of you, write me and I'll refund every penny. Everything you've received — all three Special Reports and every issue delivered — is yours to keep either way. I've kept all the risk on my side of the table.
 
-The deadline. This is a limited-time launch offer, and the clock is real: it ends at midnight Eastern on Tuesday, August 4. After that, the Founding Member rate and the free Special Reports are withdrawn, and membership is $77 a week like everyone else.
+The deadline. This is a limited-time launch offer, and the clock is real: it ends at midnight Eastern on Tuesday, August 4. After that, the Founding Member rate and the free Special Reports are withdrawn, and membership is $575/year individual or $1,150/year Team.
 
 Subscribe now and the three Special Reports arrive immediately — start running the system this weekend — with your first Wire on Tuesday.
 
-[Become a Founding Member — $38/week ($1,995/yr)]([SIGNUP LINK])
+[Become a Founding Member — $299/year or $32.50/month]([SIGNUP LINK])
 
 Karilyn Colegrove, Publisher Hollywood Sales Wire
 
@@ -179,7 +179,7 @@ P.S. If you're not the person who owns the sales number, forward this to whoever
 EMAIL 5 — Tuesday, August 4 — Close (deadline day)
 Subject: Midnight tonight: the Founding Member rate goes away
 
-Preview text: After tonight: $77 a week instead of $38, and the three Special Reports come off the table.
+Preview text: After tonight, regular rates apply and the three Special Reports come off the table.
 
 Hello [FIRST NAME],
 
@@ -187,32 +187,32 @@ Short and plain, because it's deadline day.
 
 At midnight Eastern tonight, this launch offer closes. Here's what changes at 12:01:
 
-The rate goes from $38 a week to $77 a week ($1,995 to $3,995 a year).
-The three Special Reports — The Spend Map, The $6.6 Billion Greenlight Window, The Requisition Read, $1,985 in prospecting systems — are no longer free with membership.
-The lock disappears. Founding Members keep $38 a week for as long as they stay members. Everyone after tonight pays the going rate, including future increases.
+Founding rates are $299/year or $32.50/month individual and $599/year or $64.99/month Team. Regular rates are $575/year individual and $1,150/year Team.
+The three Special Reports — The Spend Map, The $6.6 Billion Greenlight Window, and The Requisition Read — valued at $357 total, are no longer free with membership.
+The lock disappears. Founding Members keep their selected rate for as long as they stay members. Everyone after tonight pays the regular rate, including future increases.
 Subscribe before midnight and everything is immediate: the three Special Reports in your inbox tonight, your first issue of the Wire tomorrow morning.
 
 And here's what doesn't change either way: every week, somewhere in the public record, productions with fresh budgets and hard spending deadlines quietly announce themselves — in award lists, in requisitions, in money flows. Somebody's going to read those signals and make the first call.
 
 It won't be the reps working the rented lists. Those names have been pitched to death by everyone who rented them — the prospects stopped listening months ago. The first call that lands will come from someone working leads that are two weeks old instead of six months, calling prospects who still answer the phone. The only question is whether that someone works for you or for your competitor.
 
-The math one last time: $38 a week, against $1,985 in reports that are yours to keep no matter what, against a 90-day everything-to-keep guarantee, against competitors charging $15,000 for names that were cold — and worn out — before they were sold.
+The offer one last time: founding rates of $299/year or $32.50/month individual and $599/year or $64.99/month Team, alongside $357 in reports that are yours to keep no matter what and a 90-day everything-to-keep guarantee.
 
 You risk nothing. The deadline is real. It's tonight.
 
-[Become a Founding Member before midnight — $38/week]([SIGNUP LINK])
+[Become a Founding Member before midnight — $299/year or $32.50/month]([SIGNUP LINK])
 
 Whatever you decide, thank you for reading this far. If the Wire isn't for you, I hope the last five days at least changed how you look at a careers page.
 
 Karilyn Colegrove, Publisher Hollywood Sales Wire
 
-P.S. Midnight Eastern means midnight Eastern — the order page switches to the $77 rate at 12:01. If you're reading this after hours, check the page: if the $38 rate is still showing, you made it.
+P.S. Midnight Eastern means midnight Eastern — the offer page switches to regular pricing at 12:01. If you're reading this after hours, check the page for the current offer status.
 
 Production notes (strip before send)
 Salutation: [FIRST NAME] merge tag; ESP fallback "Reader".
 E1 DENSITY (reviewer): E1 carries wedge + problem + offer + CTA + PS. Draft 5 already softened the rate-stack sentence per the note; if E1 click-through still underperforms in testing, next cut is the reports sentence (keep the link).
 DRAFT 4 HEAT LAYER (reverted, parked here in case K wants it back): brand-new/first-time-ever/premiere-issue framing, "may be the hottest leads / chance of a lifetime" (with the honest "may" hedge), soggy-cereal line in E2 + E5. All removed in Draft 5 at K's request.
-Weekly math: $3,995/52 = $76.83 → "$77/week"; $1,995/52 = $38.37 → "$38/week". Regular rounds up, founding rounds down by under 40 cents; if K wants bulletproof, use "$39/week".
+Pricing references use annual and monthly amounts only; there is no weekly subscription price.
 NAME-DROP FACT-CHECK: CLEARED 2026-07-28 (see FACT-CHECK CLEARED block at top). WBD "split" replaced with Paramount-circling-WBD; $6.6B reframed to California year-one actuals.
 List-rental claim stays unnamed industry practice — never name a specific database company.
 Exclusivity language: never claim "leads nobody else has." Approved framing: leads that were never for sale/rented/carpet-bombed; "I will never rent this list."
