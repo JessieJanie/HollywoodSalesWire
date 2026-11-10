@@ -11,6 +11,7 @@ import {
   TEAM_REGULAR_RATE_YR,
 } from "@/lib/constants";
 import { orderPath } from "@/lib/foundingDeadline";
+import { formatPrice } from "@/lib/publicPricing";
 import { useFoundingDeadline } from "@/lib/useFoundingDeadline";
 import { motion } from "framer-motion";
 import { ArrowRight, FileText, TrendingUp, ShieldCheck } from "lucide-react";
@@ -195,7 +196,7 @@ export default function SalesPage() {
               Regular annual pricing is ${REGULAR_RATE_YR.toLocaleString()}/year for an individual and ${TEAM_REGULAR_RATE_YR.toLocaleString()}/year for a Team of up to five seats. One closed deal sourced from one issue pays for years of it.
             </p>
             <p data-testid="homepage-pricing">
-              Founding pricing, available through a valid offer link: Individual ${FOUNDING_RATE_YR.toLocaleString()}/year or ${FOUNDING_RATE_MONTHLY}/month; Team (up to five seats) ${TEAM_FOUNDING_RATE_YR.toLocaleString()}/year or ${TEAM_FOUNDING_RATE_MONTHLY}/month.
+              Founding pricing, available through a valid offer link: Individual ${FOUNDING_RATE_YR.toLocaleString()}/year or ${formatPrice(FOUNDING_RATE_MONTHLY, true)}/month; Team (up to five seats) ${TEAM_FOUNDING_RATE_YR.toLocaleString()}/year or ${formatPrice(TEAM_FOUNDING_RATE_MONTHLY, true)}/month.
             </p>
             <Link
               href={orderHref}

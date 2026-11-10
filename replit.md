@@ -26,7 +26,7 @@ Subscription sales site for Hollywood Sales Wire — a long-form sales letter, o
 
 ## Product
 
-- Regular rates: $1,150/year individual; $2,300/year Team (5 seats). Founding rates via valid offer link: $599/year or $64.99/month individual; $1,198/year or $129.98/month Team. Special Reports: The Spend Map, The $6.6 Billion Greenlight Window, and The Requisition Read, valued at $119 each ($357 total).
+- Regular rates: $575/year individual; $1,150/year Team (5 seats). Founding rates via valid offer link: $299/year or $32.50/month individual; $599/year or $64.99/month Team. Special Reports: The Spend Map, The $6.6 Billion Greenlight Window, and The Requisition Read, valued at $119 each ($357 total).
 - 90-Day Money-Back Guarantee (exact phrase). Support: hello@hollywoodsaleswire.com.
 - Launch deadline shown on site: Tuesday, August 4 (constants.ts).
 

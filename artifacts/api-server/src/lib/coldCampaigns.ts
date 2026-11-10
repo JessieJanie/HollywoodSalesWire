@@ -20,6 +20,15 @@ import { and, desc, eq } from "drizzle-orm";
 import { db, coldCampaignsTable } from "@workspace/db";
 import { logger } from "./logger";
 import { offerDeadlineLabel, nextMondayDeadline } from "./foundingDeadline";
+import {
+  FOUNDING_RATE_MONTHLY,
+  FOUNDING_RATE_YR,
+  REGULAR_RATE_YR,
+  TEAM_FOUNDING_RATE_MONTHLY,
+  TEAM_FOUNDING_RATE_YR,
+  TEAM_REGULAR_RATE_YR,
+} from "../../../hollywood-sales-wire/src/lib/constants.ts";
+import { formatPrice } from "../../../hollywood-sales-wire/src/lib/publicPricing.ts";
 
 const INSTANTLY_BASE = "https://api.instantly.ai/api/v2";
 const SENDING_ACCOUNTS = [
@@ -34,6 +43,10 @@ const MONITOR_FIRST = "Karilyn";
 
 /** E1=Day0, E2=+1, E3=+1, E4=+2, E5=+3 → E5 lands on Day 7. */
 const STEP_DELAYS = [0, 1, 1, 2, 3] as const;
+const INDIVIDUAL_FOUNDING_PRICES = `$${formatPrice(FOUNDING_RATE_YR)}/year or $${formatPrice(FOUNDING_RATE_MONTHLY, true)}/month`;
+const TEAM_FOUNDING_PRICES = `$${formatPrice(TEAM_FOUNDING_RATE_YR)}/year or $${formatPrice(TEAM_FOUNDING_RATE_MONTHLY, true)}/month`;
+const INDIVIDUAL_REGULAR_PRICE = `$${formatPrice(REGULAR_RATE_YR)}/year`;
+const TEAM_REGULAR_PRICE = `$${formatPrice(TEAM_REGULAR_RATE_YR)}/year`;
 
 /**
  * Mailbox daily ceiling — Instantly slow-ramp is enabled at the account level
@@ -210,7 +223,7 @@ That's the entire idea behind Hollywood Sales Wire: I read the filings, the awar
 
 Cold leads are a commodity. Hot leads are an edge.
 
-I'm running a Founding Member offer through ${dl}: subscribe using a valid offer link and an individual membership is $599/year or $64.99/month, instead of the regular $1,150/year. Team membership for up to five seats is $1,198/year or $129.98/month, instead of the regular $2,300/year. Three Special Reports worth $357 arrive free when you join.
+I'm running a Founding Member offer through ${dl}: subscribe using a valid offer link and an individual membership is ${INDIVIDUAL_FOUNDING_PRICES}, instead of the regular ${INDIVIDUAL_REGULAR_PRICE}. Team membership for up to five seats is ${TEAM_FOUNDING_PRICES}, instead of the regular ${TEAM_REGULAR_PRICE}. Three Special Reports worth $357 arrive free when you join.
 
 I'll make the full case over the next few days. But if you already know what a two-week-old award list is worth to your pipeline, there's no reason to wait:
 
@@ -253,7 +266,7 @@ The $6.6 Billion Greenlight Window — the state tax-credit system decoded as a 
 
 The Requisition Read — careers pages as disclosure documents. The job titles that mean "a budget just landed here," the posting patterns that reveal a buildout weeks before any purchase order.
 
-Subscribe through a valid offer link by ${dl} — or right now — and all three are yours free, along with the Founding Member rate: $599/year or $64.99/month for an individual, or $1,198/year or $129.98/month for a Team of up to five. Regular rates are $1,150/year for an individual and $2,300/year for a Team.
+Subscribe through a valid offer link by ${dl} — or right now — and all three are yours free, along with the Founding Member rate: ${INDIVIDUAL_FOUNDING_PRICES} for an individual, or ${TEAM_FOUNDING_PRICES} for a Team of up to five. Regular rates are ${INDIVIDUAL_REGULAR_PRICE} for an individual and ${TEAM_REGULAR_PRICE} for a Team.
 
 https://hollywoodsaleswire.com/founding-offer?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e2
 
@@ -298,7 +311,7 @@ Map, calendar, craft. A complete prospecting system.
 
 Reports teach you to fish. The Wire hands you fish every Tuesday — because you have a quota, and the filings don't read themselves.
 
-All three reports, valued at $357 total, are free with a Founding Membership through a valid offer link. The individual founding rate is $599/year or $64.99/month; the Team rate is $1,198/year or $129.98/month. Regular rates are $1,150/year individual and $2,300/year Team.
+All three reports, valued at $357 total, are free with a Founding Membership through a valid offer link. The individual founding rate is ${INDIVIDUAL_FOUNDING_PRICES}; the Team rate is ${TEAM_FOUNDING_PRICES}. Regular rates are ${INDIVIDUAL_REGULAR_PRICE} individual and ${TEAM_REGULAR_PRICE} Team.
 
 https://hollywoodsaleswire.com/founding-offer?utm_source=cold&utm_medium=email&utm_campaign=${tag}&utm_content=e3
 
@@ -331,15 +344,15 @@ That's $357 in Special Reports — a crash course in producing your own hot lead
 
 (And no — I will never rent this subscriber list to anyone, for any purpose. Your prospects stay fresh and so does your inbox.)
 
-The price. The regular rate is $1,150/year for an individual or $2,300/year for a Team of up to five. One closed deal sourced from one issue pays for years of it.
+The price. The regular rate is ${INDIVIDUAL_REGULAR_PRICE} for an individual or ${TEAM_REGULAR_PRICE} for a Team of up to five. One closed deal sourced from one issue pays for years of it.
 
-Subscribe through a valid offer link and the Founding Member rate is $599/year or $64.99/month for an individual, or $1,198/year or $129.98/month for a Team of up to five. Your rate is locked for as long as you stay a member.
+Subscribe through a valid offer link and the Founding Member rate is ${INDIVIDUAL_FOUNDING_PRICES} for an individual, or ${TEAM_FOUNDING_PRICES} for a Team of up to five. Your rate is locked for as long as you stay a member.
 
 Membership includes the weekly Wire, twelve Divergence Reports, and all three Special Reports, valued at $357 total.
 
 The guarantee — you risk nothing. Take 90 days — roughly thirteen issues of the Wire and three Divergence Reports. If it hasn't put live, workable prospects in front of you, write me and I'll refund every penny. Everything you've received — all three Special Reports and every issue delivered — is yours to keep either way. I've kept all the risk on my side of the table.
 
-The deadline. This offer ends at midnight Eastern on ${dl}. After that, the founding offer and free Special Reports are withdrawn, and regular membership is $1,150/year for an individual or $2,300/year for a Team of up to five.
+The deadline. This offer ends at midnight Eastern on ${dl}. After that, the founding offer and free Special Reports are withdrawn, and regular membership is ${INDIVIDUAL_REGULAR_PRICE} for an individual or ${TEAM_REGULAR_PRICE} for a Team of up to five.
 
 Subscribe now and the three Special Reports arrive immediately, with your first Wire the following Tuesday.
 
@@ -358,7 +371,7 @@ Short and plain, because it's deadline day.
 
 At midnight Eastern tonight, this offer closes. Here's what changes at 12:01:
 
-The individual rate goes from $599/year or $64.99/month to $1,150/year. For a Team of up to five, the offer is $1,198/year or $129.98/month; the regular rate is $2,300/year.
+The individual rate goes from ${INDIVIDUAL_FOUNDING_PRICES} to ${INDIVIDUAL_REGULAR_PRICE}. For a Team of up to five, the offer is ${TEAM_FOUNDING_PRICES}; the regular rate is ${TEAM_REGULAR_PRICE}.
 
 The three Special Reports — The Spend Map, The $6.6 Billion Greenlight Window, and The Requisition Read — are valued at $357 total and are no longer free with membership.
 

@@ -11,6 +11,7 @@ import {
   TEAM_FOUNDING_RATE_MONTHLY,
 } from "@/lib/constants";
 import { preserveDeadlineOnUrl, type FoundingDeadline } from "@/lib/foundingDeadline";
+import { formatPrice } from "@/lib/publicPricing";
 import { useFoundingDeadline } from "@/lib/useFoundingDeadline";
 import { withClientReference } from "@/lib/traffic";
 import { motion } from "framer-motion";
@@ -159,7 +160,7 @@ export function PricingContent({
                 rel="noopener noreferrer"
                 className="mt-3 w-full inline-flex items-center justify-center text-sm font-medium text-primary underline underline-offset-4 hover:text-primary/80"
               >
-                or ${FOUNDING_RATE_MONTHLY}/month
+                or ${formatPrice(FOUNDING_RATE_MONTHLY, true)}/month
               </a>
             )}
             <div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground font-mono-data opacity-80">
@@ -228,7 +229,7 @@ export function PricingContent({
                 rel="noopener noreferrer"
                 className="mt-3 w-full inline-flex items-center justify-center text-sm font-medium text-foreground underline underline-offset-4 hover:text-foreground/80"
               >
-                or ${TEAM_FOUNDING_RATE_MONTHLY}/month
+                or ${formatPrice(TEAM_FOUNDING_RATE_MONTHLY, true)}/month
               </a>
             )}
             <div className="mt-4 flex items-center justify-center gap-2 text-xs text-muted-foreground font-mono-data opacity-60">

@@ -9,6 +9,11 @@ import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
 import { logger } from "./logger";
 import {
+  REGULAR_RATE_YR,
+  TEAM_REGULAR_RATE_YR,
+} from "../../../hollywood-sales-wire/src/lib/constants.ts";
+import { formatPrice } from "../../../hollywood-sales-wire/src/lib/publicPricing.ts";
+import {
   collectCreatorJobSignals,
   formatCreatorJobSignals,
   loadCreatorJobTrend,
@@ -125,7 +130,7 @@ You are given this week's fetched source pages (markdown, with URLs). Propose up
 
 Respond with ONLY a valid JSON array of URL strings, e.g. ["https://...", "https://..."]. Empty array if nothing is worth a read.`;
 
-const WIRE_PROMPT = `You are the editor and lead researcher of "Hollywood Sales Wire," a paid weekly sales-intelligence briefing ($1,150/year individual; $2,300/year Team of up to five seats) for vendors selling into the entertainment industry. Subscribers are salespeople; they pay for names, timing, and receipts — not commentary.
+const WIRE_PROMPT = `You are the editor and lead researcher of "Hollywood Sales Wire," a paid weekly sales-intelligence briefing ($${formatPrice(REGULAR_RATE_YR)}/year individual; $${formatPrice(TEAM_REGULAR_RATE_YR)}/year Team of up to five seats) for vendors selling into the entertainment industry. Subscribers are salespeople; they pay for names, timing, and receipts — not commentary.
 
 You are given (1) this week's fetched source pages, each with its URL and fetch date, and (2) excerpts of LAST week's pages for the same sources so you can tell what is NEW.
 

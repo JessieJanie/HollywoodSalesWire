@@ -12,6 +12,14 @@ import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
 import { reportDownloadUrl, shelfUrl } from "../routes/reports";
 import { logger } from "./logger";
+import {
+  FOUNDING_RATE_MONTHLY,
+  FOUNDING_RATE_YR,
+  REGULAR_RATE_YR,
+  TEAM_FOUNDING_RATE_MONTHLY,
+  TEAM_FOUNDING_RATE_YR,
+  TEAM_REGULAR_RATE_YR,
+} from "../../../hollywood-sales-wire/src/lib/constants.ts";
 
 const NOTIFY_EMAIL = "hello@hollywoodsaleswire.com";
 
@@ -31,17 +39,9 @@ const VALID_PLANS = new Set([
 
 /**
  * Server-side mapping of known Stripe payment link IDs to plan labels.
- * These are the live payment link IDs for hollywoodsaleswire.com, set once
- * when the payment links were created. The same IDs are also stored in
- * metadata.plan on each link (set via the Stripe API) so incoming checkout
- * sessions carry the plan name directly. This hardcoded map is a secondary
- * stable fallback that does not require the session to have expanded metadata.
- *
- * Cross-reference:
- *   plink_1Tyebb8TDFH4346h8N2L6T6W  →  buy.stripe.com/7sYeV70l5bT5bDz47t1VK04  (founding-individual)
- *   plink_1Tyebb8TDFH4346hhxbXDUyX  →  buy.stripe.com/5kQfZb2td4qD373dI31VK05  (founding-team)
- *   plink_1TyeTj8TDFH4346hT3eAICwp  →  buy.stripe.com/8x200dgk30anePL8nJ1VK02  (individual)
- *   plink_1TyeTj8TDFH4346hYySSS9GB  →  buy.stripe.com/9B69AN9VFf5hfTPgUf1VK03  (team)
+ * These known legacy IDs remain mapped so checkouts from existing Stripe links
+ * continue to receive the correct plan. Current prices and public URLs live in
+ * the Hollywood Sales Wire shared constants; new links should carry metadata.plan.
  */
 export const PAYMENT_LINK_TO_PLAN: ReadonlyMap<string, string> = new Map([
   ["plink_1Tyebb8TDFH4346h8N2L6T6W", "founding-individual"],
@@ -134,6 +134,18 @@ export function planFromSession(session: CheckoutSessionLike): string {
 /** Legacy amount-based detection, used only as planFromSession fallback. */
 function planFromAmount(amountCents: number | null | undefined): string {
   switch (amountCents) {
+    case Math.round(FOUNDING_RATE_YR * 100):
+      return "founding-individual";
+    case Math.round(FOUNDING_RATE_MONTHLY * 100):
+      return "founding-individual";
+    case Math.round(TEAM_FOUNDING_RATE_YR * 100):
+      return "founding-team";
+    case Math.round(TEAM_FOUNDING_RATE_MONTHLY * 100):
+      return "founding-team";
+    case Math.round(REGULAR_RATE_YR * 100):
+      return "individual";
+    case Math.round(TEAM_REGULAR_RATE_YR * 100):
+      return "team";
     case 199500:
       return "founding-individual";
     case 499500:
@@ -150,13 +162,13 @@ function planFromAmount(amountCents: number | null | undefined): string {
 function planLabel(plan: string): string {
   switch (plan) {
     case "founding-individual":
-      return "Founding Member — Individual ($599/yr)";
+      return "Founding Member — Individual";
     case "founding-team":
-      return "Founding Member — Team ($1,198/yr)";
+      return "Founding Member — Team";
     case "individual":
-      return "Member — Individual ($1,150/yr)";
+      return "Member — Individual";
     case "team":
-      return "Member — Team ($2,300/yr)";
+      return "Member — Team";
     default:
       return "Member";
   }

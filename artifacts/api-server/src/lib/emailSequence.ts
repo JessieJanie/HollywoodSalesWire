@@ -20,8 +20,22 @@
  *     regular rate at the subscriber's deadline.
  */
 
+import {
+  FOUNDING_RATE_MONTHLY,
+  FOUNDING_RATE_YR,
+  REGULAR_RATE_YR,
+  TEAM_FOUNDING_RATE_MONTHLY,
+  TEAM_FOUNDING_RATE_YR,
+  TEAM_REGULAR_RATE_YR,
+} from "../../../hollywood-sales-wire/src/lib/constants.ts";
+import { formatPrice } from "../../../hollywood-sales-wire/src/lib/publicPricing.ts";
+
 export const FROM_ADDRESS = "Hollywood Sales Wire <briefings@hollywoodsaleswire.com>";
 export const SITE_URL = process.env.SITE_URL ?? "https://hollywoodsaleswire.com";
+const INDIVIDUAL_FOUNDING_PRICES = `$${formatPrice(FOUNDING_RATE_YR)}/year or $${formatPrice(FOUNDING_RATE_MONTHLY, true)}/month`;
+const TEAM_FOUNDING_PRICES = `$${formatPrice(TEAM_FOUNDING_RATE_YR)}/year or $${formatPrice(TEAM_FOUNDING_RATE_MONTHLY, true)}/month`;
+const INDIVIDUAL_REGULAR_PRICE = `$${formatPrice(REGULAR_RATE_YR)}/year`;
+const TEAM_REGULAR_PRICE = `$${formatPrice(TEAM_REGULAR_RATE_YR)}/year`;
 
 export interface SequenceOpts {
   unsubscribeUrl: string;
@@ -137,7 +151,7 @@ ${p("And it's worse than stale: the list companies rent those same names out, ov
 ${p("Meanwhile the hot list — who got money this month and has to spend it — sits in public filings that almost nobody in sales reads, because reading them is a genuinely tedious skill.")}
 ${p("That's the entire idea behind Hollywood Sales Wire: I read the filings, the award lists, the requisitions, and the money flows every week, and every Tuesday you get the names — who just got funded, what they're about to buy, and when the window closes.")}
 ${p("Cold leads are a commodity. Hot leads are an edge.")}
-${p(`The offer is live right now: use your valid offer link by midnight Eastern on ${deadlineLabel} — or better, today — to join at the Founding Member rate: $599/year or $64.99/month individual; $1,198/year or $129.98/month Team (up to five seats). Regular rates are $1,150/year individual and $2,300/year Team. Your rate is locked in for as long as you stay. Three Special Reports, valued at $357 total, arrive free and immediately with your membership, alongside your first issue of the Wire this coming Tuesday.`)}
+${p(`The offer is live right now: use your valid offer link by midnight Eastern on ${deadlineLabel} — or better, today — to join at the Founding Member rate: ${INDIVIDUAL_FOUNDING_PRICES} individual; ${TEAM_FOUNDING_PRICES} Team (up to five seats). Regular rates are ${INDIVIDUAL_REGULAR_PRICE} individual and ${TEAM_REGULAR_PRICE} Team. Your rate is locked in for as long as you stay. Three Special Reports, valued at $357 total, arrive free and immediately with your membership, alongside your first issue of the Wire this coming Tuesday.`)}
 ${p("I'll make the full case over the next few weeks. But if you already know what a two-week-old award list is worth to your pipeline, there's no reason to wait:")}
 ${cta("View the Founding Member offer", utm(offerUrl, 1))}
 ${sig}
@@ -200,7 +214,7 @@ ${p("Each report is valued at $119: this is the kind of thing you could sit thro
 ${p("The other two reports round out the system. The Spend Map ($119 value) hands you the territory. The $6.6 Billion Greenlight Window ($119 value) hands you the calendar.")}
 ${p("Case, calendar, craft. A complete prospecting system — and the fountainhead of the numbers the $15K databases keep promising and keep not delivering.")}
 ${p("The reports show you how to fish. The Wire hands you fish every Tuesday — because you have a quota, and the filings don't read themselves.")}
-${p(`All three reports are valued at $357 total and included with your membership. Use a valid offer link by ${deadlineLabel} to join at $599/year or $64.99/month individual, or $1,198/year or $129.98/month Team (up to five seats); regular rates are $1,150/year individual and $2,300/year Team. The offer price is locked for as long as you stay. Subscribe today and the reports hit your inbox today, with your first Wire this Tuesday.`)}
+${p(`All three reports are valued at $357 total and included with your membership. Use a valid offer link by ${deadlineLabel} to join at ${INDIVIDUAL_FOUNDING_PRICES} individual, or ${TEAM_FOUNDING_PRICES} Team (up to five seats); regular rates are ${INDIVIDUAL_REGULAR_PRICE} individual and ${TEAM_REGULAR_PRICE} Team. The offer price is locked for as long as you stay. Subscribe today and the reports hit your inbox today, with your first Wire this Tuesday.`)}
 ${cta("View the Founding Member offer", utm(offerUrl, 3))}
 ${sig}`,
         unsubscribeUrl,
@@ -226,11 +240,11 @@ ${p("<strong>The three Special Reports — free with your membership, delivered 
 </ul>
 ${p("That's $357 in Special Reports — a crash course in producing your own hot leads that the $15,000-a-year databases will never reveal, because their business is renting the same tired names to everyone.")}
 ${p("(And no — I will never rent this subscriber list to anyone, for any purpose. Your prospects stay fresh and so does your inbox.)")}
-${p("<strong>The price.</strong> The regular rate is $1,150/year for an individual or $2,300/year for a Team of up to five. One closed deal sourced from one issue pays for years of it.")}
-${p("Use a valid offer link to join at the Founding Member rate: $599/year or $64.99/month individual, or $1,198/year or $129.98/month Team (up to five seats). Your rate is locked for as long as you stay a member.")}
+${p(`<strong>The price.</strong> The regular rate is ${INDIVIDUAL_REGULAR_PRICE} for an individual or ${TEAM_REGULAR_PRICE} for a Team of up to five. One closed deal sourced from one issue pays for years of it.`)}
+${p(`Use a valid offer link to join at the Founding Member rate: ${INDIVIDUAL_FOUNDING_PRICES} individual, or ${TEAM_FOUNDING_PRICES} Team (up to five seats). Your rate is locked for as long as you stay a member.`)}
 ${p("Membership includes the weekly Wire, twelve Divergence Reports, and all three Special Reports, valued at $357 total.")}
 ${p("<strong>The guarantee — you risk nothing.</strong> Take 90 days — roughly thirteen issues of the Wire and three Divergence Reports. If it hasn't put live, workable prospects in front of you, write me and I'll refund every penny. Everything you've received — all three Special Reports and every issue delivered — is yours to keep either way. I've kept all the risk on my side of the table.")}
-${p(`<strong>The deadline.</strong> This is a limited-time offer, and the clock is real: it ends at midnight Eastern on ${deadlineLabel}. After that, the founding offer is withdrawn; regular membership is $1,150/year individual or $2,300/year Team (up to five seats).`)}
+${p(`<strong>The deadline.</strong> This is a limited-time offer, and the clock is real: it ends at midnight Eastern on ${deadlineLabel}. After that, the founding offer is withdrawn; regular membership is ${INDIVIDUAL_REGULAR_PRICE} individual or ${TEAM_REGULAR_PRICE} Team (up to five seats).`)}
 ${p("Subscribe now and the three Special Reports arrive immediately — start running the system this weekend — with your first Wire on Tuesday.")}
 ${cta("View the Founding Member offer", utm(offerUrl, 4))}
 ${sig}
@@ -248,7 +262,7 @@ ${p("P.S. If you're not the person who owns the sales number, forward this to wh
 ${p("Short and plain, because it's deadline day.")}
 ${p("At midnight Eastern tonight, this launch offer closes. Here's what changes at 12:01:")}
 <ul>
-<li>The individual rate goes from $599/year or $64.99/month to $1,150/year. For a Team of up to five, the offer is $1,198/year or $129.98/month; the regular rate is $2,300/year.</li>
+<li>The individual rate goes from ${INDIVIDUAL_FOUNDING_PRICES} to ${INDIVIDUAL_REGULAR_PRICE}. For a Team of up to five, the offer is ${TEAM_FOUNDING_PRICES}; the regular rate is ${TEAM_REGULAR_PRICE}.</li>
 <li>The lock disappears. Founding Members keep their offer rate for as long as they stay members. Everyone after tonight pays the regular rate, including future increases.</li>
 </ul>
 ${p("Subscribe before midnight and everything is immediate: the three Special Reports and your first issue of the Wire, both in your inbox.")}

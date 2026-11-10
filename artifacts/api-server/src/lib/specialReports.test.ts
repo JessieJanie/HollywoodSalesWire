@@ -10,6 +10,14 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { signMemberSlug, reportDownloadUrl, shelfUrl, verifyShelfSig } from "../routes/reports";
 import { planFromSession, PAYMENT_LINK_TO_PLAN, type CheckoutSessionLike } from "./members";
+import {
+  FOUNDING_RATE_MONTHLY,
+  FOUNDING_RATE_YR,
+  REGULAR_RATE_YR,
+  TEAM_FOUNDING_RATE_MONTHLY,
+  TEAM_FOUNDING_RATE_YR,
+  TEAM_REGULAR_RATE_YR,
+} from "../../../hollywood-sales-wire/src/lib/constants.ts";
 
 // Provide a test secret so signMemberSlug works without a real env
 const TEST_SECRET = "test-secret-value-for-unit-tests";
@@ -144,9 +152,9 @@ describe("planFromSession", () => {
 
   it("metadata.plan = founding-individual is authoritative even when amount differs", () => {
     // Simulates a founding checkout with tax applied (amount differs from the
-    // standard $1,995 total — amount_total-based detection would return "member").
+    // current $299 annual total — amount_total-based detection would return "member").
     const result = planFromSession(
-      session({ metadata: { plan: "founding-individual" }, amount_total: 204500 }),
+      session({ metadata: { plan: "founding-individual" }, amount_total: 34900 }),
     );
     expect(result).toBe("founding-individual");
   });
@@ -179,6 +187,15 @@ describe("planFromSession", () => {
   });
 
   it("falls back to amount_total when no metadata or price IDs configured", () => {
+    expect(planFromSession(session({ amount_total: Math.round(FOUNDING_RATE_YR * 100) }))).toBe("founding-individual");
+    expect(planFromSession(session({ amount_total: Math.round(FOUNDING_RATE_MONTHLY * 100) }))).toBe("founding-individual");
+    expect(planFromSession(session({ amount_total: Math.round(TEAM_FOUNDING_RATE_YR * 100) }))).toBe("founding-team");
+    expect(planFromSession(session({ amount_total: Math.round(TEAM_FOUNDING_RATE_MONTHLY * 100) }))).toBe("founding-team");
+    expect(planFromSession(session({ amount_total: Math.round(REGULAR_RATE_YR * 100) }))).toBe("individual");
+    expect(planFromSession(session({ amount_total: Math.round(TEAM_REGULAR_RATE_YR * 100) }))).toBe("team");
+  });
+
+  it("continues recognizing legacy annual payments while old links remain active", () => {
     expect(planFromSession(session({ amount_total: 199500 }))).toBe("founding-individual");
     expect(planFromSession(session({ amount_total: 499500 }))).toBe("founding-team");
     expect(planFromSession(session({ amount_total: 399500 }))).toBe("individual");
@@ -186,17 +203,17 @@ describe("planFromSession", () => {
     expect(planFromSession(session({ amount_total: 999 }))).toBe("member");
   });
 
-  it("amount_total with standard founding price + tax falls back to member without metadata (demonstrates risk)", () => {
-    // This is the failure mode planFromSession fixes: a $1995 plan with $50 tax
-    // produces amount_total=199500+5000=204500 which is NOT in the hardcoded list.
+  it("amount_total with current founding price + tax falls back to member without metadata (demonstrates risk)", () => {
+    // A $299 plan with $50 tax produces amount_total=34900, which is not in the
+    // hardcoded base-price list. Metadata remains authoritative for taxed totals.
     // Without metadata, amount fallback returns "member" — the wrong plan.
     // This test documents why metadata/price-ID config is required for tax safety.
-    const resultWithoutMetadata = planFromSession(session({ amount_total: 204500 }));
+    const resultWithoutMetadata = planFromSession(session({ amount_total: 34900 }));
     expect(resultWithoutMetadata).toBe("member"); // BUG when no metadata configured
 
     // WITH metadata, the plan is correct regardless of the taxed amount.
     const resultWithMetadata = planFromSession(
-      session({ metadata: { plan: "founding-individual" }, amount_total: 204500 }),
+      session({ metadata: { plan: "founding-individual" }, amount_total: 34900 }),
     );
     expect(resultWithMetadata).toBe("founding-individual"); // correct
   });
