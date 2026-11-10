@@ -7,6 +7,17 @@
  *
  * 7:00 AM Pacific, Tuesday Aug 4, 2026 = 14:00 UTC (PDT).
  */
+import {
+  FOUNDING_RATE_MONTHLY,
+  FOUNDING_RATE_YR,
+  REGULAR_RATE_YR,
+  TEAM_FOUNDING_RATE_MONTHLY,
+  TEAM_FOUNDING_RATE_YR,
+  TEAM_REGULAR_RATE_YR,
+} from "../../../hollywood-sales-wire/src/lib/constants.ts";
+import { formatPrice } from "../../../hollywood-sales-wire/src/lib/publicPricing.ts";
+
+const FOUNDING_PRICING_COPY = `Founding Membership is $${formatPrice(FOUNDING_RATE_YR)}/year or $${formatPrice(FOUNDING_RATE_MONTHLY, true)}/month individual, and $${formatPrice(TEAM_FOUNDING_RATE_YR)}/year or $${formatPrice(TEAM_FOUNDING_RATE_MONTHLY, true)}/month Team; regular rates are $${formatPrice(REGULAR_RATE_YR)}/year individual and $${formatPrice(TEAM_REGULAR_RATE_YR)}/year Team, locked for as long as your membership continues.`;
 
 export interface ScheduledSendSeed {
   kind: "paid" | "brief";
