@@ -12,14 +12,18 @@ import {
   TEAM_REGULAR_RATE_YR,
 } from "./constants.ts";
 
-const formatPrice = (amount: number) => amount.toLocaleString("en-US");
+export const formatPrice = (amount: number, fixedCents = false) =>
+  amount.toLocaleString("en-US", {
+    minimumFractionDigits: fixedCents ? 2 : 0,
+    maximumFractionDigits: 2,
+  });
 
 export const PRICING_FAQ_ANSWER =
   `An individual membership is $${formatPrice(REGULAR_RATE_YR)} per year. ` +
   `A team membership (up to five readers) is $${formatPrice(TEAM_REGULAR_RATE_YR)} per year. ` +
   `Founding Member pricing offered through our valid offer links is $${formatPrice(FOUNDING_RATE_YR)}/year ` +
-  `or $${formatPrice(FOUNDING_RATE_MONTHLY)}/month for an individual, and ` +
-  `$${formatPrice(TEAM_FOUNDING_RATE_YR)}/year or $${formatPrice(TEAM_FOUNDING_RATE_MONTHLY)}/month ` +
+  `or $${formatPrice(FOUNDING_RATE_MONTHLY, true)}/month for an individual, and ` +
+  `$${formatPrice(TEAM_FOUNDING_RATE_YR)}/year or $${formatPrice(TEAM_FOUNDING_RATE_MONTHLY, true)}/month ` +
   `for a Team of up to five seats. Every new membership is covered by a 90-day money-back guarantee.`;
 
 export function createPublicPricingDocument(generatedAt = new Date().toISOString()) {
@@ -55,7 +59,7 @@ export function generateLlmsPricingLines(template: string): string {
     `- Individual membership: $${formatPrice(REGULAR_RATE_YR)}/year.`,
     `- Team membership (up to 5 seats): $${formatPrice(TEAM_REGULAR_RATE_YR)}/year.`,
     `- Special Reports included with membership: The Spend Map, The $6.6 Billion Greenlight Window, and The Requisition Read ($${formatPrice(SPECIAL_REPORT_VALUE)} each; $${formatPrice(REPORTS_VALUE)} total value).`,
-    `- Founding pricing: Individual $${formatPrice(FOUNDING_RATE_YR)}/year or $${formatPrice(FOUNDING_RATE_MONTHLY)}/month; Team $${formatPrice(TEAM_FOUNDING_RATE_YR)}/year or $${formatPrice(TEAM_FOUNDING_RATE_MONTHLY)}/month (up to 5 seats), available only through a valid, active offer link.`,
+    `- Founding pricing: Individual $${formatPrice(FOUNDING_RATE_YR)}/year or $${formatPrice(FOUNDING_RATE_MONTHLY, true)}/month; Team $${formatPrice(TEAM_FOUNDING_RATE_YR)}/year or $${formatPrice(TEAM_FOUNDING_RATE_MONTHLY, true)}/month (up to 5 seats), available only through a valid, active offer link.`,
   ];
   const prefixes = [
     "- Individual membership:",

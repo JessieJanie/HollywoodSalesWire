@@ -6,25 +6,25 @@
 // directly, appending a valid ?d= when
 // the visitor arrived with one.
 export const CHECKOUT_LINKS = {
-  INDIVIDUAL_REGULAR: "https://buy.stripe.com/bJe8wO4696qn6ET2qZ3ks0a",
-  TEAM_REGULAR: "https://buy.stripe.com/00wbJ0dGJdSPaV94z73ks0b",
-  INDIVIDUAL_FOUNDING: "https://buy.stripe.com/aFa9AScCF163d3h5Db3ks06",
-  TEAM_FOUNDING: "https://buy.stripe.com/bJe00i7ilaGD8N1e9H3ks08",
-  INDIVIDUAL_FOUNDING_MONTHLY: "https://buy.stripe.com/cNicN45adeWT4wLc1z3ks07",
-  TEAM_FOUNDING_MONTHLY: "https://buy.stripe.com/9B6fZg1Y1cOL2oD3v33ks09",
+  INDIVIDUAL_REGULAR: "https://buy.stripe.com/8x2bJ0fOR3eb7IX8Pn3ks0i",
+  TEAM_REGULAR: "https://buy.stripe.com/9B6dR87il5mjfbp0iR3ks0j",
+  INDIVIDUAL_FOUNDING: "https://buy.stripe.com/14A28q3254if9R5ghP3ks0e",
+  TEAM_FOUNDING: "https://buy.stripe.com/eVqbJ07il6qn0gv3v33ks0g",
+  INDIVIDUAL_FOUNDING_MONTHLY: "https://buy.stripe.com/3cI14mbyB9Cz4wL2qZ3ks0f",
+  TEAM_FOUNDING_MONTHLY: "https://buy.stripe.com/6oU6oG5adaGDd3h1mV3ks0h",
 };
 
 export const FOUNDING_OFFER_PATH = "/founding-offer";
 export const FOUNDING_DEADLINE_PARAM = "d";
 
 export const SUPPORT_EMAIL = "hello@hollywoodsaleswire.com";
-export const REGULAR_RATE_YR = 1150;
-export const FOUNDING_RATE_YR = 599;
-export const FOUNDING_RATE_MONTHLY = 64.99;
+export const REGULAR_RATE_YR = 575;
+export const FOUNDING_RATE_YR = 299;
+export const FOUNDING_RATE_MONTHLY = 32.5;
 
-export const TEAM_REGULAR_RATE_YR = 2300;
-export const TEAM_FOUNDING_RATE_YR = 1198;
-export const TEAM_FOUNDING_RATE_MONTHLY = 129.98;
+export const TEAM_REGULAR_RATE_YR = 1150;
+export const TEAM_FOUNDING_RATE_YR = 599;
+export const TEAM_FOUNDING_RATE_MONTHLY = 64.99;
 
 export const REPORTS_VALUE = 357;
 export const SPECIAL_REPORT_VALUE = REPORTS_VALUE / 3;
