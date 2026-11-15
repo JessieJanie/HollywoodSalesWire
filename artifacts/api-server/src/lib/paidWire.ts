@@ -161,7 +161,9 @@ export function planPaidSend(
   freshRecipientCount: number,
 ): PaidSendPlan {
   if (existingClaim) {
-    return existingClaim.status === "sent" ? { action: "already-sent" } : { action: "resume" };
+    return existingClaim.status === "sent" || existingClaim.status === "auto_sent_after_24h"
+      ? { action: "already-sent" }
+      : { action: "resume" };
   }
   return freshRecipientCount === 0 ? { action: "no-recipients" } : { action: "create" };
 }

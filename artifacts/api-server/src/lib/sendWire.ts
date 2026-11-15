@@ -138,6 +138,7 @@ export async function executeBriefSend(
   subject: string,
   bodyText: string,
   idempotencyPrefix?: string,
+  origin: "publisher" | "auto_sent_after_24h" = "publisher",
 ): Promise<BriefSendResult> {
   const recipients = await db
     .select()
@@ -176,7 +177,7 @@ export async function executeBriefSend(
       .orderBy(desc(weeklyPreviewsTable.sentAt))
       .limit(40);
     if (!briefAlreadyArchived(recent, subject, new Date())) {
-      await db.insert(weeklyPreviewsTable).values({ subject, bodyText, recipientCount: sent });
+      await db.insert(weeklyPreviewsTable).values({ subject, bodyText, recipientCount: sent, origin });
     }
   }
   if (failures.length > 0) {
@@ -250,6 +251,7 @@ export async function executePaidSend(
   subject: string,
   bodyText: string,
   weekKeyOverride?: string,
+  completionStatus: "sent" | "auto_sent_after_24h" = "sent",
 ): Promise<PaidSendResult> {
   const weekKey = weekKeyOverride ?? currentWeekKey();
   const loadExisting = () =>
@@ -333,7 +335,7 @@ export async function executePaidSend(
     .update(paidWireSendsTable)
     .set(
       failedEmails.length === 0
-        ? { status: "sent", recipientCount: sent }
+        ? { status: completionStatus, recipientCount: sent }
         : { recipientCount: sent },
     )
     .where(eq(paidWireSendsTable.id, frozenClaim.id));

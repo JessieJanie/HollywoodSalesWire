@@ -498,6 +498,13 @@ export default function PublisherPage() {
                   data-testid="text-wire-draft"
                 />
               )}
+              {(wire.data as { draftReadyNotifiedAt?: string; autoSendHeld?: boolean; autoSendState?: string }).draftReadyNotifiedAt
+                && !(wire.data as { autoSendHeld?: boolean }).autoSendHeld
+                && (wire.data as { autoSendState?: string }).autoSendState !== "auto_sent_after_24h" && (
+                <p className="mt-4 text-sm text-muted-foreground" data-testid="text-auto-send">
+                  This draft will be sent automatically 24 hours after the review email unless you approve, edit, or hold it.
+                </p>
+              )}
               <div className="mt-4 flex flex-wrap items-center gap-4">
                 <button
                   onClick={handleApprovePaid}
@@ -516,6 +523,24 @@ export default function PublisherPage() {
                 >
                   {send.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   Approve and send the Weekly Brief
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    void fetch(`${import.meta.env.BASE_URL}api/publisher/wire/hold`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ key }),
+                    }).then(async (response) => {
+                      if (!response.ok) return;
+                      await wire.refetch();
+                    });
+                  }}
+                  disabled={Boolean((wire.data as { autoSendHeld?: boolean }).autoSendHeld)}
+                  className="inline-flex items-center gap-2 border border-border px-4 py-2 text-sm font-medium hover:bg-muted disabled:opacity-40"
+                  data-testid="button-hold-draft"
+                >
+                  {(wire.data as { autoSendHeld?: boolean }).autoSendHeld ? "Held" : "Hold"}
                 </button>
                 <button
                   onClick={() => {

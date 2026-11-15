@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, and } from "drizzle-orm";
 import { timingSafeEqual } from "node:crypto";
 import { db, wireRunsTable } from "@workspace/db";
 import { runWeeklyResearch } from "../lib/wireResearch";
@@ -39,7 +39,29 @@ router.get("/publisher/wire/latest", async (req, res): Promise<void> => {
     ...(run.freeSubject ? { freeSubject: run.freeSubject } : {}),
     ...(run.freeBody ? { freeBody: run.freeBody } : {}),
     ...(run.sources ? { sources: run.sources } : {}),
+    ...(run.draftReadyNotifiedAt ? { draftReadyNotifiedAt: run.draftReadyNotifiedAt.toISOString() } : {}),
+    ...(run.autoSendHoldAt ? { autoSendHeld: true } : {}),
+    ...(run.autoSendState ? { autoSendState: run.autoSendState } : {}),
   });
+});
+
+router.post("/publisher/wire/hold", async (req, res): Promise<void> => {
+  if (!keyOk(req.body?.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  const { currentWeekKey } = await import("../lib/wireResearch");
+  const weekKey = currentWeekKey();
+  const held = await db
+    .update(wireRunsTable)
+    .set({ autoSendHoldAt: new Date() })
+    .where(and(eq(wireRunsTable.weekKey, weekKey), eq(wireRunsTable.status, "ready")))
+    .returning({ weekKey: wireRunsTable.weekKey });
+  if (held.length === 0) {
+    res.status(409).json({ error: "No current ready draft to hold." });
+    return;
+  }
+  res.json({ weekKey, held: true });
 });
 
 router.patch("/publisher/wire/save", async (req, res): Promise<void> => {
@@ -63,7 +85,10 @@ router.patch("/publisher/wire/save", async (req, res): Promise<void> => {
   }
   await db
     .update(wireRunsTable)
-    .set({ wireMarkdown: normalizeWireDateline(wireMarkdown, run.weekKey) })
+    .set({
+      wireMarkdown: normalizeWireDateline(wireMarkdown, run.weekKey),
+      autoSendHoldAt: new Date(),
+    })
     .where(eq(wireRunsTable.weekKey, run.weekKey));
   res.json({ weekKey: run.weekKey, saved: true });
 });

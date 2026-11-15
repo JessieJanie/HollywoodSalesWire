@@ -245,7 +245,9 @@ router.get("/publisher/status", async (req, res): Promise<void> => {
   res.json({
     subscriberCount: count,
     memberCount,
-    paidSentThisWeek: lastPaid?.weekKey === currentWeekKey() && lastPaid.status === "sent",
+    paidSentThisWeek:
+      lastPaid?.weekKey === currentWeekKey()
+      && (lastPaid.status === "sent" || lastPaid.status === "auto_sent_after_24h"),
     ...(last ? { lastSentAt: last.sentAt.toISOString(), lastSubject: last.subject } : {}),
     ...(lastPaid
       ? { lastPaidSentAt: lastPaid.sentAt.toISOString(), lastPaidSubject: lastPaid.subject }
