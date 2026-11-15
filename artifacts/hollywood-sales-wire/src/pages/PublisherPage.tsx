@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { WireRenderer } from "../components/WireRenderer";
 import { ProductionStagesSection } from "../components/ProductionStagesSection";
 import { briefApprovePayload, paidApprovePayload } from "../lib/approveSend";
@@ -222,6 +222,7 @@ export default function PublisherPage() {
           HOLLYWOOD SALES WIRE — PUBLISHER CONSOLE
         </p>
         <h1 className="text-3xl font-serif font-bold mb-8">Publisher Console</h1>
+        <SamplePicker publisherKey={key} />
 
         {/* ---------------------------------------------------------------- */}
         {/* Special Reports                                                   */}
@@ -705,6 +706,79 @@ export default function PublisherPage() {
           </div>
         )}
       </div>
+    </div>
+  );
+}
+
+function SamplePicker({ publisherKey }: { publisherKey: string }) {
+  const [issues, setIssues] = useState<{ weekKey: string; subject: string }[]>([]);
+  const [selected, setSelected] = useState("");
+  const [current, setCurrent] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!publisherKey) return;
+    let cancelled = false;
+    fetch(`${import.meta.env.BASE_URL}api/publisher/sent-issues?key=${encodeURIComponent(publisherKey)}`)
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data: { issues: { weekKey: string; subject: string }[]; sampleWeekKey: string | null } | null) => {
+        if (cancelled || !data) return;
+        setIssues(data.issues);
+        setCurrent(data.sampleWeekKey);
+        setSelected(data.sampleWeekKey ?? data.issues[0]?.weekKey ?? "");
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [publisherKey]);
+
+  return (
+    <div className="bg-card border border-border p-6 mb-6 shadow-sm">
+      <h2 className="font-serif font-bold text-lg mb-1">Public sample issue</h2>
+      <p className="text-sm text-muted-foreground mb-4">
+        Choose one paid issue that has already been sent. It is the only paid issue shown at /sample, with the source links stored on that week&rsquo;s research run.
+        {current ? ` Currently showing the week of ${current}.` : " Nothing is public until you choose one."}
+      </p>
+      {issues.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No sent paid issue yet.</p>
+      ) : (
+        <div className="flex flex-wrap items-center gap-3">
+          <select
+            value={selected}
+            onChange={(event) => setSelected(event.target.value)}
+            className="border border-border bg-background p-2 text-sm"
+            data-testid="select-sample-issue"
+          >
+            {issues.map((issue) => (
+              <option key={issue.weekKey} value={issue.weekKey}>
+                {issue.weekKey} — {issue.subject}
+              </option>
+            ))}
+          </select>
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-sm font-serif font-bold"
+            onClick={() => {
+              setMessage(null);
+              fetch(`${import.meta.env.BASE_URL}api/publisher/sample`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ key: publisherKey, weekKey: selected }),
+              })
+                .then(async (response) => {
+                  if (!response.ok) throw new Error("save failed");
+                  setCurrent(selected);
+                  setMessage(`The week of ${selected} is now the public sample.`);
+                })
+                .catch(() => setMessage("Could not save that sample. Try again."));
+            }}
+          >
+            Show this issue at /sample
+          </button>
+        </div>
+      )}
+      {message && <p className="mt-3 text-sm">{message}</p>}
     </div>
   );
 }

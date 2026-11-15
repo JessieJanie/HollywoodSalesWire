@@ -50,7 +50,7 @@ export function Footer() {
             </span>
           </Link>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            Your weekly source for entertainment industry sales intelligence. We report it first, others report it months later.
+            Your weekly source for entertainment industry sales intelligence, drawn from public filings and state award lists.
           </p>
         </div>
         <div className="flex flex-col gap-2 text-sm text-muted-foreground">
@@ -58,6 +58,7 @@ export function Footer() {
           <Link href="/" className="hover:text-foreground transition-colors">The Briefing</Link>
           <Link href="/articles" className="hover:text-foreground transition-colors">Articles</Link>
           <a href="/briefs" className="hover:text-foreground transition-colors">Weekly Brief Archive</a>
+          <a href="/sample" className="hover:text-foreground transition-colors">Sample issue</a>
           <Link href="/press" className="hover:text-foreground transition-colors">Press Releases</Link>
           <Link href="/faq" className="hover:text-foreground transition-colors">FAQ</Link>
           <Link href={orderHref} className="hover:text-foreground transition-colors">Become a Member</Link>

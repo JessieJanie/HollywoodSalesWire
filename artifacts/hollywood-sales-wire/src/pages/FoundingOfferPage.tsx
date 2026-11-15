@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { useFoundingOffer } from "@workspace/api-client-react";
 import { Header, Footer } from "@/components/layout/Shell";
 import { orderPath } from "@/lib/foundingDeadline";
+import { publicOfferBanner } from "@/lib/publicOfferBanner";
 import { useFoundingDeadline } from "@/lib/useFoundingDeadline";
 import { PricingContent } from "./OrderPage";
 
@@ -90,23 +91,17 @@ export default function FoundingOfferPage() {
     );
   }
 
+  const banner = publicOfferBanner(deadline);
   return (
     <div className="min-h-screen flex flex-col font-sans text-foreground bg-[#F6F5F2]">
       <Header />
-      {!deadline ? (
+      {banner === "loading" ? (
         <main className="flex-1 flex items-center justify-center py-32">
           <p className="text-muted-foreground font-mono-data text-sm tracking-widest">CHECKING THE OFFER DATE…</p>
         </main>
       ) : (
         <>
-          {deadline.closed ? (
-            <div
-              className="bg-muted text-muted-foreground py-3 px-4 text-center text-sm"
-              data-testid="founding-deadline"
-            >
-              This founding offer has ended. Regular rates are below.
-            </div>
-          ) : (
+          {banner === "founding" && deadline && (
             <div
               className="bg-primary text-primary-foreground py-3 px-4 text-center text-sm"
               data-testid="founding-deadline"
@@ -114,7 +109,7 @@ export default function FoundingOfferPage() {
               This offer {deadline.endsPhrase ?? "has ended"} — {deadline.daysLeftLabel}
             </div>
           )}
-          <PricingContent founding={!deadline.closed} deadline={deadline} />
+          <PricingContent founding={banner === "founding"} deadline={deadline} />
         </>
       )}
       <Footer />

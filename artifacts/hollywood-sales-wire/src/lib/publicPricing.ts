@@ -11,6 +11,7 @@ import {
   TEAM_FOUNDING_RATE_YR,
   TEAM_REGULAR_RATE_YR,
 } from "./constants.ts";
+import { MEMBERSHIP_INCLUDES_LINE } from "./sourcedClaims.ts";
 
 export const formatPrice = (amount: number, fixedCents = false) =>
   amount.toLocaleString("en-US", {
@@ -118,6 +119,7 @@ export function generateHomepageJsonLd(html: string): string {
     (item) => item["@type"] === "Product" && item.name === "Hollywood Sales Wire Membership",
     "membership Product",
   );
+  product.description = `A weekly intelligence briefing delivered every Tuesday: who just got funded, what they're about to buy, and when the window closes. ${MEMBERSHIP_INCLUDES_LINE} Backed by a 90-day money-back guarantee.`;
   if (!Array.isArray(product.offers)) {
     throw new Error("Pricing generation: membership Product has no offers");
   }
@@ -134,7 +136,7 @@ export function generateHomepageJsonLd(html: string): string {
   );
 
   individual.price = String(REGULAR_RATE_YR);
-  individual.description = `$${formatPrice(REGULAR_RATE_YR)} per year. 52 weekly issues plus 12 monthly Divergence Reports, with a 90-day money-back guarantee.`;
+  individual.description = `$${formatPrice(REGULAR_RATE_YR)} per year. 52 weekly issues of the HSW Weekly Wire, with a 90-day money-back guarantee.`;
   team.price = String(TEAM_REGULAR_RATE_YR);
   team.description = `$${formatPrice(TEAM_REGULAR_RATE_YR)} per year for up to 5 seats, with separate inbox deliveries and unified billing.`;
 

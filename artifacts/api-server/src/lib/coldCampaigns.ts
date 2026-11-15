@@ -29,6 +29,13 @@ import {
   TEAM_REGULAR_RATE_YR,
 } from "../../../hollywood-sales-wire/src/lib/constants.ts";
 import { formatPrice } from "../../../hollywood-sales-wire/src/lib/publicPricing.ts";
+import {
+  CALIFORNIA_FIRST_YEAR_CLAIM,
+  CALIFORNIA_FIRST_YEAR_NOTE,
+  CALIFORNIA_PROGRAM_SOURCE_URL,
+  GUARANTEE_WITHOUT_MONTHLY_REPORT,
+  MEMBERSHIP_INCLUDES_LINE,
+} from "../../../hollywood-sales-wire/src/lib/sourcedClaims.ts";
 
 const INSTANTLY_BASE = "https://api.instantly.ai/api/v2";
 const SENDING_ACCOUNTS = [
@@ -205,11 +212,11 @@ function buildEmails(
 
 I'm Karilyn Colegrove — I publish Hollywood Sales Wire, a weekly intelligence briefing for vendors selling into the entertainment industry. I found your contact while researching companies active in production-side sales, and I think this will be worth two minutes of your time.
 
-Three weeks ago, California's film office closed the books on the first year of its expanded tax credit: 170 productions awarded, $6.6 billion in direct production spending — including 41 new films greenlit in the final round alone.
+${CALIFORNIA_FIRST_YEAR_CLAIM}
 
-Not projections. Not "industry outlook." Awards. Named productions, approved budgets, published on a state list — which means every one of them is now on a clock: crew up, book stages, cut purchase orders, spend the money or lose the credit.
+${CALIFORNIA_FIRST_YEAR_NOTE} Source: ${CALIFORNIA_PROGRAM_SOURCE_URL}
 
-California alone now moves three-quarters of a billion dollars a year through its expanded credit. Georgia doesn't even cap its program. And every production on those award lists is a company that is about to buy things: cameras, stages, software, localization, post, payroll, insurance — the whole supply chain of a budget with a deadline.
+Every production on that award list is a company that is about to buy things: cameras, stages, software, localization, post, payroll, insurance — the whole supply chain of a budget with a deadline.
 
 Here's the part that should bother you.
 
@@ -328,9 +335,7 @@ What the subscription is. Hollywood Sales Wire is a weekly intelligence briefing
 
 Every Tuesday, you get the week's live buying signals — new tax-credit awards, requisition sweeps, money flows — read and translated into who to call, what they're about to buy, and when the window closes. Fifty-two issues a year.
 
-Once a month, subscribers also receive The Divergence Report — the strategic layer on top of the weekly wire. Where the Tuesday wire tells you who to call this week, the Divergence Report is the deeper monthly read on where the money is moving next quarter — the spend shifts, the buildouts forming, the territories opening — so you're positioned before the crowd shows up.
-
-The wire is your calls for the week. The Divergence Report is your plan for the season. Both come with the subscription.
+${MEMBERSHIP_INCLUDES_LINE}
 
 What Founding Members get on top — the three Special Reports. These are one-time bonuses, free when you join during this offer, delivered immediately, and yours to keep forever.
 
@@ -348,9 +353,9 @@ The price. The regular rate is ${INDIVIDUAL_REGULAR_PRICE} for an individual or 
 
 Subscribe through a valid offer link and the Founding Member rate is ${INDIVIDUAL_FOUNDING_PRICES} for an individual, or ${TEAM_FOUNDING_PRICES} for a Team of up to five. Your rate is locked for as long as you stay a member.
 
-Membership includes the weekly Wire, twelve Divergence Reports, and all three Special Reports, valued at $357 total.
+${MEMBERSHIP_INCLUDES_LINE} The three Special Reports are valued at $357 total.
 
-The guarantee — you risk nothing. Take 90 days — roughly thirteen issues of the Wire and three Divergence Reports. If it hasn't put live, workable prospects in front of you, write me and I'll refund every penny. Everything you've received — all three Special Reports and every issue delivered — is yours to keep either way. I've kept all the risk on my side of the table.
+The guarantee — you risk nothing. ${GUARANTEE_WITHOUT_MONTHLY_REPORT}
 
 The deadline. This offer ends at midnight Eastern on ${dl}. After that, the founding offer and free Special Reports are withdrawn, and regular membership is ${INDIVIDUAL_REGULAR_PRICE} for an individual or ${TEAM_REGULAR_PRICE} for a Team of up to five.
 

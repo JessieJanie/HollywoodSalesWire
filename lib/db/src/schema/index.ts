@@ -21,6 +21,7 @@ export * from "./emailSubscribers";
 export * from "./weeklyPreviews";
 export * from "./wireRuns";
 export * from "./publisherAlerts";
+export * from "./publicSamples";
 export * from "./members";
 export * from "./paidWireSends";
 export * from "./specialReports";

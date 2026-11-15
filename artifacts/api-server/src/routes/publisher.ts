@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { timingSafeEqual } from "node:crypto";
 import {
   db,
@@ -7,6 +7,7 @@ import {
   weeklyPreviewsTable,
   membersTable,
   paidWireSendsTable,
+  publicSamplesTable,
   specialReportsTable,
 } from "@workspace/db";
 import { executeBriefSend, executePaidSend } from "../lib/sendWire";
@@ -162,6 +163,51 @@ router.post("/publisher/paid-send", async (req, res): Promise<void> => {
   }
   const statusByCode = { "no-recipients": 400, "already-sent": 409, "send-failed": 502, partial: 502 } as const;
   res.status(statusByCode[result.code]).json({ error: result.error });
+});
+
+router.get("/publisher/sent-issues", async (req, res): Promise<void> => {
+  if (!keyOk(req.query.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  const issues = await db
+    .select({
+      weekKey: paidWireSendsTable.weekKey,
+      subject: paidWireSendsTable.subject,
+      sentAt: paidWireSendsTable.sentAt,
+    })
+    .from(paidWireSendsTable)
+    .where(eq(paidWireSendsTable.status, "sent"))
+    .orderBy(desc(paidWireSendsTable.sentAt));
+  const [sample] = await db
+    .select({ weekKey: publicSamplesTable.weekKey })
+    .from(publicSamplesTable)
+    .orderBy(desc(publicSamplesTable.selectedAt))
+    .limit(1);
+  res.json({
+    issues: issues.map((issue) => ({ ...issue, sentAt: issue.sentAt.toISOString() })),
+    sampleWeekKey: sample?.weekKey ?? null,
+  });
+});
+
+router.post("/publisher/sample", async (req, res): Promise<void> => {
+  if (!keyOk(req.body?.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  const weekKey = typeof req.body?.weekKey === "string" ? req.body.weekKey : "";
+  const [issue] = await db
+    .select({ weekKey: paidWireSendsTable.weekKey })
+    .from(paidWireSendsTable)
+    .where(and(eq(paidWireSendsTable.weekKey, weekKey), eq(paidWireSendsTable.status, "sent")))
+    .limit(1);
+  if (!issue) {
+    res.status(400).json({ error: "Choose a paid issue that has already been sent." });
+    return;
+  }
+  await db.delete(publicSamplesTable);
+  await db.insert(publicSamplesTable).values({ weekKey });
+  res.json({ weekKey });
 });
 
 router.get("/publisher/status", async (req, res): Promise<void> => {

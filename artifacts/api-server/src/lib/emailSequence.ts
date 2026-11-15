@@ -30,6 +30,13 @@ import {
   TEAM_REGULAR_RATE_YR,
 } from "../../../hollywood-sales-wire/src/lib/constants.ts";
 import { formatPrice } from "../../../hollywood-sales-wire/src/lib/publicPricing.ts";
+import {
+  CALIFORNIA_FIRST_YEAR_CLAIM,
+  CALIFORNIA_FIRST_YEAR_NOTE,
+  CALIFORNIA_PROGRAM_SOURCE_URL,
+  GUARANTEE_WITHOUT_MONTHLY_REPORT,
+  MEMBERSHIP_INCLUDES_LINE,
+} from "../../../hollywood-sales-wire/src/lib/sourcedClaims.ts";
 
 export const FROM_ADDRESS = "Hollywood Sales Wire <briefings@hollywoodsaleswire.com>";
 export const SITE_URL = process.env.SITE_URL ?? "https://hollywoodsaleswire.com";
@@ -143,9 +150,9 @@ export const SEQUENCE: SequenceStep[] = [
     body: ({ unsubscribeUrl, offerUrl, deadlineLabel }) =>
       wrap(
         `${p("Hello Reader,")}
-${p("Three weeks ago, California's film office closed the books on the first year of its expanded tax credit: 170 productions awarded, $6.6 billion in direct production spending — including 41 new films greenlit in the final round alone.")}
-${p("Not projections. Not &ldquo;industry outlook.&rdquo; Awards. Named productions, approved budgets, published on a state list — which means every one of them is now on a clock: crew up, book stages, cut purchase orders, spend the money or lose the credit.")}
-${p("California alone now moves three-quarters of a billion dollars a year through its expanded credit. Georgia doesn't even cap its program. And every production on those award lists is a company that is about to buy things: cameras, stages, software, localization, post, payroll, insurance — the whole supply chain of a budget with a deadline.")}
+${p(CALIFORNIA_FIRST_YEAR_CLAIM)}
+${p(CALIFORNIA_FIRST_YEAR_NOTE + " Source: " + CALIFORNIA_PROGRAM_SOURCE_URL)}
+${p("Every production on that award list is a company that is about to buy things: cameras, stages, software, localization, post, payroll, insurance — the whole supply chain of a budget with a deadline.")}
 ${p("Here's the part that should bother you.")}
 ${p("The &ldquo;industry lead lists&rdquo; your competitors are working from — the $15,000-a-year databases, the festival directories, the scraped LinkedIn exports — were cold before they were ever sold. Six months stale on a good day.")}
 ${p("And it's worse than stale: the list companies rent those same names out, over and over, to anyone with a marketing budget. By the time you dial, that contact has been pitched by a dozen vendors, three conferences, and a webinar series. They're not just cold. They're sick of the phone.")}
@@ -156,7 +163,7 @@ ${p(`The offer is live right now: use your valid offer link by midnight Eastern 
 ${p("I'll make the full case over the next few weeks. But if you already know what a two-week-old award list is worth to your pipeline, there's no reason to wait:")}
 ${cta("View the Founding Member offer", utm(offerUrl, 1))}
 ${sig}
-${p("P.S. One question worth sitting with: when a state publishes a list of 170 funded productions worth $6.6 billion, who in your company is assigned to call those productions first? If the answer is &ldquo;nobody,&rdquo; that's fixable — by " + deadlineLabel + ".")}`,
+${p("P.S. One question worth sitting with: the California Film Commission projects $6.6 billion in direct production spending from the 170 projects awarded in the first year of the expanded credit. Who in your company is assigned to call those productions first? If the answer is &ldquo;nobody,&rdquo; that's fixable — by " + deadlineLabel + ".")}`,
         unsubscribeUrl,
       ),
   },
@@ -231,8 +238,7 @@ ${sig}`,
 ${p("Today, the whole offer, plainly, so you can make the call with all the facts in front of you.")}
 ${p("<strong>What the subscription is.</strong> Hollywood Sales Wire is a weekly intelligence briefing for people who sell into the production economy.")}
 ${p("Every Tuesday, you get the week's live buying signals — new tax-credit awards, requisition sweeps, money flows — read and translated into who to call, what they're about to buy, and when the window closes. Fifty-two issues a year.")}
-${p("Once a month, subscribers also receive The Divergence Report — the strategic layer on top of the HSW Weekly Wire. Where the Tuesday issue tells you who to call this week, the Divergence Report is the deeper monthly read on where the money is moving next quarter — the spend shifts, the buildouts forming, the territories opening — so you're positioned before the crowd shows up.")}
-${p("The wire is your calls for the week. The Divergence Report is your plan for the season. Both come with the subscription, every month you're a member.")}
+${p(MEMBERSHIP_INCLUDES_LINE)}
 ${p("<strong>The three Special Reports — free with your membership, delivered immediately, yours to keep forever.</strong> These are one-time bonuses included with every membership:")}
 <ul>
 <li><strong>The Spend Map</strong> ($119 value) — a sourced map of spending across physical production, sports rights, localization, and AI.</li>
@@ -243,8 +249,8 @@ ${p("That's $357 in Special Reports — a crash course in producing your own hot
 ${p("(And no — I will never rent this subscriber list to anyone, for any purpose. Your prospects stay fresh and so does your inbox.)")}
 ${p(`<strong>The price.</strong> The regular rate is ${INDIVIDUAL_REGULAR_PRICE} for an individual or ${TEAM_REGULAR_PRICE} for a Team of up to five. One closed deal sourced from one issue pays for years of it.`)}
 ${p(`Use a valid offer link to join at the Founding Member rate: ${INDIVIDUAL_FOUNDING_PRICES} individual, or ${TEAM_FOUNDING_PRICES} Team (up to five seats). Your rate is locked for as long as you stay a member.`)}
-${p("Membership includes the weekly Wire, twelve Divergence Reports, and all three Special Reports, valued at $357 total.")}
-${p("<strong>The guarantee — you risk nothing.</strong> Take 90 days — roughly thirteen issues of the Wire and three Divergence Reports. If it hasn't put live, workable prospects in front of you, write me and I'll refund every penny. Everything you've received — all three Special Reports and every issue delivered — is yours to keep either way. I've kept all the risk on my side of the table.")}
+${p(MEMBERSHIP_INCLUDES_LINE + " The three Special Reports are valued at $357 total.")}
+${p("<strong>The guarantee — you risk nothing.</strong> " + GUARANTEE_WITHOUT_MONTHLY_REPORT)}
 ${p(`<strong>The deadline.</strong> This is a limited-time offer, and the clock is real: it ends at midnight Eastern on ${deadlineLabel}. After that, the founding offer is withdrawn; regular membership is ${INDIVIDUAL_REGULAR_PRICE} individual or ${TEAM_REGULAR_PRICE} Team (up to five seats).`)}
 ${p("Subscribe now and the three Special Reports arrive immediately — start running the system this weekend — with your first Wire on Tuesday.")}
 ${cta("View the Founding Member offer", utm(offerUrl, 4))}

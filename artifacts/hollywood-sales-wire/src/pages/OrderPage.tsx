@@ -12,6 +12,7 @@ import {
 } from "@/lib/constants";
 import { preserveDeadlineOnUrl, type FoundingDeadline } from "@/lib/foundingDeadline";
 import { formatPrice } from "@/lib/publicPricing";
+import { publicOfferBanner } from "@/lib/publicOfferBanner";
 import { useFoundingDeadline } from "@/lib/useFoundingDeadline";
 import { withClientReference } from "@/lib/traffic";
 import { motion } from "framer-motion";
@@ -64,7 +65,6 @@ export function PricingContent({
   const individualFeatures = founding
     ? [
         "52 issues of the Tuesday Wire",
-        "12 issues of The Divergence Report",
         <span key="1"><strong>Bonus:</strong> The Spend Map (${SPECIAL_REPORT_VALUE.toLocaleString()} value)</span>,
         <span key="2"><strong>Bonus:</strong> The $6.6 Billion Greenlight Window (${SPECIAL_REPORT_VALUE.toLocaleString()} value)</span>,
         <span key="3"><strong>Bonus:</strong> The Requisition Read (${SPECIAL_REPORT_VALUE.toLocaleString()} value)</span>,
@@ -72,7 +72,6 @@ export function PricingContent({
       ]
     : [
         "52 issues of the Tuesday Wire",
-        "12 issues of The Divergence Report",
         <span key="1"><strong>Bonus:</strong> The Spend Map (${SPECIAL_REPORT_VALUE.toLocaleString()} value)</span>,
         <span key="2"><strong>Bonus:</strong> The $6.6 Billion Greenlight Window (${SPECIAL_REPORT_VALUE.toLocaleString()} value)</span>,
         <span key="3"><strong>Bonus:</strong> The Requisition Read (${SPECIAL_REPORT_VALUE.toLocaleString()} value)</span>,
@@ -266,19 +265,19 @@ export default function OrderPage() {
   const deadline = useFoundingDeadline();
   // Founding pricing requires an explicit valid ?d= deadline that has
   // not passed. A missing or expired date shows regular rates.
-  const founding = !!deadline && deadline.overrideDate !== null && !deadline.closed;
+  const banner = publicOfferBanner(deadline);
   return (
     <div className="min-h-screen flex flex-col font-sans text-foreground bg-[#F6F5F2]">
       <Header />
-      {(!deadline || deadline.closed) && (
+      {banner === "founding" && deadline && (
         <div
-          className="bg-muted text-muted-foreground py-3 px-4 text-center text-sm"
+          className="bg-primary text-primary-foreground py-3 px-4 text-center text-sm"
           data-testid="order-deadline"
         >
-          This founding offer has ended. Regular rates and checkout are below.
+          This offer {deadline.endsPhrase} — {deadline.daysLeftLabel}
         </div>
       )}
-      <PricingContent founding={founding} deadline={deadline} />
+      <PricingContent founding={banner === "founding"} deadline={deadline} />
       <Footer />
     </div>
   );
