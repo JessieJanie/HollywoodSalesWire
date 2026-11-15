@@ -13,7 +13,19 @@ function modeForKey(secretKey: string): StripeCredentialMode {
  * Fetches Stripe credentials from the Replit connection API.
  * Not cached — tokens can rotate, so fetch fresh each time.
  */
-async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecret?: string }> {
+/**
+ * The live endpoint (we_…, see stripeConfig.ts) was created in the Stripe
+ * Dashboard, so neither the Replit Stripe connector nor stripe-replit-sync's
+ * managed-webhook table holds its signing secret. Its single source is the
+ * STRIPE_WEBHOOK_SECRET app secret (Stripe Dashboard → Webhooks → endpoint →
+ * Signing secret).
+ */
+export function getStripeWebhookSecret(): string | undefined {
+  const secret = process.env.STRIPE_WEBHOOK_SECRET?.trim();
+  return secret ? secret : undefined;
+}
+
+async function getStripeCredentials(): Promise<{ secretKey: string }> {
   const hostname = process.env.REPLIT_CONNECTORS_HOSTNAME;
   const xReplitToken = process.env.REPL_IDENTITY
     ? "repl " + process.env.REPL_IDENTITY
@@ -42,7 +54,7 @@ async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecre
 
   const data = (await resp.json()) as {
     items?: Array<{
-      settings?: { secret_key?: string; secret?: string; webhook_secret?: string };
+      settings?: { secret_key?: string; secret?: string };
     }>;
   };
   // This connection stores the key under `secret` (some store `secret_key`).
@@ -59,7 +71,7 @@ async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecre
     );
   }
 
-  return { secretKey, webhookSecret: settings?.webhook_secret };
+  return { secretKey };
 }
 
 /** Returns a fresh authenticated Stripe client (not cached; keys can rotate). */
@@ -84,10 +96,17 @@ export async function getStripeSync(): Promise<StripeSync> {
     throw new Error("DATABASE_URL environment variable is required");
   }
 
-  const { secretKey, webhookSecret } = await getStripeCredentials();
+  const webhookSecret = getStripeWebhookSecret();
+  if (!webhookSecret) {
+    throw new Error(
+      "STRIPE_WEBHOOK_SECRET is not set, so Stripe webhook signatures cannot be verified.",
+    );
+  }
+
+  const { secretKey } = await getStripeCredentials();
   return new StripeSync({
     poolConfig: { connectionString: databaseUrl },
     stripeSecretKey: secretKey,
-    stripeWebhookSecret: webhookSecret ?? "",
+    stripeWebhookSecret: webhookSecret,
   });
 }
