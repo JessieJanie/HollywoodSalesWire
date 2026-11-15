@@ -35,6 +35,14 @@ export default function ShelfPage() {
   const [formEmail, setFormEmail] = useState("");
   const [sending, setSending] = useState(false);
   const [sentMessage, setSentMessage] = useState<string | null>(null);
+  const [archiveQuery, setArchiveQuery] = useState("");
+  const [prefStates, setPrefStates] = useState("CA");
+  const [prefTypes, setPrefTypes] = useState("");
+  const [prefBands, setPrefBands] = useState("");
+  const [prefVendors, setPrefVendors] = useState("");
+  const [watchLabel, setWatchLabel] = useState("");
+  const [boardMessage, setBoardMessage] = useState<string | null>(null);
+  const [watchEvents, setWatchEvents] = useState<{ kind: string; detail: string }[]>([]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -62,6 +70,14 @@ export default function ShelfPage() {
       })
       .then((d) => {
         if (d) setData(d);
+        if (d) {
+          void fetch(`${import.meta.env.BASE_URL}api/board/watches`)
+            .then(async (response) => (response.ok ? response.json() : null))
+            .then((body: { events?: { kind: string; detail: string }[] } | null) => {
+              if (body?.events) setWatchEvents(body.events);
+            })
+            .catch(() => undefined);
+        }
       })
       .catch((err: Error) => setError(err.message));
   }, []);
@@ -195,6 +211,14 @@ export default function ShelfPage() {
               <p className="text-sm text-muted-foreground mb-4">
                 Every weekly issue sent during your membership, newest first.
               </p>
+              <label className="block text-sm mb-4">
+                Search your archive
+                <input
+                  value={archiveQuery}
+                  onChange={(event) => setArchiveQuery(event.target.value)}
+                  className="mt-1 w-full border border-border bg-background p-2"
+                />
+              </label>
               {data.issues.length === 0 ? (
                 <p className="text-muted-foreground text-sm">
                   Your first issue arrives Tuesday morning — it will appear here as soon as it&apos;s
@@ -202,7 +226,13 @@ export default function ShelfPage() {
                 </p>
               ) : (
                 <ul className="space-y-4">
-                  {data.issues.map((issue) => (
+                  {data.issues
+                    .filter((issue) => {
+                      const needle = archiveQuery.trim().toLowerCase();
+                      if (!needle) return true;
+                      return `${issue.subject} ${issue.bodyText}`.toLowerCase().includes(needle);
+                    })
+                    .map((issue) => (
                     <li key={issue.weekKey} className="border border-border rounded-md bg-card">
                       <details>
                         <summary className="cursor-pointer p-4">
@@ -216,6 +246,76 @@ export default function ShelfPage() {
                         </div>
                       </details>
                     </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+            <section className="mt-12">
+              <h2 className="text-2xl font-serif font-bold mb-1">Your territory</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Save the states you sell into. The Tuesday issue adds a &ldquo;Your territory&rdquo; section from those preferences. Tags on the public board say &ldquo;likely needs,&rdquo; which is a guess, not a purchase.
+              </p>
+              <form
+                className="space-y-3"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void fetch(`${import.meta.env.BASE_URL}api/board/preferences`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                      states: prefStates.split(",").map((part) => part.trim()).filter(Boolean),
+                      projectTypes: prefTypes.split(",").map((part) => part.trim()).filter(Boolean),
+                      budgetBands: prefBands.split(",").map((part) => part.trim()).filter(Boolean),
+                      vendorCategories: prefVendors.split(",").map((part) => part.trim()).filter(Boolean),
+                    }),
+                  }).then((response) => setBoardMessage(response.ok ? "Preferences saved." : "Could not save preferences."));
+                }}
+              >
+                <label className="block text-sm">
+                  States (CA, NYC, NY, TX, NM, UT, GA)
+                  <input value={prefStates} onChange={(event) => setPrefStates(event.target.value)} className="mt-1 w-full border border-border bg-background p-2" />
+                </label>
+                <label className="block text-sm">
+                  Project types
+                  <input value={prefTypes} onChange={(event) => setPrefTypes(event.target.value)} className="mt-1 w-full border border-border bg-background p-2" />
+                </label>
+                <label className="block text-sm">
+                  Budget bands
+                  <input value={prefBands} onChange={(event) => setPrefBands(event.target.value)} className="mt-1 w-full border border-border bg-background p-2" />
+                </label>
+                <label className="block text-sm">
+                  Vendor categories
+                  <input value={prefVendors} onChange={(event) => setPrefVendors(event.target.value)} className="mt-1 w-full border border-border bg-background p-2" />
+                </label>
+                <button type="submit" className="bg-primary text-primary-foreground px-4 py-2 text-sm font-serif font-bold">Save preferences</button>
+              </form>
+              <form
+                className="mt-6 space-y-3"
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void fetch(`${import.meta.env.BASE_URL}api/board/watch`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ label: watchLabel, companyKey: watchLabel.toLowerCase() }),
+                  }).then((response) => setBoardMessage(response.ok ? `Following ${watchLabel}.` : "Could not save that watch."));
+                }}
+              >
+                <label className="block text-sm">
+                  Follow a production or company
+                  <input value={watchLabel} onChange={(event) => setWatchLabel(event.target.value)} className="mt-1 w-full border border-border bg-background p-2" />
+                </label>
+                <button type="submit" className="border border-border px-4 py-2 text-sm">Add to watchlist</button>
+              </form>
+              <p className="mt-4 text-sm">
+                <a href={`${import.meta.env.BASE_URL}api/board/export.csv`}>Download the last 12 months of the board (CSV)</a>
+                {" · "}
+                <a href={`${import.meta.env.BASE_URL}api/board/crm.csv`}>HubSpot / Salesforce import template</a>
+              </p>
+              {boardMessage && <p className="mt-2 text-sm">{boardMessage}</p>}
+              {watchEvents.length > 0 && (
+                <ul className="mt-4 text-sm space-y-2">
+                  {watchEvents.map((event, index) => (
+                    <li key={`${event.kind}-${index}`}>{event.kind}: {event.detail}</li>
                   ))}
                 </ul>
               )}

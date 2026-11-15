@@ -15,6 +15,8 @@ import {
   emailSubscribersTable,
   membersTable,
   paidWireSendsTable,
+  productionsTable,
+  subscriberPreferencesTable,
   weeklyPreviewsTable,
 } from "@workspace/db";
 import { resendRequest } from "./resend";
@@ -32,6 +34,7 @@ import { shelfUrl } from "../routes/reports";
 import { logger } from "./logger";
 import { normalizeWireDateline } from "./wireDateline";
 import { briefAlreadyArchived } from "./briefArchive";
+import { yourTerritory, type StoredProduction } from "./greenlightBoard";
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -96,7 +99,7 @@ export function briefHtml(bodyText: string, unsubscribeUrl: string): string {
  * Paid HSW Weekly Wire email HTML: a short cover note from the publisher (with
  * the member's own signed Shelf link), then the full Wire, then the About block.
  */
-export function paidWireHtml(bodyText: string, memberShelfUrl: string): string {
+export function paidWireHtml(bodyText: string, memberShelfUrl: string, territory?: string | null): string {
   return `<!doctype html>
 <html>
   <body style="margin:0;padding:0;background:#f6f5f2;">
@@ -107,6 +110,7 @@ export function paidWireHtml(bodyText: string, memberShelfUrl: string): string {
       <p style="margin:0 0 20px;">— Karilyn</p>
       <hr style="border:none;border-top:1px solid #e5e2da;margin:24px 0;" />
       ${paragraphsHtml(bodyText)}
+      ${territory ? `<hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />${paragraphsHtml(territory)}` : ""}
       <hr style="border:none;border-top:1px solid #e5e2da;margin:32px 0 16px;" />
       ${aboutHtml()}
       <p style="font-size:12px;color:#8a8577;font-family:Arial,sans-serif;">
@@ -272,6 +276,7 @@ export async function executePaidSend(
           status: "sending",
           recipientEmails: recipients.map((r) => r.email),
           recipientCount: 0,
+          territoryByEmail: await territoriesFor(recipients.map((r) => r.email)),
         })
         .onConflictDoNothing({ target: paidWireSendsTable.weekKey })
         .returning();
@@ -300,7 +305,11 @@ export async function executePaidSend(
       from: FROM_ADDRESS,
       to: [email],
       subject: frozenClaim.subject,
-      html: paidWireHtml(frozenClaim.bodyText, shelfUrl(email, SITE_URL)),
+      html: paidWireHtml(
+        frozenClaim.bodyText,
+        shelfUrl(email, SITE_URL),
+        frozenTerritory(frozenClaim.territoryByEmail, email),
+      ),
     }),
     sendBatch: (emails, idempotencyKey) =>
       resendRequest("/emails/batch", {
@@ -337,4 +346,51 @@ export async function executePaidSend(
     };
   }
   return { ok: true, sent };
+}
+
+function frozenTerritory(value: unknown, email: string): string | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const text = (value as Record<string, unknown>)[email];
+  return typeof text === "string" && text.length > 0 ? text : null;
+}
+
+function asStringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+/** Frozen onto the weekly claim so a retry cannot change the personalization. */
+async function territoriesFor(emails: string[]): Promise<Record<string, string>> {
+  try {
+    const prefs = await db.select().from(subscriberPreferencesTable);
+    const rows = await db.select().from(productionsTable);
+    const productions = rows.flatMap((row) => {
+      if (!row || typeof row !== "object" || !("titleKey" in row)) return [];
+      return [row as unknown as StoredProduction];
+    });
+    const out: Record<string, string> = {};
+    for (const pref of prefs) {
+      if (!pref || typeof pref !== "object" || !("email" in pref)) continue;
+      const email = String((pref as { email?: unknown }).email ?? "");
+      if (!emails.includes(email)) continue;
+      const record = pref as {
+        states?: unknown;
+        projectTypes?: unknown;
+        budgetBands?: unknown;
+        vendorCategories?: unknown;
+      };
+      out[email] = yourTerritory(
+        {
+          states: asStringList(record.states),
+          projectTypes: asStringList(record.projectTypes),
+          budgetBands: asStringList(record.budgetBands),
+          vendorCategories: asStringList(record.vendorCategories),
+        },
+        productions,
+      );
+    }
+    return out;
+  } catch (err) {
+    logger.error({ err }, "territory section skipped for this claim");
+    return {};
+  }
 }

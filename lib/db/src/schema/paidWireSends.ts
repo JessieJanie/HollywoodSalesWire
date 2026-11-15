@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp, integer, uniqueIndex } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer, uniqueIndex, jsonb } from "drizzle-orm/pg-core";
 
 // One row per weekly paid-Wire send to members. The unique index on week_key
 // is the double-send guard: the row is claimed atomically before sending.
@@ -18,6 +18,8 @@ export const paidWireSendsTable = pgTable(
     // to identical payloads even if membership changes between attempts.
     recipientEmails: text("recipient_emails").array().notNull(),
     recipientCount: integer("recipient_count").notNull().default(0),
+    /** Frozen per-recipient "Your territory" text. Retries must reuse it. */
+    territoryByEmail: jsonb("territory_by_email"),
     sentAt: timestamp("sent_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [uniqueIndex("paid_wire_sends_week_key_unique").on(t.weekKey)],

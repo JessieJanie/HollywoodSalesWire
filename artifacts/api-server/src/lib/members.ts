@@ -266,6 +266,7 @@ function welcomeHtml(
       ${p(`<a href="${shelfLink}" style="color:#1d5c3a;font-weight:bold;">Click here</a> for the latest issue of the HSW Weekly Wire. Your subscription will actually start with next Tuesday's issue. It will arrive in your inbox here as well.`)}
       ${h("Your account")}
       ${p(`Everything above is stored on your <a href="${shelfLink}" style="color:#1d5c3a;font-weight:bold;">HSW Shelf</a>, with new HSW Weekly Wire issues automatically added every week. Both the Special Reports and every HSW Weekly Wire issue you receive are stored here for your convenience. Sign in any time with this email address. Past issues stay here too, so you never have to dig through your inbox for anything.`)}
+      ${p(`On that same Shelf you can save the states you sell into and follow a production or company. Tuesday's issue then includes a "Your territory" section for those preferences.`)}
       ${h("What happens next")}
       ${p("Every Tuesday your issue of the HSW Weekly Wire arrives in this inbox: the latest week's production spending signals, entity formations, and hiring tells — read, sorted, and turned into calls you can make the same day. Nothing to remember, nothing to log in for — and your HSW Shelf is always there with everything you've received to date, for easy reference.")}
       ${h("Getting the most from your first hour")}
