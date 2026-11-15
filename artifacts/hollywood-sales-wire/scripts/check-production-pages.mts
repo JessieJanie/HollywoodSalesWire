@@ -182,6 +182,37 @@ export async function checkPage(
   return failures;
 }
 
+/**
+ * A cold autoscale instance can take longer than one request timeout to answer
+ * its first request. Retry thrown request errors (timeouts, resets) before
+ * reporting them; content assertions are deterministic and are not retried.
+ */
+export async function checkPageWithRetry(
+  expected: PageExpectation,
+  origin: URL,
+  canonicalOrigin: URL,
+  { attempts = 3, retryDelayMs = 10_000, timeoutMs = 15_000 } = {},
+): Promise<string[]> {
+  let lastError: unknown;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await checkPage(expected, origin, canonicalOrigin, timeoutMs);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) {
+        console.log(
+          `Retrying ${expected.path} after attempt ${attempt} failed: ${
+            error instanceof Error ? error.message : String(error)
+          }`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, retryDelayMs));
+      }
+    }
+  }
+  const message = lastError instanceof Error ? lastError.message : String(lastError);
+  throw new Error(`${message} (after ${attempts} attempts)`);
+}
+
 export async function main(arguments_ = process.argv.slice(2)): Promise<void> {
   const root = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
   const ssrEntry = path.join(root, 'dist', 'ssr', 'entry-server.js');
@@ -209,7 +240,7 @@ export async function main(arguments_ = process.argv.slice(2)): Promise<void> {
   const pageFailures: PageFailure[] = [];
   for (const page of pages) {
     try {
-      const failures = await checkPage(page, origin, canonicalOrigin);
+      const failures = await checkPageWithRetry(page, origin, canonicalOrigin);
       if (failures.length === 0) {
         console.log(`PASS ${page.path}`);
         continue;

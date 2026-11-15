@@ -8,7 +8,11 @@ import {
   EXPECTED_STRIPE_WEBHOOK_ID,
   EXPECTED_STRIPE_WEBHOOK_URL,
 } from "./stripeConfig";
-import { initStripe, verifyExpectedStripeWebhook } from "./stripeInit";
+import {
+  initStripe,
+  stripeAlertIdempotencyKey,
+  verifyExpectedStripeWebhook,
+} from "./stripeInit";
 
 vi.mock("stripe-replit-sync", () => ({ runMigrations: vi.fn() }));
 vi.mock("./stripeClient", () => ({ getStripeClientContext: vi.fn() }));
@@ -132,5 +136,20 @@ describe("read-only Stripe startup webhook verification", () => {
     expect(writes.update).not.toHaveBeenCalled();
     expect(writes.del).not.toHaveBeenCalled();
     expect(resendRequest).toHaveBeenCalledOnce();
+  });
+
+  it("dedupes repeated cold-start alerts with a stable per-reason idempotency key", async () => {
+    const { stripe } = stripeMock("acct_wrong");
+    vi.mocked(getStripeClientContext).mockResolvedValue({ stripe, mode: "live" });
+
+    await initStripe();
+    await initStripe();
+
+    const calls = vi.mocked(resendRequest).mock.calls;
+    expect(calls).toHaveLength(2);
+    const keys = calls.map(([, init]) => init.headers?.["Idempotency-Key"]);
+    expect(keys[0]).toMatch(/^stripe-webhook-verification-[0-9a-f]{32}$/);
+    expect(keys[1]).toBe(keys[0]);
+    expect(stripeAlertIdempotencyKey("other reason")).not.toBe(keys[0]);
   });
 });
