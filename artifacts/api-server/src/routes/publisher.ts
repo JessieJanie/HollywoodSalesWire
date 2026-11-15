@@ -16,6 +16,7 @@ import { PublisherSendResponse } from "@workspace/api-zod";
 import { currentWeekKey } from "../lib/wireResearch";
 import { ObjectStorageService } from "../lib/objectStorage";
 import { deliverReportsToPendingMembers } from "../lib/members";
+import { refreshGreenlightBoard } from "../lib/greenlightIngest";
 import {
   uploadColdLeads,
   getLatestColdCampaign,
@@ -208,6 +209,15 @@ router.post("/publisher/sample", async (req, res): Promise<void> => {
   await db.delete(publicSamplesTable);
   await db.insert(publicSamplesTable).values({ weekKey });
   res.json({ weekKey });
+});
+
+router.post("/publisher/greenlight/refresh", async (req, res): Promise<void> => {
+  if (!keyOk(req.body?.key)) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
+  const attempts = await refreshGreenlightBoard();
+  res.json({ attempts });
 });
 
 router.get("/publisher/status", async (req, res): Promise<void> => {

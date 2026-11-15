@@ -59,6 +59,8 @@ app.post(
       const { handleStripeEvent } = await import("./lib/members");
       const event = JSON.parse(req.body.toString("utf8"));
       await handleStripeEvent(event);
+      const { recordStripeCheckout } = await import("./lib/checkoutEvents");
+      await recordStripeCheckout(event);
     } catch (err) {
       // Member persistence failed — return 500 so Stripe retries the event.
       // (Email side effects never throw; they log and self-recover on retry.)
@@ -74,6 +76,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api", router);
+
+app.use((req, res, next) => {
+  import("./routes/greenlight")
+    .then((m) => m.default(req, res, next))
+    .catch(next);
+});
 
 // Public HTML archive of sent Weekly Briefs (crawler-readable marketing pages).
 // Mounted outside /api on purpose — see routes/briefs.ts. Lazy-imported the

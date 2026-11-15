@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Header, Footer } from "@/components/layout/Shell";
 import {
   CHECKOUT_LINKS,
@@ -61,6 +62,31 @@ export function PricingContent({
   const teamLink = checkoutSource ? teamBase : preserveDeadlineOnUrl(teamBase, overrideDate);
   const indMonthlyLink = preserveDeadlineOnUrl(withClientReference(CHECKOUT_LINKS.INDIVIDUAL_FOUNDING_MONTHLY), overrideDate);
   const teamMonthlyLink = preserveDeadlineOnUrl(withClientReference(CHECKOUT_LINKS.TEAM_FOUNDING_MONTHLY), overrideDate);
+  useEffect(() => {
+    void fetch(`${import.meta.env.BASE_URL}api/checkout-events`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        kind: "offer_view",
+        path: window.location.pathname,
+        deadline: new URLSearchParams(window.location.search).get("d"),
+      }),
+      keepalive: true,
+    }).catch(() => undefined);
+  }, []);
+  const trackPlan = (plan: string) => {
+    void fetch(`${import.meta.env.BASE_URL}api/checkout-events`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        kind: "plan_click",
+        path: window.location.pathname,
+        plan,
+        deadline: new URLSearchParams(window.location.search).get("d"),
+      }),
+      keepalive: true,
+    }).catch(() => undefined);
+  };
 
   const individualFeatures = founding
     ? [
@@ -146,6 +172,7 @@ export function PricingContent({
 
             <a
               href={indLink}
+              onClick={() => trackPlan(founding ? "individual-founding" : "individual")}
               target="_blank"
               rel="noopener noreferrer"
               className="group w-full inline-flex items-center justify-center gap-2 bg-primary text-primary-foreground px-6 py-4 sm:py-5 text-lg font-serif font-bold hover:bg-primary/90 transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5"
@@ -215,6 +242,7 @@ export function PricingContent({
 
             <a
               href={teamLink}
+              onClick={() => trackPlan(founding ? "team-founding" : "team")}
               target="_blank"
               rel="noopener noreferrer"
               className="group w-full inline-flex items-center justify-center gap-2 bg-secondary text-secondary-foreground px-6 py-4 sm:py-5 text-lg font-serif font-bold hover:bg-border transition-all border border-border"
