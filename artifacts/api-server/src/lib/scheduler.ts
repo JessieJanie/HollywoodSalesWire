@@ -20,6 +20,7 @@ import { executeBriefSend, executePaidSend } from "./sendWire";
 import { SCHEDULED_SEND_SEEDS } from "./scheduledSeeds";
 import { deliverReportsToPendingMembers, resetStaleReportLeases } from "./members";
 import { runWeeklyResearch, currentWeekKey } from "./wireResearch";
+import { tickDeliveryReliability } from "./deliveryWatch";
 import { FROM_ADDRESS, SEQUENCE, SITE_URL } from "./emailSequence";
 import { deadlineLabel } from "./foundingDeadline";
 import { resendRequest } from "./resend";
@@ -745,6 +746,11 @@ async function notifyColdPipelineIssue(reason: string): Promise<void> {
 }
 
 async function tick(): Promise<void> {
+  try {
+    await tickDeliveryReliability();
+  } catch (err) {
+    logger.error({ err }, "delivery-reliability tick failed");
+  }
   try {
     await tickPendingEmails();
   } catch (err) {

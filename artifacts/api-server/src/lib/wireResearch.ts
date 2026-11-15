@@ -1,5 +1,5 @@
 import { desc, eq, and, ne, sql } from "drizzle-orm";
-import { db, wireRunsTable, researchPagesTable, socialDraftsTable } from "@workspace/db";
+import { db, wireRunsTable, researchPagesTable, socialDraftsTable, type WireRun } from "@workspace/db";
 import { skimRead, skimReadJs, skimFilmIncentives, skimStudioJobs, skimEntityFormations } from "./skim";
 import { draftFreeEdition } from "./freeEdition";
 import { normalizeWireDateline, wirePublicationDate } from "./wireDateline";
@@ -8,6 +8,7 @@ import { claimSocialDraft } from "./socialDrafts";
 import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
 import { logger } from "./logger";
+import { RESEARCH_RUN_TIMEOUT_MS, RUN_TIMEOUT_ERROR } from "./deliveryReliability";
 import {
   REGULAR_RATE_YR,
   TEAM_REGULAR_RATE_YR,
@@ -305,40 +306,70 @@ export async function runWeeklyResearch(
   weekKeyOverride?: string,
 ): Promise<{ started: boolean; reason?: string }> {
   if (runInFlight) return { started: false, reason: "A run is already in progress." };
+  runInFlight = true;
   // Only the current or next week may be targeted — the override exists so a
   // manual weekend run can prepare Monday's Wire early (the unique week_key
   // then makes Monday's scheduled run a no-op; nothing is bought twice).
   const weekKey =
     weekKeyOverride && weekKeyOverride === nextWeekKey() ? weekKeyOverride : currentWeekKey();
 
-  // Atomic claim: the unique index on week_key is the distributed lock.
-  const inserted = await db
-    .insert(wireRunsTable)
-    .values({ weekKey, status: "running", trigger })
-    .onConflictDoNothing({ target: wireRunsTable.weekKey })
-    .returning();
-  let run = inserted[0];
-  if (!run) {
-    if (trigger === "schedule") return { started: false, reason: "This week's run already exists." };
-    // Manual retry may only take over a FAILED run (atomically) — a ready
-    // draft is never silently re-bought.
-    const took = await db
-      .update(wireRunsTable)
-      .set({ status: "running", trigger, startedAt: new Date(), finishedAt: null, error: null })
-      .where(and(eq(wireRunsTable.weekKey, weekKey), eq(wireRunsTable.status, "failed")))
+  let run: WireRun | undefined;
+  try {
+    // Atomic claim: the unique index on week_key is the distributed lock.
+    const inserted = await db
+      .insert(wireRunsTable)
+      .values({ weekKey, status: "running", trigger })
+      .onConflictDoNothing({ target: wireRunsTable.weekKey })
       .returning();
-    if (!took[0]) {
-      return {
-        started: false,
-        reason: "This week's draft already exists or is still being researched.",
-      };
+    run = inserted[0];
+    if (!run) {
+      if (trigger === "schedule") {
+        runInFlight = false;
+        return { started: false, reason: "This week's run already exists." };
+      }
+      // Manual retry may only take over a FAILED run (atomically) — a ready
+      // draft is never silently re-bought. stall bookkeeping lives in
+      // publisher_alerts, so this reset must not clear that record.
+      const took = await db
+        .update(wireRunsTable)
+        .set({ status: "running", trigger, startedAt: new Date(), finishedAt: null, error: null })
+        .where(and(eq(wireRunsTable.weekKey, weekKey), eq(wireRunsTable.status, "failed")))
+        .returning();
+      if (!took[0]) {
+        runInFlight = false;
+        return {
+          started: false,
+          reason: "This week's draft already exists or is still being researched.",
+        };
+      }
+      run = took[0];
+      await db.delete(researchPagesTable).where(eq(researchPagesTable.runId, run.id));
     }
-    run = took[0];
-    await db.delete(researchPagesTable).where(eq(researchPagesTable.runId, run.id));
+  } catch (err) {
+    runInFlight = false;
+    throw err;
   }
 
+  if (!run) {
+    runInFlight = false;
+    return { started: false, reason: "Could not claim a research run." };
+  }
+  const activeRun = run;
+
   // Fire-and-forget the heavy work; callers get an immediate answer.
+  // A hung fetch cannot leave the row in `running`: the timer closes it, and
+  // the success write only lands if the row is still `running`.
+  const timeout = setTimeout(() => {
+    void db
+      .update(wireRunsTable)
+      .set({ status: "failed", finishedAt: new Date(), error: RUN_TIMEOUT_ERROR })
+      .where(and(eq(wireRunsTable.id, activeRun.id), eq(wireRunsTable.status, "running")))
+      .catch((err) => {
+        logger.error({ err, runId: activeRun.id }, "weekly research: timeout close failed");
+      });
+  }, RESEARCH_RUN_TIMEOUT_MS);
   void (async () => {
+    const run = activeRun;
     try {
       logger.info({ runId: run.id, weekKey, trigger }, "weekly research: starting");
 
@@ -650,7 +681,7 @@ export async function runWeeklyResearch(
       // 6. Draft the free edition from the paid draft.
       const free = await draftFreeEdition(wireMarkdown);
 
-      await db
+      const saved = await db
         .update(wireRunsTable)
         .set({
           status: "ready",
@@ -666,7 +697,12 @@ export async function runWeeklyResearch(
             fetchedAt: p.fetchedAt,
           })),
         })
-        .where(eq(wireRunsTable.id, run.id));
+        .where(and(eq(wireRunsTable.id, run.id), eq(wireRunsTable.status, "running")))
+        .returning({ id: wireRunsTable.id });
+      if (saved.length === 0) {
+        logger.warn({ runId: run.id }, "weekly research: finished after the run was already closed — draft not saved over the close");
+        return;
+      }
 
       if (pendingVoices.length > 0) {
         await markIndustryVoicesUsed(pendingVoices.map((v) => v.id), weekKey);
@@ -751,12 +787,13 @@ export async function runWeeklyResearch(
       await db
         .update(wireRunsTable)
         .set({ status: "failed", finishedAt: new Date(), error: msg })
-        .where(eq(wireRunsTable.id, run.id));
+        .where(and(eq(wireRunsTable.id, run.id), eq(wireRunsTable.status, "running")));
       await notify(
         "Monday research run FAILED — action needed",
         `Karilyn,\n\nThis week's automatic research run failed with:\n\n${msg}\n\nOpen your publisher console and press "Run research now" to retry, or reply to your agent in Replit.\n\n— Hollywood Sales Wire research desk`,
       ).catch(() => undefined);
     } finally {
+      clearTimeout(timeout);
       runInFlight = false;
     }
   })();
