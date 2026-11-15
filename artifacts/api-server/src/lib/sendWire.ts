@@ -9,7 +9,7 @@
  * recipient snapshots, and per-batch Resend idempotency keys — a double-send
  * stays impossible no matter which caller triggers it.
  */
-import { eq, sql } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import {
   db,
   emailSubscribersTable,
@@ -31,6 +31,7 @@ import {
 import { shelfUrl } from "../routes/reports";
 import { logger } from "./logger";
 import { normalizeWireDateline } from "./wireDateline";
+import { briefAlreadyArchived } from "./briefArchive";
 
 function escapeHtml(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -165,7 +166,14 @@ export async function executeBriefSend(
   }
 
   if (sent > 0) {
-    await db.insert(weeklyPreviewsTable).values({ subject, bodyText, recipientCount: sent });
+    const recent = await db
+      .select({ subject: weeklyPreviewsTable.subject, sentAt: weeklyPreviewsTable.sentAt })
+      .from(weeklyPreviewsTable)
+      .orderBy(desc(weeklyPreviewsTable.sentAt))
+      .limit(40);
+    if (!briefAlreadyArchived(recent, subject, new Date())) {
+      await db.insert(weeklyPreviewsTable).values({ subject, bodyText, recipientCount: sent });
+    }
   }
   if (failures.length > 0) {
     logger.error({ count: failures.length }, "weekly brief: some recipients failed");

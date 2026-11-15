@@ -84,4 +84,10 @@ app.use("/briefs", (req, res, next) => {
     .catch(next);
 });
 
+app.use("/sample", (req, res, next) => {
+  import("./routes/sample")
+    .then((m) => m.default(req, res, next))
+    .catch(next);
+});
+
 export default app;

@@ -13,8 +13,15 @@ import {
 import { orderPath } from "@/lib/foundingDeadline";
 import { formatPrice } from "@/lib/publicPricing";
 import { useFoundingDeadline } from "@/lib/useFoundingDeadline";
-import { motion } from "framer-motion";
+import {
+  CALIFORNIA_FIRST_YEAR_CLAIM,
+  CALIFORNIA_FIRST_YEAR_NOTE,
+  CALIFORNIA_PROGRAM_SOURCE_URL,
+  GUARANTEE_WITHOUT_MONTHLY_REPORT,
+  MEMBERSHIP_INCLUDES_LINE,
+} from "@/lib/sourcedClaims";
 import { ArrowRight, FileText, TrendingUp, ShieldCheck } from "lucide-react";
+import { motion } from "framer-motion";
 import PreviewSignup from "@/components/PreviewSignup";
 
 const FadeIn = ({ children, delay = 0 }: { children: React.ReactNode, delay?: number }) => (
@@ -66,7 +73,7 @@ export default function SalesPage() {
             The lead list your competitors bought is already dead.
           </h1>
           <p className="text-xl sm:text-2xl text-muted-foreground font-serif italic leading-relaxed text-balance">
-            170 funded productions, $6.6 billion, all on a public list. Somebody's going to call them first.
+            170 projects awarded in the first year of California&rsquo;s expanded film credit. The Film Commission, on July 7, 2026, projects $6.6 billion in direct production spending.
           </p>
         </motion.div>
 
@@ -75,13 +82,14 @@ export default function SalesPage() {
           
           <FadeIn>
             <p className="first-letter:text-7xl first-letter:font-serif first-letter:font-bold first-letter:mr-4 first-letter:float-left first-letter:text-primary first-letter:leading-[0.8] first-line:uppercase first-line:tracking-widest first-line:text-sm first-line:font-bold first-line:font-sans">
-              Three weeks ago, California's film office closed the books on the first year of its expanded tax credit: 170 productions awarded, $6.6 billion in direct production spending — including 41 new films greenlit in the final round alone.
+              {CALIFORNIA_FIRST_YEAR_CLAIM}
             </p>
             <p>
-              Not projections. Not "industry outlook." Awards. Named productions, approved budgets, published on a state list — which means every one of them is now on a clock: crew up, book stages, cut purchase orders, spend the money or lose the credit.
+              {CALIFORNIA_FIRST_YEAR_NOTE}{" "}
+              <a href={CALIFORNIA_PROGRAM_SOURCE_URL}>California Film Commission, July 7, 2026</a>.
             </p>
             <p>
-              California alone now moves three-quarters of a billion dollars a year through its expanded credit. Georgia doesn't even cap its program. And every production on those award lists is a company that is about to buy things: cameras, stages, software, localization, post, payroll, insurance — the whole supply chain of a budget with a deadline.
+              Every production on that award list is a company that is about to buy things: cameras, stages, software, localization, post, payroll, insurance — the whole supply chain of a budget with a deadline.
             </p>
           </FadeIn>
 
@@ -185,9 +193,6 @@ export default function SalesPage() {
             <p>
               The three Special Reports are valued at <strong>${REPORTS_VALUE.toLocaleString()} total</strong> — a crash course in producing your own hot leads that the $15,000-a-year databases will never reveal. Included with your membership, and yours to keep forever.
             </p>
-            <p>
-              Plus, once a month, subscribers receive <strong>The Divergence Report</strong> — the strategic layer on top of the HSW Weekly Wire. It's the deeper monthly read on where the money is moving <em>next quarter</em>, so you're positioned before the crowd shows up. The HSW Weekly Wire is your calls for the week; the Divergence Report is your plan for the season. Both come with the subscription.
-            </p>
           </FadeIn>
 
           <FadeIn>
@@ -212,7 +217,7 @@ export default function SalesPage() {
               </p>
             </div>
             <p>
-              Membership includes the weekly Wire, twelve Divergence Reports, and all three Special Reports.
+              {MEMBERSHIP_INCLUDES_LINE}
             </p>
 
             <div className="flex flex-col sm:flex-row items-start gap-6 p-8 border border-border mt-10 bg-card">
@@ -220,7 +225,7 @@ export default function SalesPage() {
               <div>
                 <h4 className="font-serif font-bold text-2xl mb-3 m-0">The 90-Day Money-Back Guarantee</h4>
                 <p className="text-base m-0 text-muted-foreground leading-relaxed">
-                  Take 90 days — roughly thirteen issues of the Wire and three Divergence Reports. If it hasn't put live, workable prospects in front of you, write me and I'll refund every penny. Everything you've received — all three Special Reports and every issue delivered — is yours to keep either way. I've kept all the risk on my side of the table.
+                  {GUARANTEE_WITHOUT_MONTHLY_REPORT}
                 </p>
               </div>
             </div>

@@ -12,9 +12,10 @@
  *   GET /briefs/:date         — one Brief (date = YYYY-MM-DD of its send)
  */
 import { Router, type Request, type Response } from "express";
-import { and, desc, gte, lt } from "drizzle-orm";
+import { desc } from "drizzle-orm";
 import { db, weeklyPreviewsTable, type WeeklyPreview } from "@workspace/db";
 import { SITE_URL } from "../lib/emailSequence";
+import { briefSitemapXml, pacificIssueDate } from "../lib/briefArchive";
 
 const router: Router = Router();
 
@@ -29,7 +30,7 @@ function escapeHtml(s: string): string {
 }
 
 function dateSlug(sentAt: Date): string {
-  return sentAt.toISOString().slice(0, 10);
+  return pacificIssueDate(sentAt);
 }
 
 function humanDate(sentAt: Date): string {
@@ -155,45 +156,21 @@ router.get("/", async (_req: Request, res: Response) => {
 
 router.get("/sitemap.xml", async (_req: Request, res: Response) => {
   const rows = await allSent();
-  const urls = [
-    `<url><loc>${SITE_URL}/briefs</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>`,
-    ...rows.map(
-      (r) =>
-        `<url><loc>${SITE_URL}/briefs/${dateSlug(r.sentAt)}</loc><lastmod>${dateSlug(r.sentAt)}</lastmod><changefreq>yearly</changefreq><priority>0.6</priority></url>`,
-    ),
-  ].join("\n");
   res
     .status(200)
     .set("Cache-Control", CACHE_HEADER)
     .type("application/xml")
-    .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls}\n</urlset>`);
+    .send(briefSitemapXml(rows, SITE_URL));
 });
 
 router.get("/:date", async (req: Request, res: Response) => {
   const dateParam = typeof req.params.date === "string" ? req.params.date : "";
-  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateParam);
-  if (!m) {
+  if (!/^(\d{4})-(\d{2})-(\d{2})$/.test(dateParam)) {
     res.status(404).type("html").send(notFound());
     return;
   }
-  const dayStart = new Date(`${m[0]}T00:00:00Z`);
-  // Reject impossible calendar dates (e.g. 2026-02-31, which Date would
-  // silently normalize to a different day and serve the wrong issue).
-  if (
-    Number.isNaN(dayStart.getTime()) ||
-    dayStart.toISOString().slice(0, 10) !== dateParam
-  ) {
-    res.status(404).type("html").send(notFound());
-    return;
-  }
-  const dayEnd = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
-  const rows = await db
-    .select()
-    .from(weeklyPreviewsTable)
-    .where(and(gte(weeklyPreviewsTable.sentAt, dayStart), lt(weeklyPreviewsTable.sentAt, dayEnd)))
-    .orderBy(desc(weeklyPreviewsTable.sentAt))
-    .limit(1);
-  const row = rows[0];
+  const rows = await allSent();
+  const row = rows.find((candidate) => pacificIssueDate(candidate.sentAt) === dateParam);
   if (!row) {
     res.status(404).type("html").send(notFound());
     return;
