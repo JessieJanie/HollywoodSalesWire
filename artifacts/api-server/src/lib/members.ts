@@ -12,14 +12,7 @@ import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
 import { reportDownloadUrl, shelfUrl } from "../routes/reports";
 import { logger } from "./logger";
-import {
-  FOUNDING_RATE_MONTHLY,
-  FOUNDING_RATE_YR,
-  REGULAR_RATE_YR,
-  TEAM_FOUNDING_RATE_MONTHLY,
-  TEAM_FOUNDING_RATE_YR,
-  TEAM_REGULAR_RATE_YR,
-} from "../../../hollywood-sales-wire/src/lib/constants.ts";
+import { STRIPE_PRICE_ID_TO_PLAN } from "../../../hollywood-sales-wire/src/lib/constants.ts";
 
 const NOTIFY_EMAIL = "hello@hollywoodsaleswire.com";
 
@@ -34,48 +27,93 @@ const VALID_PLANS = new Set([
   "founding-team",
   "individual",
   "team",
-  "member",
 ]);
 
 /**
  * Server-side mapping of known Stripe payment link IDs to plan labels.
- * These known legacy IDs remain mapped so checkouts from existing Stripe links
- * continue to receive the correct plan. Current prices and public URLs live in
- * the Hollywood Sales Wire shared constants; new links should carry metadata.plan.
+ * Keep old links mapped so existing checkouts retain their original plan.
  */
 export const PAYMENT_LINK_TO_PLAN: ReadonlyMap<string, string> = new Map([
   ["plink_1Tyebb8TDFH4346h8N2L6T6W", "founding-individual"],
   ["plink_1Tyebb8TDFH4346hhxbXDUyX", "founding-team"],
   ["plink_1TyeTj8TDFH4346hT3eAICwp", "individual"],
   ["plink_1TyeTj8TDFH4346hYySSS9GB", "team"],
+  ["plink_1Ua3KHCjWTn48pRoSFhWD7mS", "founding-individual"],
+  ["plink_1Ua3KJCjWTn48pRoxiAqrams", "founding-individual"],
+  ["plink_1Ua3KLCjWTn48pRo1lgFCn3J", "founding-team"],
+  ["plink_1Ua3KMCjWTn48pRoB7STfEdi", "founding-team"],
+  ["plink_1Ua3KOCjWTn48pRopoMrVpWA", "individual"],
+  ["plink_1Ua3KQCjWTn48pRoLsEbSISd", "team"],
+  ["plink_1UbwxDCjWTn48pRodSTyVgMg", "founding-individual"],
+  ["plink_1UbwxHCjWTn48pRo2vTDjo2p", "founding-individual"],
+  ["plink_1UbwxJCjWTn48pRoRu7nydU8", "founding-team"],
+  ["plink_1UbwxNCjWTn48pRoL9pydZLE", "founding-team"],
+  ["plink_1UbwxPCjWTn48pRonl4l9Ivn", "individual"],
+  ["plink_1UbwxSCjWTn48pRoEpNfEM68", "team"],
 ]);
 
 /**
- * Comma-separated Stripe price IDs for each plan, read from env vars.
- * Configuring these allows the webhook to identify the plan from a stable
- * price identifier rather than the charged amount (which varies with taxes and
- * discounts). Set FOUNDING_INDIVIDUAL_PRICE_IDS, FOUNDING_TEAM_PRICE_IDS,
- * INDIVIDUAL_PRICE_IDS, TEAM_PRICE_IDS as comma-separated price ID lists.
+ * Known price IDs are maintained beside the shared pricing constants so they
+ * cannot silently drift from the public checkout catalog.
  */
-function buildPriceIdMap(): Map<string, string> {
-  const map = new Map<string, string>();
-  const planEnvs: [string, string][] = [
-    ["founding-individual", "FOUNDING_INDIVIDUAL_PRICE_IDS"],
-    ["founding-team", "FOUNDING_TEAM_PRICE_IDS"],
-    ["individual", "INDIVIDUAL_PRICE_IDS"],
-    ["team", "TEAM_PRICE_IDS"],
-  ];
-  for (const [plan, envKey] of planEnvs) {
-    const raw = process.env[envKey] ?? "";
-    for (const id of raw.split(",").map((s) => s.trim()).filter(Boolean)) {
-      map.set(id, plan);
+const PRICE_ID_TO_PLAN = new Map<string, string>(Object.entries(STRIPE_PRICE_ID_TO_PLAN));
+
+/**
+ * Amounts from known current and historical catalogs. Amount-only matching is
+ * allowed only when every known catalog uses that amount for the same plan.
+ * Ambiguous amounts (including $299, $575, and $32.50) intentionally have no
+ * fallback classification.
+ */
+const KNOWN_CATALOG_AMOUNT_PLANS: ReadonlyArray<ReadonlyArray<readonly [number, string]>> = [
+  [
+    [14900, "founding-individual"],
+    [1625, "founding-individual"],
+    [29900, "founding-team"],
+    [3250, "founding-team"],
+    [28900, "individual"],
+    [57500, "team"],
+  ],
+  [
+    [29900, "founding-individual"],
+    [3250, "founding-individual"],
+    [59900, "founding-team"],
+    [6499, "founding-team"],
+    [57500, "individual"],
+    [115000, "team"],
+  ],
+  [
+    [59900, "founding-individual"],
+    [6499, "founding-individual"],
+    [119800, "founding-team"],
+    [12998, "founding-team"],
+    [115000, "individual"],
+    [230000, "team"],
+  ],
+  [
+    [199500, "founding-individual"],
+    [499500, "founding-team"],
+    [399500, "individual"],
+    [999500, "team"],
+  ],
+];
+
+function buildUnambiguousAmountMap(): Map<number, string> {
+  const plansByAmount = new Map<number, Set<string>>();
+  for (const catalog of KNOWN_CATALOG_AMOUNT_PLANS) {
+    for (const [amount, plan] of catalog) {
+      const plans = plansByAmount.get(amount) ?? new Set<string>();
+      plans.add(plan);
+      plansByAmount.set(amount, plans);
     }
   }
-  return map;
+  return new Map(
+    [...plansByAmount.entries()]
+      .filter(([, plans]) => plans.size === 1)
+      .map(([amount, plans]) => [amount, [...plans][0]]),
+  );
 }
 
-// Build once at module load; process.env values are set before the server starts.
-const PRICE_ID_TO_PLAN = buildPriceIdMap();
+const UNAMBIGUOUS_AMOUNT_TO_PLAN = buildUnambiguousAmountMap();
 
 /**
  * Determine the subscription plan from a checkout session using stable
@@ -83,19 +121,17 @@ const PRICE_ID_TO_PLAN = buildPriceIdMap();
  *
  * 1. `session.metadata.plan` — explicit plan tag set on the payment link.
  *    Most reliable: immune to pricing changes, taxes, and discounts.
- *    All four HSW payment links now have this set via the Stripe API.
+ *    All six current HSW payment links carry it, including subscription metadata.
  *
  * 2. `session.payment_link` ID matched against PAYMENT_LINK_TO_PLAN —
  *    hardcoded map of the known live payment link IDs. Stable across
  *    tax/discount and requires no session expansion; works even if the
  *    metadata.plan key is missing from an older payment link.
  *
- * 3. Line item price IDs mapped via FOUNDING_INDIVIDUAL_PRICE_IDS /
- *    FOUNDING_TEAM_PRICE_IDS / INDIVIDUAL_PRICE_IDS / TEAM_PRICE_IDS env vars
- *    (comma-separated). Stable across tax/discount; requires env config.
+ * 3. Line item price IDs mapped from the shared constants.
  *
- * 4. `amount_total` — last-resort fallback. Logs a warning because taxes or
- *    promotions can change the total and mis-classify a Founding member.
+ * 4. `amount_total` — only when that amount identifies one plan across every
+ *    known catalog; otherwise the owner is alerted and the plan stays generic.
  *
  * @returns a plan string ("founding-individual", "founding-team",
  *   "individual", "team", or "member").
@@ -114,49 +150,34 @@ export function planFromSession(session: CheckoutSessionLike): string {
     if (fromLink) return fromLink;
   }
 
-  // 3. Price ID matching via env-configured lists.
-  if (PRICE_ID_TO_PLAN.size > 0) {
-    for (const item of session.line_items?.data ?? []) {
-      const priceId = typeof item.price === "string" ? item.price : (item.price?.id ?? "");
-      const matched = PRICE_ID_TO_PLAN.get(priceId);
-      if (matched) return matched;
-    }
+  // 3. Price ID matching via the shared-code map.
+  for (const item of session.line_items?.data ?? []) {
+    const priceId = typeof item.price === "string" ? item.price : (item.price?.id ?? "");
+    const matched = PRICE_ID_TO_PLAN.get(priceId);
+    if (matched) return matched;
   }
 
-  // 4. Amount-total last resort — warns so the operator knows to configure.
+  // 4. A uniquely identifying amount may be used; an ambiguous/unknown amount
+  // must never be guessed because catalogs have reused prices across plans.
+  const amountPlan =
+    session.amount_total == null
+      ? undefined
+      : UNAMBIGUOUS_AMOUNT_TO_PLAN.get(session.amount_total);
+  if (amountPlan) return amountPlan;
+
+  const priceIds = (session.line_items?.data ?? []).map((item) =>
+    typeof item.price === "string" ? item.price : (item.price?.id ?? ""),
+  ).filter(Boolean);
   logger.warn(
-    { amountCents: session.amount_total, paymentLink: paymentLinkId },
-    "stripe: plan detected from amount_total (fallback); set metadata.plan on payment link or add link ID to PAYMENT_LINK_TO_PLAN",
+    {
+      sessionId: session.id,
+      amountCents: session.amount_total,
+      paymentLink: paymentLinkId,
+      priceIds,
+    },
+    "stripe: could not classify paid checkout from metadata, payment link, price ID, or an unambiguous amount",
   );
-  return planFromAmount(session.amount_total);
-}
-
-/** Legacy amount-based detection, used only as planFromSession fallback. */
-function planFromAmount(amountCents: number | null | undefined): string {
-  switch (amountCents) {
-    case Math.round(FOUNDING_RATE_YR * 100):
-      return "founding-individual";
-    case Math.round(FOUNDING_RATE_MONTHLY * 100):
-      return "founding-individual";
-    case Math.round(TEAM_FOUNDING_RATE_YR * 100):
-      return "founding-team";
-    case Math.round(TEAM_FOUNDING_RATE_MONTHLY * 100):
-      return "founding-team";
-    case Math.round(REGULAR_RATE_YR * 100):
-      return "individual";
-    case Math.round(TEAM_REGULAR_RATE_YR * 100):
-      return "team";
-    case 199500:
-      return "founding-individual";
-    case 499500:
-      return "founding-team";
-    case 399500:
-      return "individual";
-    case 999500:
-      return "team";
-    default:
-      return "member";
-  }
+  return "member";
 }
 
 function planLabel(plan: string): string {
@@ -742,6 +763,26 @@ export async function handleStripeEvent(event: {
 
   logger.info({ email, plan }, "stripe: paid member recorded");
 
+  const needsPlanReview = plan === "member";
+  if (needsPlanReview) {
+    try {
+      const priceIds = (session.line_items?.data ?? []).map((item) =>
+        typeof item.price === "string" ? item.price : (item.price?.id ?? ""),
+      ).filter(Boolean);
+      await resendRequest("/emails", {
+        method: "POST",
+        body: {
+          from: FROM_ADDRESS,
+          to: [NOTIFY_EMAIL],
+          subject: "Action needed: HSW purchase plan could not be identified",
+          html: `<p>A paid Stripe checkout was recorded, but its plan could not be safely identified. The member was saved under the generic plan and founding benefits were not assumed.</p><ul><li><strong>Session:</strong> ${escapeHtml(session.id ?? "unknown")}</li><li><strong>Payment link:</strong> ${escapeHtml(typeof session.payment_link === "string" ? session.payment_link : "unknown")}</li><li><strong>Amount (cents):</strong> ${escapeHtml(String(session.amount_total ?? "unknown"))}</li><li><strong>Price IDs:</strong> ${escapeHtml(priceIds.join(", ") || "none")}</li><li><strong>Email:</strong> ${escapeHtml(email)}</li></ul><p>Please verify this purchase in Stripe and update the local plan mapping if needed.</p>`,
+        },
+      });
+    } catch (err) {
+      logger.error({ err, email, sessionId: session.id }, "stripe: failed to alert publisher about unclassified purchase");
+    }
+  }
+
   // Atomically claim the one-time welcome/notification. Zero rows = another
   // delivery already claimed it (or it was already sent) — stop here.
   const claimed = await db
@@ -805,20 +846,23 @@ export async function handleStripeEvent(event: {
     return;
   }
 
-  // Publisher notification.
-  try {
-    const reportsNote =
-      " Their welcome email included the Special Report links (if all three are uploaded) — otherwise the reports go out automatically as soon as you upload the PDFs via your publisher console.";
-    await resendRequest("/emails", {
-      method: "POST",
-      body: {
-        from: FROM_ADDRESS,
-        to: [NOTIFY_EMAIL],
-        subject: `New paid member: ${email}`,
-        html: `<p>A new member just subscribed via Stripe.</p><ul><li><strong>Email:</strong> ${email}</li><li><strong>Plan:</strong> ${planLabel(plan)}</li></ul><p>Their welcome email was sent automatically, and any pending founding-offer sales emails to them were canceled.${reportsNote}</p>`,
-      },
-    });
-  } catch (err) {
-    logger.error({ err, email }, "stripe: failed to send publisher notification");
+  // Publisher notification for recognized plans. Unclassified purchases
+  // already received a dedicated action-needed alert above.
+  if (!needsPlanReview) {
+    try {
+      const reportsNote =
+        " Their welcome email included the Special Report links (if all three are uploaded) — otherwise the reports go out automatically as soon as you upload the PDFs via your publisher console.";
+      await resendRequest("/emails", {
+        method: "POST",
+        body: {
+          from: FROM_ADDRESS,
+          to: [NOTIFY_EMAIL],
+          subject: `New paid member: ${email}`,
+          html: `<p>A new member just subscribed via Stripe.</p><ul><li><strong>Email:</strong> ${email}</li><li><strong>Plan:</strong> ${planLabel(plan)}</li></ul><p>Their welcome email was sent automatically, and any pending founding-offer sales emails to them were canceled.${reportsNote}</p>`,
+        },
+      });
+    } catch (err) {
+      logger.error({ err, email }, "stripe: failed to send publisher notification");
+    }
   }
 }

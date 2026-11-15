@@ -1,31 +1,31 @@
 {
   "individual": {
     "regular": {
-      "annual": 1150
+      "annual": 289
     },
     "founding": {
-      "annual": 599,
-      "monthly": 64.99
+      "annual": 149,
+      "monthly": 16.25
     }
   },
   "team": {
     "regular": {
-      "annual": 2300,
+      "annual": 575,
       "seats": 5
     },
     "founding": {
-      "annual": 1198,
-      "monthly": 129.98,
+      "annual": 299,
+      "monthly": 32.5,
       "seats": 5
     }
   },
   "checkout_links": {
-    "INDIVIDUAL_REGULAR": "https://buy.stripe.com/bJe8wO4696qn6ET2qZ3ks0a",
-    "TEAM_REGULAR": "https://buy.stripe.com/00wbJ0dGJdSPaV94z73ks0b",
-    "INDIVIDUAL_FOUNDING": "https://buy.stripe.com/aFa9AScCF163d3h5Db3ks06",
-    "TEAM_FOUNDING": "https://buy.stripe.com/bJe00i7ilaGD8N1e9H3ks08",
-    "INDIVIDUAL_FOUNDING_MONTHLY": "https://buy.stripe.com/cNicN45adeWT4wLc1z3ks07",
-    "TEAM_FOUNDING_MONTHLY": "https://buy.stripe.com/9B6fZg1Y1cOL2oD3v33ks09"
+    "INDIVIDUAL_REGULAR": "https://buy.stripe.com/7sYdR88mp2a7e7l8Pn3ks0o",
+    "TEAM_REGULAR": "https://buy.stripe.com/eVqdR89qt9Cz6ETfdL3ks0p",
+    "INDIVIDUAL_FOUNDING": "https://buy.stripe.com/7sY7sKdGJ1639R56Hf3ks0k",
+    "TEAM_FOUNDING": "https://buy.stripe.com/5kQ00ifOR2a76ET8Pn3ks0m",
+    "INDIVIDUAL_FOUNDING_MONTHLY": "https://buy.stripe.com/eVqbJ04692a70gvfdL3ks0l",
+    "TEAM_FOUNDING_MONTHLY": "https://buy.stripe.com/eVq5kC9qteWTaV94z73ks0n"
   },
   "reports_value": 357,
   "canonical_offer_path": "/founding-offer",
@@ -33,5 +33,5 @@
   "deadline_format": "YYYY-MM-DD",
   "deadline_closes_at": "11:59 PM",
   "deadline_timezone": "America/New_York",
-  "generated_at": "2026-11-09T19:25:49.880Z"
+  "generated_at": "2026-11-15T06:43:51.589Z"
 }

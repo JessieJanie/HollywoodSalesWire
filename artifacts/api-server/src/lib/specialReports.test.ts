@@ -7,17 +7,10 @@
  * deferred to a future integration-test pass once test-database infra exists.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach } from "vitest";
 import { signMemberSlug, reportDownloadUrl, shelfUrl, verifyShelfSig } from "../routes/reports";
 import { planFromSession, PAYMENT_LINK_TO_PLAN, type CheckoutSessionLike } from "./members";
-import {
-  FOUNDING_RATE_MONTHLY,
-  FOUNDING_RATE_YR,
-  REGULAR_RATE_YR,
-  TEAM_FOUNDING_RATE_MONTHLY,
-  TEAM_FOUNDING_RATE_YR,
-  TEAM_REGULAR_RATE_YR,
-} from "../../../hollywood-sales-wire/src/lib/constants.ts";
+import { STRIPE_PRICE_ID_TO_PLAN } from "../../../hollywood-sales-wire/src/lib/constants.ts";
 
 // Provide a test secret so signMemberSlug works without a real env
 const TEST_SECRET = "test-secret-value-for-unit-tests";
@@ -130,21 +123,6 @@ describe("report entitlement policy", () => {
 // ---------------------------------------------------------------------------
 
 describe("planFromSession", () => {
-  // Save/restore env vars around each test that mutates them.
-  const savedEnv: Record<string, string | undefined> = {};
-  beforeEach(() => {
-    for (const key of ["FOUNDING_INDIVIDUAL_PRICE_IDS", "FOUNDING_TEAM_PRICE_IDS", "INDIVIDUAL_PRICE_IDS", "TEAM_PRICE_IDS"]) {
-      savedEnv[key] = process.env[key];
-      delete process.env[key];
-    }
-  });
-  afterEach(() => {
-    for (const [key, val] of Object.entries(savedEnv)) {
-      if (val === undefined) delete process.env[key];
-      else process.env[key] = val;
-    }
-  });
-
   // Helper to build a minimal session object
   function session(overrides: Partial<CheckoutSessionLike>): CheckoutSessionLike {
     return { payment_status: "paid", ...overrides };
@@ -152,7 +130,7 @@ describe("planFromSession", () => {
 
   it("metadata.plan = founding-individual is authoritative even when amount differs", () => {
     // Simulates a founding checkout with tax applied (amount differs from the
-    // current $299 annual total — amount_total-based detection would return "member").
+    // current $149 annual total — amount-only detection is not needed here.
     const result = planFromSession(
       session({ metadata: { plan: "founding-individual" }, amount_total: 34900 }),
     );
@@ -170,52 +148,52 @@ describe("planFromSession", () => {
   });
 
   it("payment_link ID identifies founding-team even with discounted amount", () => {
-    const [plinkId] = [...PAYMENT_LINK_TO_PLAN.entries()].find(([, v]) => v === "founding-team")!;
     const result = planFromSession(
-      session({ payment_link: plinkId, amount_total: 100 }), // deeply discounted
+      session({
+        payment_link: "plink_1UbwxJCjWTn48pRoRu7nydU8",
+        amount_total: 100,
+      }), // discounted $299 Team founding purchase
     );
     expect(result).toBe("founding-team");
   });
 
-  it("PAYMENT_LINK_TO_PLAN contains all four active HSW payment link IDs", () => {
-    const plans = [...PAYMENT_LINK_TO_PLAN.values()];
-    expect(plans).toContain("founding-individual");
-    expect(plans).toContain("founding-team");
-    expect(plans).toContain("individual");
-    expect(plans).toContain("team");
-    expect(PAYMENT_LINK_TO_PLAN.size).toBe(4);
+  it("classifies current Individual founding $149 by price ID", () => {
+    expect(
+      planFromSession(
+        session({
+          amount_total: 14900,
+          line_items: { data: [{ price: "price_1UbwwqCjWTn48pRoHGG6nCzB" }] },
+        }),
+      ),
+    ).toBe("founding-individual");
   });
 
-  it("falls back to amount_total when no metadata or price IDs configured", () => {
-    expect(planFromSession(session({ amount_total: Math.round(FOUNDING_RATE_YR * 100) }))).toBe("founding-individual");
-    expect(planFromSession(session({ amount_total: Math.round(FOUNDING_RATE_MONTHLY * 100) }))).toBe("founding-individual");
-    expect(planFromSession(session({ amount_total: Math.round(TEAM_FOUNDING_RATE_YR * 100) }))).toBe("founding-team");
-    expect(planFromSession(session({ amount_total: Math.round(TEAM_FOUNDING_RATE_MONTHLY * 100) }))).toBe("founding-team");
-    expect(planFromSession(session({ amount_total: Math.round(REGULAR_RATE_YR * 100) }))).toBe("individual");
-    expect(planFromSession(session({ amount_total: Math.round(TEAM_REGULAR_RATE_YR * 100) }))).toBe("team");
+  it("keeps current and Nov 9 Stripe price IDs mapped to their plans", () => {
+    expect(Object.keys(STRIPE_PRICE_ID_TO_PLAN)).toHaveLength(12);
+    expect(STRIPE_PRICE_ID_TO_PLAN.price_1UbwwqCjWTn48pRoHGG6nCzB).toBe("founding-individual");
+    expect(STRIPE_PRICE_ID_TO_PLAN.price_1UbwwzCjWTn48pRo8DqE2sZr).toBe("founding-team");
+    expect(STRIPE_PRICE_ID_TO_PLAN.price_1Ua3JkCjWTn48pRokWP3FVKs).toBe("founding-individual");
+    expect(STRIPE_PRICE_ID_TO_PLAN.price_1Ua3JnCjWTn48pRojMu5s3hA).toBe("founding-team");
   });
 
-  it("continues recognizing legacy annual payments while old links remain active", () => {
-    expect(planFromSession(session({ amount_total: 199500 }))).toBe("founding-individual");
-    expect(planFromSession(session({ amount_total: 499500 }))).toBe("founding-team");
-    expect(planFromSession(session({ amount_total: 399500 }))).toBe("individual");
-    expect(planFromSession(session({ amount_total: 999500 }))).toBe("team");
+  it("retains all legacy, Nov 9, and current payment links", () => {
+    expect(PAYMENT_LINK_TO_PLAN.size).toBe(16);
+    expect(PAYMENT_LINK_TO_PLAN.get("plink_1Ua3KHCjWTn48pRoSFhWD7mS")).toBe("founding-individual");
+    expect(PAYMENT_LINK_TO_PLAN.get("plink_1Ua3KLCjWTn48pRo1lgFCn3J")).toBe("founding-team");
+    expect(PAYMENT_LINK_TO_PLAN.get("plink_1UbwxPCjWTn48pRonl4l9Ivn")).toBe("individual");
+    expect(PAYMENT_LINK_TO_PLAN.get("plink_1UbwxSCjWTn48pRoEpNfEM68")).toBe("team");
+  });
+
+  it("does not guess when an amount belongs to multiple plans across catalogs", () => {
+    expect(planFromSession(session({ amount_total: 29900 }))).toBe("member");
+    expect(planFromSession(session({ amount_total: 57500 }))).toBe("member");
+    expect(planFromSession(session({ amount_total: 3250 }))).toBe("member");
+  });
+
+  it("uses amount fallback only when the amount is unique across known catalogs", () => {
+    expect(planFromSession(session({ amount_total: 14900 }))).toBe("founding-individual");
+    expect(planFromSession(session({ amount_total: 28900 }))).toBe("individual");
     expect(planFromSession(session({ amount_total: 999 }))).toBe("member");
-  });
-
-  it("amount_total with current founding price + tax falls back to member without metadata (demonstrates risk)", () => {
-    // A $299 plan with $50 tax produces amount_total=34900, which is not in the
-    // hardcoded base-price list. Metadata remains authoritative for taxed totals.
-    // Without metadata, amount fallback returns "member" — the wrong plan.
-    // This test documents why metadata/price-ID config is required for tax safety.
-    const resultWithoutMetadata = planFromSession(session({ amount_total: 34900 }));
-    expect(resultWithoutMetadata).toBe("member"); // BUG when no metadata configured
-
-    // WITH metadata, the plan is correct regardless of the taxed amount.
-    const resultWithMetadata = planFromSession(
-      session({ metadata: { plan: "founding-individual" }, amount_total: 34900 }),
-    );
-    expect(resultWithMetadata).toBe("founding-individual"); // correct
   });
 });
 

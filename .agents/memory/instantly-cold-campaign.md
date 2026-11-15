@@ -37,7 +37,7 @@ Copy source: `marketing/cold-campaign-draft1.txt` (publisher-locked; update [DAT
 
 ## Rolling deadline offer rule
 Every new cold campaign batch gets a fresh deadline = the day E5 sends (Day 7 from lead-add date).
-Offer uses the current founding prices ($299/year or $32.50/month individual; $599/year or $64.99/month Team) plus 3 free Special Reports.
+Offer uses the current founding prices ($149/year or $16.25/month individual; $299/year or $32.50/month Team) plus 3 free Special Reports. Regular rates are $289/year individual and $575/year Team.
 When creating a new batch: replace [DATE TOKEN] in all 5 emails with the actual E5 date before loading into Instantly.
 
 ## CTA links must land on a founding-verified page
