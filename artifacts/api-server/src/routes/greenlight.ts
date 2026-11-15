@@ -4,13 +4,14 @@
  */
 import { Router, type Request, type Response } from "express";
 import { timingSafeEqual } from "node:crypto";
-import { desc } from "drizzle-orm";
+import { desc, eq, inArray } from "drizzle-orm";
 import {
   db,
   checkoutEventsTable,
   productionsTable,
   spendReportDraftsTable,
   subscriberPreferencesTable,
+  watchEventsTable,
   watchlistTable,
 } from "@workspace/db";
 import { SITE_URL } from "../lib/emailSequence";
@@ -110,6 +111,23 @@ function shelfEmail(req: Request): string | null {
   if (email && typeof sig === "string" && verifyShelfSig(email, sig)) return email;
   return verifyShelfSession(req.cookies?.[SHELF_COOKIE]);
 }
+
+router.get("/api/board/watches", async (req: Request, res: Response) => {
+  const email = shelfEmail(req);
+  if (!email) {
+    res.status(403).json({ error: "Shelf sign-in required" });
+    return;
+  }
+  const watches = await db.select().from(watchlistTable).where(eq(watchlistTable.email, email));
+  const ids = watches.map((watch) => watch.id);
+  const events = ids.length
+    ? await db.select().from(watchEventsTable).where(inArray(watchEventsTable.watchId, ids))
+    : [];
+  res.json({
+    watches: watches.map((watch) => ({ id: watch.id, label: watch.label })),
+    events: events.map((event) => ({ kind: event.kind, detail: event.detail, sourceUrl: event.sourceUrl, seenAt: event.seenAt })),
+  });
+});
 
 router.get("/api/board/export.csv", async (req: Request, res: Response) => {
   const email = shelfEmail(req);

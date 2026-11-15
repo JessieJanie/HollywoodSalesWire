@@ -1,5 +1,5 @@
 import { and, eq } from "drizzle-orm";
-import { db, productionsTable } from "@workspace/db";
+import { db, productionsTable, watchEventsTable, watchlistTable } from "@workspace/db";
 import {
   CA_APPROVED_URL,
   NYC_PERMITS_URL,
@@ -8,6 +8,7 @@ import {
   nycFreshness,
   parseCaCells,
   parseNycPermit,
+  watchHits,
   type ProductionInput,
 } from "./greenlightBoard";
 
@@ -179,6 +180,20 @@ export async function refreshGreenlightBoard(fetchImpl: typeof fetch = fetch, no
           sources: merged.sources,
         },
       });
+    const previousUrls = new Set((existing && Array.isArray(existing.sources) ? existing.sources : []).map((source) => (source as { url?: string }).url));
+    const added = merged.sources.some((source) => !previousUrls.has(source.url));
+    if (!existing || added) {
+      const watches = await db.select().from(watchlistTable);
+      const kind = incoming.jurisdiction === "NYC" ? "permit" : "registry";
+      const hits = watchHits(
+        watches.map((watch) => ({ id: watch.id, titleKey: watch.titleKey, companyKey: watch.companyKey })),
+        merged,
+        kind,
+      );
+      for (const hit of hits) {
+        await db.insert(watchEventsTable).values(hit);
+      }
+    }
   }
   return ingestFetchedSources(pages, now).attempts;
 }
