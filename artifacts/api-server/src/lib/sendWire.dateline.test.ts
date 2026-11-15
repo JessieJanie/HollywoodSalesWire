@@ -18,7 +18,15 @@ vi.mock("@workspace/db", () => {
       select: () => ({
         from: (table: unknown) => table === paid
           ? { where: async () => state.claim ? [state.claim] : [] }
-          : Promise.resolve([{ id: 1, email: "member@example.com", stripeSubscriptionId: null }]),
+          : Promise.resolve([{
+              id: 1,
+              email: "member@example.com",
+              stripeSubscriptionId: "sub_active",
+              stripeCustomerId: "cus_active",
+            }]),
+      }),
+      execute: async () => ({
+        rows: [{ id: "sub_active", status: "active", customer: "cus_active" }],
       }),
       insert: () => ({
         values: (value: any) => {

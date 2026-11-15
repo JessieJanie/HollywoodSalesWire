@@ -2,7 +2,9 @@ import { describe, it, expect } from "vitest";
 import {
   activeRecipients,
   batchIdempotencyKey,
+  membershipMismatchDigest,
   planPaidSend,
+  reconcileMembers,
   sendPaidWireBatches,
   type PaidRecipient,
   type BatchEmail,
@@ -20,16 +22,19 @@ describe("activeRecipients", () => {
       [member(1, "sub_active"), member(2, "sub_canceled"), member(3, null)],
       new Set(["sub_canceled"]),
     );
-    expect(out.map((m) => m.id)).toEqual([1, 3]);
+    expect(out.map((m) => m.id)).toEqual([1]);
   });
 
-  it("keeps one-time purchasers (no subscription id)", () => {
-    const out = activeRecipients([member(9, null)], new Set(["whatever"]));
-    expect(out).toHaveLength(1);
+  it("does not treat a missing subscription id as active", () => {
+    const out = activeRecipients([member(9, null)], new Set());
+    expect(out).toHaveLength(0);
   });
 
   it("sorts deterministically by id so retry batches are stable", () => {
-    const out = activeRecipients([member(5), member(2), member(9)], new Set());
+    const out = activeRecipients(
+      [member(5, "sub_5"), member(2, "sub_2"), member(9, "sub_9")],
+      new Set(),
+    );
     expect(out.map((m) => m.id)).toEqual([2, 5, 9]);
   });
 });
@@ -146,5 +151,55 @@ describe("sendPaidWireBatches", () => {
     });
     expect(outcome.sent).toBe(0);
     expect(outcome.failedEmails).toEqual(["m1@example.com"]);
+  });
+});
+
+describe("reconcileMembers", () => {
+  const member = (
+    id: number,
+    stripeSubscriptionId: string | null,
+    stripeCustomerId: string | null = null,
+  ) => ({
+    id,
+    email: `m${id}@example.com`,
+    stripeSubscriptionId,
+    stripeCustomerId,
+  });
+
+  it("sends only when the subscription id exists and Stripe says it is live", () => {
+    const { recipients, mismatches } = reconcileMembers(
+      [member(2, "sub_canceled", "cus_2"), member(1, "sub_ok", "cus_1"), member(3, null, null)],
+      [
+        { id: "sub_ok", status: "active", customerId: "cus_1" },
+        { id: "sub_canceled", status: "canceled", customerId: "cus_2" },
+      ],
+    );
+    expect(recipients.map((r) => r.id)).toEqual([1]);
+    expect(mismatches.map((m) => m.kind)).toEqual(["inactive_stripe_status"]);
+  });
+
+  it("does not send a member with no subscription id, and alerts when Stripe has a live one", () => {
+    const { recipients, mismatches } = reconcileMembers(
+      [member(4, null, "cus_live")],
+      [{ id: "sub_live", status: "trialing", customerId: "cus_live" }],
+    );
+    expect(recipients).toEqual([]);
+    expect(mismatches[0]?.kind).toBe("missing_subscription_id");
+    expect(membershipMismatchDigest(mismatches)).toContain("sub_live");
+  });
+
+  it("alerts when the local subscription id is missing from Stripe", () => {
+    const { recipients, mismatches } = reconcileMembers(
+      [member(5, "sub_gone", "cus_5")],
+      [],
+    );
+    expect(recipients).toEqual([]);
+    expect(mismatches[0]?.kind).toBe("subscription_missing_in_stripe");
+  });
+
+  it("does not alert for a complimentary member with no Stripe customer", () => {
+    const { recipients, mismatches } = reconcileMembers([member(6, null, null)], []);
+    expect(recipients).toEqual([]);
+    expect(membershipMismatchDigest(mismatches)).toBeNull();
   });
 });

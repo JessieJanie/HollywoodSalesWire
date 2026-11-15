@@ -21,11 +21,12 @@ import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
 import { currentWeekKey } from "./wireResearch";
 import {
-  INACTIVE_SUB_STATUSES,
-  activeRecipients,
+  membershipMismatchDigest,
   planPaidSend,
+  reconcileMembers,
   sendPaidWireBatches,
   type PaidRecipient,
+  type StripeSubscriptionSnapshot,
 } from "./paidWire";
 import { shelfUrl } from "../routes/reports";
 import { logger } from "./logger";
@@ -173,27 +174,55 @@ export async function executeBriefSend(
 }
 
 /**
- * Members whose Stripe subscription is in an inactive state (canceled, unpaid,
- * …) are excluded; Stripe's synced `stripe.subscriptions` table is the source
- * of truth. Members without a subscription id (one-time purchases) stay in.
+ * A member is active only when Stripe's synced subscription row says so.
+ * No subscription id is not active. Mismatches are logged and, in
+ * production, emailed once per distinct digest so a restarted process can
+ * report a new disagreement without mailing the same list on every tick.
  */
+let lastMismatchDigest: string | null = null;
+
 export async function paidRecipients(): Promise<PaidRecipient[]> {
   const members = await db
     .select({
       id: membersTable.id,
       email: membersTable.email,
       stripeSubscriptionId: membersTable.stripeSubscriptionId,
+      stripeCustomerId: membersTable.stripeCustomerId,
     })
     .from(membersTable);
-  const subIds = members.map((m) => m.stripeSubscriptionId).filter((s): s is string => !!s);
-  let inactive = new Set<string>();
-  if (subIds.length > 0) {
-    const rows = await db.execute(
-      sql`select id from stripe.subscriptions where id = any(${subIds}) and status = any(${[...INACTIVE_SUB_STATUSES]})`,
-    );
-    inactive = new Set((rows.rows as { id: string }[]).map((r) => r.id));
+  const rows = await db.execute(
+    sql`select id, status, customer from stripe.subscriptions`,
+  );
+  const subscriptions: StripeSubscriptionSnapshot[] = (rows.rows as { id: string; status: string; customer: string | null }[]).map(
+    (row) => ({
+      id: row.id,
+      status: row.status,
+      customerId: row.customer,
+    }),
+  );
+  const { recipients, mismatches } = reconcileMembers(members, subscriptions);
+  const digest = membershipMismatchDigest(mismatches);
+  if (digest && digest !== lastMismatchDigest) {
+    lastMismatchDigest = digest;
+    logger.error({ count: mismatches.length }, "membership: Stripe status does not match the member rows");
+    if (process.env.REPLIT_DEPLOYMENT === "1") {
+      try {
+        await resendRequest("/emails", {
+          method: "POST",
+          body: {
+            from: FROM_ADDRESS,
+            to: ["hello@hollywoodsaleswire.com"],
+            subject: "Membership list does not match Stripe",
+            text: `Karilyn,\n\nThese member rows disagree with the synced Stripe subscriptions. None of them were treated as active for the Tuesday issue.\n\n${digest}\n\n— Hollywood Sales Wire`,
+          },
+        });
+      } catch (err) {
+        lastMismatchDigest = null;
+        logger.error({ err }, "membership: mismatch alert failed");
+      }
+    }
   }
-  return activeRecipients(members, inactive);
+  return recipients;
 }
 
 export type PaidSendResult =

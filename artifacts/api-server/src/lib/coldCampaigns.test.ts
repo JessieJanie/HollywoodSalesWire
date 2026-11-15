@@ -117,14 +117,16 @@ describe("validateColdLead", () => {
 });
 
 describe("getColdCampaignContactCap", () => {
+  // Anchors are 10 then 15. Later weeks grow 40% and round, holding at the
+  // mailbox ceiling of 40 documented in coldCampaigns.ts.
   it.each([
     ["2026-09-08T15:00:00Z", 10],
     ["2026-09-10T15:00:00Z", 10],
     ["2026-09-15T15:00:00Z", 15],
-    ["2026-09-22T15:00:00Z", 20],
-    ["2026-09-29T15:00:00Z", 25],
-    ["2026-10-06T15:00:00Z", 30],
-    ["2027-01-05T16:00:00Z", 30],
+    ["2026-09-22T15:00:00Z", 21],
+    ["2026-09-29T15:00:00Z", 29],
+    ["2026-10-06T15:00:00Z", 40],
+    ["2027-01-05T16:00:00Z", 40],
   ])("caps campaign date %s at %i contacts", (date, expected) => {
     expect(getColdCampaignContactCap(new Date(date))).toBe(expected);
   });

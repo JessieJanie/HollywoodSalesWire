@@ -5,8 +5,10 @@ import { INACTIVE_SUB_STATUSES } from "./paidWire";
 /**
  * Is this member currently entitled to NEW paid content (the latest HSW
  * Weekly Wire)? Mirrors the weekly paid-send rule: members with no Stripe
- * subscription id (comp / one-time founding purchases) stay entitled; a
- * subscription in an inactive state means no new paid content.
+ * subscription id (comp / one-time founding purchases) stay entitled to the
+ * Shelf's latest-issue fallback. The Tuesday send in sendWire.ts is stricter:
+ * no subscription id is not active there, and Stripe status is reconciled
+ * before anyone is mailed. Do not copy this Shelf rule into the send path.
  *
  * NOTE: this is deliberately NOT used by the Special Report download route or
  * for historical Shelf issues — those follow the "yours to keep" policy
