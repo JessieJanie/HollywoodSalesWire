@@ -1,7 +1,11 @@
 import { createHash } from "node:crypto";
 import { runMigrations } from "stripe-replit-sync";
 import type Stripe from "stripe";
-import { getStripeClientContext, type StripeCredentialMode } from "./stripeClient";
+import {
+  getStripeClientContext,
+  getStripeWebhookSecret,
+  type StripeCredentialMode,
+} from "./stripeClient";
 import {
   EXPECTED_STRIPE_ACCOUNT_ID,
   EXPECTED_STRIPE_WEBHOOK_ID,
@@ -61,6 +65,14 @@ export async function verifyExpectedStripeWebhook(
       ok: false,
       accountId: account.id,
       reason: `Webhook ${webhook.id} is ${webhook.status}; expected enabled.`,
+    };
+  }
+
+  if (!getStripeWebhookSecret()?.startsWith("whsec_")) {
+    return {
+      ok: false,
+      accountId: account.id,
+      reason: `STRIPE_WEBHOOK_SECRET is missing or malformed, so events from ${EXPECTED_STRIPE_WEBHOOK_ID} will be rejected and paid signups won't be fulfilled. Add that endpoint's signing secret (Stripe Dashboard > Developers > Webhooks) as the STRIPE_WEBHOOK_SECRET app secret and republish.`,
     };
   }
 

@@ -15,13 +15,18 @@ import {
 } from "./stripeInit";
 
 vi.mock("stripe-replit-sync", () => ({ runMigrations: vi.fn() }));
-vi.mock("./stripeClient", () => ({ getStripeClientContext: vi.fn() }));
+vi.mock("./stripeClient", () => ({
+  getStripeClientContext: vi.fn(),
+  getStripeWebhookSecret: () => process.env.STRIPE_WEBHOOK_SECRET,
+}));
 vi.mock("./resend", () => ({ resendRequest: vi.fn() }));
 
 const originalDatabaseUrl = process.env.DATABASE_URL;
+const originalWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 beforeEach(() => {
   process.env.DATABASE_URL = "postgres://stripe-init-test";
+  process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_fixture";
   vi.mocked(runMigrations).mockResolvedValue(undefined);
   vi.mocked(resendRequest).mockResolvedValue({});
 });
@@ -29,6 +34,8 @@ beforeEach(() => {
 afterEach(() => {
   if (originalDatabaseUrl === undefined) delete process.env.DATABASE_URL;
   else process.env.DATABASE_URL = originalDatabaseUrl;
+  if (originalWebhookSecret === undefined) delete process.env.STRIPE_WEBHOOK_SECRET;
+  else process.env.STRIPE_WEBHOOK_SECRET = originalWebhookSecret;
   vi.clearAllMocks();
 });
 
@@ -151,5 +158,16 @@ describe("read-only Stripe startup webhook verification", () => {
     expect(keys[0]).toMatch(/^stripe-webhook-verification-[0-9a-f]{32}$/);
     expect(keys[1]).toBe(keys[0]);
     expect(stripeAlertIdempotencyKey("other reason")).not.toBe(keys[0]);
+  });
+
+  it("fails verification when the webhook signing secret is missing", async () => {
+    delete process.env.STRIPE_WEBHOOK_SECRET;
+    const { stripe, writes } = stripeMock();
+
+    const result = await verifyExpectedStripeWebhook(stripe, "live");
+
+    expect(result).toMatchObject({ ok: false, accountId: EXPECTED_STRIPE_ACCOUNT_ID });
+    expect(result.ok ? "" : result.reason).toMatch(/STRIPE_WEBHOOK_SECRET/);
+    expect(writes.create).not.toHaveBeenCalled();
   });
 });
