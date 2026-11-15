@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { runMigrations } from "stripe-replit-sync";
 import type Stripe from "stripe";
 import { getStripeClientContext, type StripeCredentialMode } from "./stripeClient";
@@ -75,10 +76,25 @@ function escapeHtml(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
+/**
+ * Autoscale starts a fresh API instance on every cold start, and each start
+ * runs this check. Resend keeps an idempotency key for 24 hours, so keying the
+ * alert on the failure reason sends one email per distinct problem per day
+ * instead of one per cold start.
+ */
+export function stripeAlertIdempotencyKey(reason: string): string {
+  const fingerprint = createHash("sha256")
+    .update(`${EXPECTED_STRIPE_ACCOUNT_ID}|${EXPECTED_STRIPE_WEBHOOK_ID}|${reason}`)
+    .digest("hex")
+    .slice(0, 32);
+  return `stripe-webhook-verification-${fingerprint}`;
+}
+
 async function alertOwner(reason: string): Promise<void> {
   try {
     await resendRequest("/emails", {
       method: "POST",
+      headers: { "Idempotency-Key": stripeAlertIdempotencyKey(reason) },
       body: {
         from: FROM_ADDRESS,
         to: [OWNER_EMAIL],

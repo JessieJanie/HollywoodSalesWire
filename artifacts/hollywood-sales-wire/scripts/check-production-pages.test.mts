@@ -6,6 +6,7 @@ import {
   DEFAULT_ORIGIN,
   HOME_TITLE,
   checkPage,
+  checkPageWithRetry,
   notifyPublisher,
   publisherAlertSuccessMessage,
   resolveOrigin,
@@ -20,6 +21,7 @@ const expected: PageExpectation = {
 };
 const canonicalOrigin = new URL('https://canonical.example');
 let server: Server;
+let slowFirstHits = 0;
 let origin: URL;
 
 function html({
@@ -54,6 +56,11 @@ before(async () => {
         break;
       case '/home-shell':
         response.end(html({ title: HOME_TITLE }));
+        break;
+      case '/slow-first':
+        slowFirstHits += 1;
+        if (slowFirstHits === 1) setTimeout(() => response.end(validHtml), 200);
+        else response.end(validHtml);
         break;
       case '/timeout':
         setTimeout(() => response.end(validHtml), 200);
@@ -118,6 +125,20 @@ test('reports a home-page shell on an inner route and accepts route-specific HTM
 test('reports request timeouts and accepts timely responses', async () => {
   await assert.rejects(failuresFor('/timeout', expected, 25), /aborted|timeout/i);
   await assert.doesNotReject(failuresFor('/pass'));
+});
+
+test('retries a cold-start timeout before reporting it, and gives up after the last attempt', async () => {
+  slowFirstHits = 0;
+  const options = { attempts: 2, retryDelayMs: 1, timeoutMs: 50 };
+  assert.deepEqual(
+    await checkPageWithRetry({ ...expected, path: '/slow-first' }, origin, canonicalOrigin, options),
+    [],
+  );
+  assert.equal(slowFirstHits, 2);
+  await assert.rejects(
+    checkPageWithRetry({ ...expected, path: '/timeout' }, origin, canonicalOrigin, options),
+    /after 2 attempts/,
+  );
 });
 
 test('verified production uses the fixed origin without an override', () => {
@@ -212,6 +233,11 @@ test('configured production server gates the live check behind crawler fixtures'
   assert.match(
     productionServer,
     /spawn\('pnpm', \['run', 'check:production:publish'\]/,
+  );
+  assert.doesNotMatch(
+    productionServer,
+    /stop\(1\)/,
+    'a failed crawler check must not take down the production web server',
   );
   assert.equal(
     packageJson.scripts['check:production'],

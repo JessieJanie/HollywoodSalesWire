@@ -157,8 +157,9 @@ void (async () => {
     await runCrawlerCheck();
     console.log('Post-publish crawler verification passed.');
   } catch (error) {
+    // Keep serving the site. The check emails the publisher on a real failure;
+    // exiting here would take down a healthy production instance.
     console.error('POST-PUBLISH CRAWLER VERIFICATION FAILED');
     console.error(error instanceof Error ? error.message : String(error));
-    stop(1);
   }
 })();
