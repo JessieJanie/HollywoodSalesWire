@@ -12,16 +12,46 @@ export const INACTIVE_SUB_STATUSES = [
   "paused",
 ] as const;
 
+/**
+ * Statuses Stripe itself still treats as a live subscription. Anything else,
+ * including a missing row, is not active.
+ */
+export const ACTIVE_SUB_STATUSES = ["active", "trialing", "past_due"] as const;
+
+export function isActiveStripeStatus(status: string): boolean {
+  return (ACTIVE_SUB_STATUSES as readonly string[]).includes(status);
+}
+
 export interface PaidRecipient {
   id: number;
   email: string;
   stripeSubscriptionId: string | null;
 }
 
+export interface MemberForReconcile {
+  id: number;
+  email: string;
+  stripeSubscriptionId: string | null;
+  stripeCustomerId: string | null;
+}
+
+export interface StripeSubscriptionSnapshot {
+  id: string;
+  status: string;
+  customerId: string | null;
+}
+
+export interface MembershipMismatch {
+  email: string;
+  kind: "missing_subscription_id" | "subscription_missing_in_stripe" | "inactive_stripe_status";
+  detail: string;
+}
+
 /**
- * Members with a subscription in an inactive state are excluded. Members with
- * no subscription id (e.g. one-time founding purchases) stay entitled.
- * Returns recipients sorted by id so retry batches are deterministic.
+ * Members with a subscription in an inactive state are excluded. A member
+ * with no Stripe subscription id is not active, including complimentary and
+ * one-time rows. Returns recipients sorted by id so retry batches are
+ * deterministic.
  */
 export function activeRecipients(
   members: PaidRecipient[],
@@ -29,9 +59,75 @@ export function activeRecipients(
 ): PaidRecipient[] {
   return members
     .filter(
-      (m) => !m.stripeSubscriptionId || !inactiveSubscriptionIds.has(m.stripeSubscriptionId),
+      (m) => Boolean(m.stripeSubscriptionId) && !inactiveSubscriptionIds.has(m.stripeSubscriptionId as string),
     )
     .sort((a, b) => a.id - b.id);
+}
+
+/**
+ * Stripe's synced subscription rows are the source of truth. A local member
+ * is active only when their subscription id is present and that row's status
+ * is active, trialing, or past_due. Disagreements are returned for the
+ * publisher alert; they are not guessed into the send list.
+ */
+export function reconcileMembers(
+  members: MemberForReconcile[],
+  subscriptions: StripeSubscriptionSnapshot[],
+): { recipients: PaidRecipient[]; mismatches: MembershipMismatch[] } {
+  const byId = new Map(subscriptions.map((sub) => [sub.id, sub]));
+  const activeByCustomer = new Map<string, StripeSubscriptionSnapshot>();
+  for (const sub of subscriptions) {
+    if (sub.customerId && isActiveStripeStatus(sub.status)) activeByCustomer.set(sub.customerId, sub);
+  }
+
+  const mismatches: MembershipMismatch[] = [];
+  const recipients: PaidRecipient[] = [];
+  for (const member of members) {
+    if (!member.stripeSubscriptionId) {
+      const found = member.stripeCustomerId ? activeByCustomer.get(member.stripeCustomerId) : undefined;
+      if (found) {
+        mismatches.push({
+          email: member.email,
+          kind: "missing_subscription_id",
+          detail: `Stripe subscription ${found.id} is ${found.status}, but the member row has no subscription id, so the Tuesday issue will not include them.`,
+        });
+      }
+      continue;
+    }
+    const sub = byId.get(member.stripeSubscriptionId);
+    if (!sub) {
+      mismatches.push({
+        email: member.email,
+        kind: "subscription_missing_in_stripe",
+        detail: `Subscription ${member.stripeSubscriptionId} is not in the synced Stripe table, so this member is not treated as active.`,
+      });
+      continue;
+    }
+    if (!isActiveStripeStatus(sub.status)) {
+      mismatches.push({
+        email: member.email,
+        kind: "inactive_stripe_status",
+        detail: `Stripe subscription ${sub.id} is ${sub.status}, so this member is not treated as active.`,
+      });
+      continue;
+    }
+    recipients.push({
+      id: member.id,
+      email: member.email,
+      stripeSubscriptionId: member.stripeSubscriptionId,
+    });
+  }
+  recipients.sort((a, b) => a.id - b.id);
+  return { recipients, mismatches };
+}
+
+export function membershipMismatchDigest(mismatches: MembershipMismatch[]): string | null {
+  if (mismatches.length === 0) return null;
+  return mismatches
+    .slice()
+    .sort((a, b) => a.email.localeCompare(b.email) || a.kind.localeCompare(b.kind))
+    .map((mismatch) => `${mismatch.email} [${mismatch.kind}]: ${mismatch.detail}`)
+    .join("\n");
 }
 
 /**

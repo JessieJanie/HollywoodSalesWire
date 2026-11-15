@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 import { WireRenderer } from "../components/WireRenderer";
 import { ProductionStagesSection } from "../components/ProductionStagesSection";
+import { briefApprovePayload, paidApprovePayload } from "../lib/approveSend";
 import {
   usePublisherStatus,
   usePublisherDraft,
@@ -183,6 +184,30 @@ export default function PublisherPage() {
     if (!window.confirm(`Send "${subject}" to ${n} subscriber${n === 1 ? "" : "s"} now?`)) return;
     send.mutate(
       { data: { key, subject, bodyText } },
+      { onSuccess: (r) => { setSentCount(r.sent); status.refetch(); } },
+    );
+  };
+
+  const handleApprovePaid = () => {
+    if (!wire.data) return;
+    const payload = paidApprovePayload(wire.data, wireEditText);
+    if (!payload) return;
+    const n = status.data?.memberCount ?? 0;
+    if (!window.confirm(`Approve and send the paid Wire for the week of ${wire.data.weekKey} to ${n} member${n === 1 ? "" : "s"} now? Nothing sends without this click, and this week can only be sent once.`)) return;
+    paidSend.mutate(
+      { data: { key, subject: payload.subject, bodyText: payload.bodyText } },
+      { onSuccess: (r) => { setPaidSentCount(r.sent); status.refetch(); } },
+    );
+  };
+
+  const handleApproveBrief = () => {
+    if (!wire.data) return;
+    const payload = briefApprovePayload(wire.data);
+    if (!payload) return;
+    const n = status.data?.subscriberCount ?? 0;
+    if (!window.confirm(`Approve and send the Weekly Brief "${payload.subject}" to ${n} subscriber${n === 1 ? "" : "s"} now? Nothing sends without this click.`)) return;
+    send.mutate(
+      { data: { key, subject: payload.subject, bodyText: payload.bodyText } },
       { onSuccess: (r) => { setSentCount(r.sent); status.refetch(); } },
     );
   };
@@ -473,6 +498,24 @@ export default function PublisherPage() {
                 />
               )}
               <div className="mt-4 flex flex-wrap items-center gap-4">
+                <button
+                  onClick={handleApprovePaid}
+                  disabled={paidSend.isPending || !paidApprovePayload(wire.data, wireEditText) || status.data?.paidSentThisWeek}
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-sm font-serif font-bold disabled:opacity-40"
+                  data-testid="button-approve-paid"
+                >
+                  {paidSend.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  Approve and send the paid Wire
+                </button>
+                <button
+                  onClick={handleApproveBrief}
+                  disabled={send.isPending || !briefApprovePayload(wire.data)}
+                  className="inline-flex items-center gap-2 bg-primary text-primary-foreground px-4 py-2 text-sm font-serif font-bold disabled:opacity-40"
+                  data-testid="button-approve-brief"
+                >
+                  {send.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  Approve and send the Weekly Brief
+                </button>
                 <button
                   onClick={() => {
                     setWireText(wireEditText ?? wire.data?.wireMarkdown ?? "");
