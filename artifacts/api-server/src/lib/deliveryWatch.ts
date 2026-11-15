@@ -1,17 +1,16 @@
 import { and, eq } from "drizzle-orm";
-import { db, paidWireSendsTable, publisherAlertsTable, wireRunsTable } from "@workspace/db";
+import { db, paidWireSendsTable, publisherAlertsTable, weeklyPreviewsTable, wireRunsTable } from "@workspace/db";
 import {
   decideStaleRun,
-  draftAlertDue,
-  draftLateAlertKey,
-  issueLateAlertKey,
-  sendAlertDue,
+  deliveryAlert,
   staleRetryAlertKey,
 } from "./deliveryReliability";
 import { FROM_ADDRESS } from "./emailSequence";
 import { logger } from "./logger";
 import { resendRequest } from "./resend";
 import { currentWeekKey, runWeeklyResearch } from "./wireResearch";
+import { AUTO_SENT_STATUS, decideAutoSend } from "./autoSend";
+import { executeBriefSend, executePaidSend } from "./sendWire";
 
 const NOTIFY_EMAIL = "hello@hollywoodsaleswire.com";
 
@@ -133,42 +132,119 @@ async function alertOnce(alertKey: string, subject: string, text: string): Promi
   }
 }
 
-/** Tell the publisher when Monday's draft or Tuesday's paid issue is late. */
+/** Tell the publisher when this Tuesday's draft is missing or its issue is unsent. */
 export async function alertMissedDeliveryDeadlines(now = new Date()): Promise<void> {
   const week = currentWeekKey(now);
-  if (draftAlertDue(now)) {
-    const [run] = await db
-      .select({ status: wireRunsTable.status, wireMarkdown: wireRunsTable.wireMarkdown })
-      .from(wireRunsTable)
-      .where(eq(wireRunsTable.weekKey, week))
-      .limit(1);
-    const ready = run?.status === "ready" && Boolean(run.wireMarkdown && run.wireMarkdown.trim().length > 0);
-    if (!ready) {
-      await alertOnce(
-        draftLateAlertKey(week),
-        `Monday's Wire draft is not ready — week of ${week}`,
-        `Karilyn,\n\nIt is past 5:00 AM Pacific on Tuesday and the week of ${week} does not have a ready draft in the publisher console (status: ${run?.status ?? "no run"}).\n\nNothing has been sent. Open the publisher console and press "Run research now" if the row is failed or missing.\n\n— Hollywood Sales Wire research desk`,
-      );
-    }
-  }
-
-  if (sendAlertDue(now)) {
-    const [sent] = await db
-      .select({ status: paidWireSendsTable.status })
-      .from(paidWireSendsTable)
-      .where(eq(paidWireSendsTable.weekKey, week))
-      .limit(1);
-    if (sent?.status !== "sent") {
-      await alertOnce(
-        issueLateAlertKey(week),
-        `Tuesday's issue has not been sent — week of ${week}`,
-        `Karilyn,\n\nIt is past 12:00 PM Pacific on Tuesday and the paid Wire for the week of ${week} is not marked sent (status: ${sent?.status ?? "not started"}).\n\nNothing sends by itself. Open the publisher console and use Approve and send when the draft looks right.\n\n— Hollywood Sales Wire research desk`,
-      );
-    }
-  }
+  const [run] = await db
+    .select({ status: wireRunsTable.status, wireMarkdown: wireRunsTable.wireMarkdown })
+    .from(wireRunsTable)
+    .where(eq(wireRunsTable.weekKey, week))
+    .limit(1);
+  const [sent] = await db
+    .select({ status: paidWireSendsTable.status })
+    .from(paidWireSendsTable)
+    .where(eq(paidWireSendsTable.weekKey, week))
+    .limit(1);
+  const decision = deliveryAlert({
+    now,
+    weekKey: week,
+    runStatus: run?.status ?? "none",
+    hasReadyDraft: run?.status === "ready" && Boolean(run.wireMarkdown && run.wireMarkdown.trim().length > 0),
+    paidStatus: sent?.status ?? null,
+  });
+  if (decision.action === "none") return;
+  const subject = decision.action === "draft-missing"
+    ? `Monday's Wire draft is missing — week of ${decision.weekKey}`
+    : `Tuesday's issue has not been sent — week of ${decision.weekKey}`;
+  await alertOnce(decision.alertKey, subject, decision.text);
 }
 
 export async function tickDeliveryReliability(now = new Date()): Promise<void> {
   await reapStaleResearchRuns(now);
   await alertMissedDeliveryDeadlines(now);
+  await tickAutoSend(now);
+}
+
+/**
+ * Publish the current week's ready draft 24 hours after the review email
+ * unless the publisher held it, already sent it, or the draft has no source links.
+ * Production only — a dev process must not mail the lists.
+ */
+export async function tickAutoSend(now = new Date()): Promise<void> {
+  if (process.env.REPLIT_DEPLOYMENT !== "1") return;
+  const week = currentWeekKey(now);
+  const [run] = await db.select().from(wireRunsTable).where(eq(wireRunsTable.weekKey, week)).limit(1);
+  if (!run) return;
+  const [paid] = await db
+    .select({ status: paidWireSendsTable.status })
+    .from(paidWireSendsTable)
+    .where(eq(paidWireSendsTable.weekKey, week))
+    .limit(1);
+  const previews = run.freeSubject
+    ? await db
+        .select({ sentAt: weeklyPreviewsTable.sentAt })
+        .from(weeklyPreviewsTable)
+        .where(eq(weeklyPreviewsTable.subject, run.freeSubject))
+    : [];
+  const briefAlreadySent = Boolean(
+    run.draftReadyNotifiedAt
+    && previews.some((preview) => preview.sentAt.getTime() >= run.draftReadyNotifiedAt!.getTime()),
+  );
+  const decision = decideAutoSend({
+    draft: {
+      weekKey: run.weekKey,
+      status: run.status,
+      wireMarkdown: run.wireMarkdown,
+      freeSubject: run.freeSubject,
+      freeBody: run.freeBody,
+      sources: run.sources,
+      draftReadyNotifiedAt: run.draftReadyNotifiedAt,
+      autoSendHoldAt: run.autoSendHoldAt,
+      autoSendState: run.autoSendState,
+    },
+    now,
+    currentWeekKey: week,
+    paidAlreadySent: paid?.status === "sent" || paid?.status === AUTO_SENT_STATUS,
+    briefAlreadySent,
+  });
+  if (decision.action !== "send") return;
+
+  const alertKey = `auto-send:${week}`;
+  const claimed = await claimAlert(alertKey);
+  if (!claimed) return;
+  try {
+    const [fresh] = await db.select().from(wireRunsTable).where(eq(wireRunsTable.id, run.id)).limit(1);
+    if (!fresh || fresh.autoSendHoldAt || fresh.weekKey !== week) {
+      await releaseAlert(alertKey);
+      return;
+    }
+    if (decision.paid) {
+      const result = await executePaidSend(decision.paid.subject, decision.paid.bodyText, week, AUTO_SENT_STATUS);
+      if (!result.ok && result.code !== "already-sent") {
+        throw new Error(result.error);
+      }
+    }
+    if (decision.brief) {
+      const result = await executeBriefSend(
+        decision.brief.subject,
+        decision.brief.bodyText,
+        `auto-brief-${week}`,
+        AUTO_SENT_STATUS,
+      );
+      if (result.sent === 0 && result.recipientCount > 0) {
+        throw new Error("Weekly Brief batches failed");
+      }
+    }
+    await db
+      .update(wireRunsTable)
+      .set({ autoSendState: AUTO_SENT_STATUS })
+      .where(eq(wireRunsTable.id, run.id));
+    await notifyPublisher(
+      `Week of ${week} was sent automatically`,
+      `Karilyn,\n\nThe ready draft for the week of ${week} was not approved, edited, or held within 24 hours of the review email, so it was published as it stood. The send is marked ${AUTO_SENT_STATUS}.\n\nThe paid Wire went only to members whose Stripe subscription is active. The Weekly Brief went to the free list.\n\n— Hollywood Sales Wire research desk`,
+    );
+  } catch (err) {
+    await releaseAlert(alertKey);
+    logger.error({ err, week }, "auto-send failed — will retry");
+  }
 }

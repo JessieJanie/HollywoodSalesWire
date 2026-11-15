@@ -18,6 +18,12 @@ export const wireRunsTable = pgTable("wire_runs", {
   freeBody: text("free_body"),
   /** Array of { url, label, wordCount, status } receipts for every fetch attempted */
   sources: jsonb("sources"),
+  /** When the "draft is ready" email was accepted. The 24-hour auto-send clock starts here. */
+  draftReadyNotifiedAt: timestamp("draft_ready_notified_at", { withTimezone: true }),
+  /** Set when the publisher holds this draft. Auto-send will not touch it. */
+  autoSendHoldAt: timestamp("auto_send_hold_at", { withTimezone: true }),
+  /** null | auto_sent_after_24h once the unattended draft was published. */
+  autoSendState: text("auto_send_state"),
 }, (t) => [
   // One run per week — the DB is the distributed lock (autoscale runs many instances).
   uniqueIndex("wire_runs_week_key_unique").on(t.weekKey),

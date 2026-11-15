@@ -54,11 +54,93 @@ export function staleRetryAlertKey(runId: number): string {
 }
 
 export function draftLateAlertKey(weekKey: string): string {
-  return `draft-not-ready:${weekKey}`;
+  return `draft-missing:${weekKey}`;
 }
 
 export function issueLateAlertKey(weekKey: string): string {
   return `issue-not-sent:${weekKey}`;
+}
+
+export type PacificClock = {
+  year: number;
+  month: number;
+  day: number;
+  hour: number;
+  minute: number;
+  /** Sun, Mon, Tue, Wed, Thu, Fri, Sat */
+  weekday: string;
+};
+
+/** Wall clock in America/Los_Angeles. Weekday comes from the same zoned date. */
+export function pacificClock(now: Date): PacificClock {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: PT,
+    weekday: "short",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hourCycle: "h23",
+  }).formatToParts(now);
+  const raw = (type: Intl.DateTimeFormatPartTypes) => parts.find((part) => part.type === type)?.value ?? "";
+  let hour = Number(raw("hour"));
+  if (hour === 24) hour = 0;
+  return {
+    year: Number(raw("year")),
+    month: Number(raw("month")),
+    day: Number(raw("day")),
+    hour,
+    minute: Number(raw("minute")),
+    weekday: raw("weekday"),
+  };
+}
+
+export type DeliveryAlert =
+  | { action: "none" }
+  | { action: "draft-missing"; weekKey: string; alertKey: string; text: string }
+  | { action: "issue-not-sent"; weekKey: string; alertKey: string; text: string };
+
+/**
+ * Deadline mail is only for this Tuesday, after the threshold, and only for
+ * this Tuesday's Monday week key. A missing draft is "draft missing", never
+ * "not sent". A closed or reaped past week is silent.
+ */
+export function deliveryAlert(input: {
+  now: Date;
+  /** Monday week key of the row being considered. */
+  weekKey: string;
+  /** none when no research row exists. */
+  runStatus: string;
+  /** True when a ready draft has body text. */
+  hasReadyDraft: boolean;
+  /** null when no paid-send row exists. */
+  paidStatus: string | null;
+}): DeliveryAlert {
+  const currentWeek = pacificMonday(input.now);
+  if (input.weekKey !== currentWeek) return { action: "none" };
+  const clock = pacificClock(input.now);
+  if (clock.weekday !== "Tue") return { action: "none" };
+  const minutes = clock.hour * 60 + clock.minute;
+  if (minutes < 5 * 60) return { action: "none" };
+  if (!input.hasReadyDraft || input.runStatus !== "ready") {
+    const status = input.runStatus === "none" ? "not started" : input.runStatus;
+    return {
+      action: "draft-missing",
+      weekKey: input.weekKey,
+      alertKey: draftLateAlertKey(input.weekKey),
+      text: `Karilyn,\n\nIt is Tuesday after 5:00 AM Pacific and the week of ${input.weekKey} has no ready draft (status: ${status}). This is a draft-missing alert, not a send alert. Nothing goes out until a draft exists.\n\n— Hollywood Sales Wire research desk`,
+    };
+  }
+  if (minutes < 12 * 60) return { action: "none" };
+  if (input.paidStatus === "sent" || input.paidStatus === "auto_sent_after_24h") return { action: "none" };
+  const status = input.paidStatus ?? "not started";
+  return {
+    action: "issue-not-sent",
+    weekKey: input.weekKey,
+    alertKey: issueLateAlertKey(input.weekKey),
+    text: `Karilyn,\n\nIt is Tuesday after 12:00 PM Pacific and the paid Wire for the week of ${input.weekKey} is ready but not sent (status: ${status}).\n\nOpen the publisher console and use Approve and send, or hold the draft if it should wait.\n\n— Hollywood Sales Wire research desk`,
+  };
 }
 
 type PtDate = { year: number; month: number; day: number };
@@ -83,20 +165,16 @@ export function issueSentDeadlineMs(now: Date): number {
   return pacificLocalToUtcMs(addCalendarDays(pacificMonday(now), 1), 12, 0);
 }
 
-function nextMondayMs(now: Date): number {
-  return pacificLocalToUtcMs(addCalendarDays(pacificMonday(now), 7), 0, 0);
-}
-
-/** Monday's draft is late from Tuesday 5:00 AM PT until the next Monday. */
+/** True only on Tuesday, at or after 5:00 AM Pacific. Not on later days of that week. */
 export function draftAlertDue(now: Date): boolean {
-  const t = now.getTime();
-  return t >= draftReadyDeadlineMs(now) && t < nextMondayMs(now);
+  const clock = pacificClock(now);
+  return clock.weekday === "Tue" && clock.hour * 60 + clock.minute >= 5 * 60;
 }
 
-/** Tuesday's paid issue is late from Tuesday 12:00 PM PT until the next Monday. */
+/** True only on Tuesday, at or after 12:00 PM Pacific. */
 export function sendAlertDue(now: Date): boolean {
-  const t = now.getTime();
-  return t >= issueSentDeadlineMs(now) && t < nextMondayMs(now);
+  const clock = pacificClock(now);
+  return clock.weekday === "Tue" && clock.hour * 60 + clock.minute >= 12 * 60;
 }
 
 function pacificDate(instant: Date): PtDate {

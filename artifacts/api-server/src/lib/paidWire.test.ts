@@ -66,6 +66,12 @@ describe("planPaidSend", () => {
     expect(planPaidSend(undefined, 0)).toEqual({ action: "no-recipients" });
   });
 
+  it("treats an automatic 24-hour send as already sent", () => {
+    expect(planPaidSend({ status: "auto_sent_after_24h", recipientEmails: ["m@example.com"] }, 3)).toEqual({
+      action: "already-sent",
+    });
+  });
+
   it("creates a new claim when none exists and members are active", () => {
     expect(planPaidSend(undefined, 3)).toEqual({ action: "create" });
   });

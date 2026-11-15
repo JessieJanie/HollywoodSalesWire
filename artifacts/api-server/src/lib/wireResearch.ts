@@ -1,4 +1,4 @@
-import { desc, eq, and, ne, sql } from "drizzle-orm";
+import { desc, eq, and, ne, sql, isNull } from "drizzle-orm";
 import { db, wireRunsTable, researchPagesTable, socialDraftsTable, type WireRun } from "@workspace/db";
 import { skimRead, skimReadJs, skimFilmIncentives, skimStudioJobs, skimEntityFormations } from "./skim";
 import { draftFreeEdition } from "./freeEdition";
@@ -9,6 +9,7 @@ import { resendRequest } from "./resend";
 import { FROM_ADDRESS, SITE_URL } from "./emailSequence";
 import { logger } from "./logger";
 import { RESEARCH_RUN_TIMEOUT_MS, RUN_TIMEOUT_ERROR } from "./deliveryReliability";
+import { draftReadyAutoSendSentence } from "./autoSend";
 import {
   REGULAR_RATE_YR,
   TEAM_REGULAR_RATE_YR,
@@ -332,7 +333,16 @@ export async function runWeeklyResearch(
       // publisher_alerts, so this reset must not clear that record.
       const took = await db
         .update(wireRunsTable)
-        .set({ status: "running", trigger, startedAt: new Date(), finishedAt: null, error: null })
+        .set({
+          status: "running",
+          trigger,
+          startedAt: new Date(),
+          finishedAt: null,
+          error: null,
+          draftReadyNotifiedAt: null,
+          autoSendHoldAt: null,
+          autoSendState: null,
+        })
         .where(and(eq(wireRunsTable.weekKey, weekKey), eq(wireRunsTable.status, "failed")))
         .returning();
       if (!took[0]) {
@@ -770,10 +780,15 @@ export async function runWeeklyResearch(
       // genuinely successful run back to "failed" and hide a good draft —
       // so this is fenced off the same way the Typefully block is.
       try {
+        const notifiedAt = new Date();
         await notify(
           "Your Tuesday Wire draft is ready",
-          `Karilyn,\n\nThe Monday research run finished. This week's paid Wire draft and the Free Edition draft are waiting in your publisher console for review.\n\n${report}\n\nOpen your bookmarked publisher console link to review.\n\n— Hollywood Sales Wire research desk`,
+          `Karilyn,\n\nThe Monday research run finished. This week's paid Wire draft and the Free Edition draft are waiting in your publisher console for review.\n\n${draftReadyAutoSendSentence(notifiedAt)}\n\n${report}\n\nOpen your bookmarked publisher console link to review.\n\n— Hollywood Sales Wire research desk`,
         );
+        await db
+          .update(wireRunsTable)
+          .set({ draftReadyNotifiedAt: notifiedAt })
+          .where(and(eq(wireRunsTable.id, run.id), isNull(wireRunsTable.draftReadyNotifiedAt)));
       } catch (notifyErr) {
         logger.warn(
           { err: notifyErr, runId: run.id },
