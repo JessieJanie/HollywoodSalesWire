@@ -3,6 +3,7 @@
  * Lookup shows only stored public facts and their source URLs.
  */
 import { Router, type Request, type Response } from "express";
+import { timingSafeEqual } from "node:crypto";
 import { desc } from "drizzle-orm";
 import {
   db,
@@ -69,6 +70,7 @@ router.get("/greenlight", async (req: Request, res: Response) => {
         .map((need) => `<li>likely needs ${escapeHtml(need.category)} — ${escapeHtml(need.reason)}</li>`)
         .join("");
       const sources = production.sources
+        .filter((source) => source.url.startsWith("https://"))
         .map((source) => `<li><a href="${escapeHtml(source.url)}">${escapeHtml(source.label || source.url)}</a> (${escapeHtml(source.status)})</li>`)
         .join("");
       return `<article><h2>${escapeHtml(production.title)}</h2><p>${escapeHtml(production.company)} · ${escapeHtml(production.jurisdictions.join(", "))} · ${escapeHtml(production.status)}</p><p>Credit: ${escapeHtml(production.credit ?? "not published")}. Qualified spend: ${escapeHtml(production.qualifiedSpend ?? "not published")}. Filming days: ${escapeHtml(production.filmingDays ?? "not published")}. Jobs: ${escapeHtml(production.jobs ?? "not published")}.</p><ul>${needs}</ul><ul>${sources}</ul></article>`;
@@ -169,6 +171,12 @@ router.post("/api/board/watch", async (req: Request, res: Response) => {
 });
 
 router.post("/api/board/spend-draft", async (req: Request, res: Response) => {
+  const expected = process.env.PUBLISHER_KEY;
+  const provided = typeof req.body?.key === "string" ? req.body.key : "";
+  if (!expected || provided.length !== expected.length || !timingSafeEqual(Buffer.from(provided), Buffer.from(expected))) {
+    res.status(401).json({ error: "Invalid key" });
+    return;
+  }
   const monthKey = typeof req.body?.monthKey === "string" ? req.body.monthKey : "";
   if (!/^\d{4}-\d{2}$/.test(monthKey)) {
     res.status(400).json({ error: "monthKey must be YYYY-MM" });
