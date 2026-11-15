@@ -42,6 +42,7 @@ export default function ShelfPage() {
   const [prefVendors, setPrefVendors] = useState("");
   const [watchLabel, setWatchLabel] = useState("");
   const [boardMessage, setBoardMessage] = useState<string | null>(null);
+  const [watchEvents, setWatchEvents] = useState<{ kind: string; detail: string }[]>([]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -69,6 +70,14 @@ export default function ShelfPage() {
       })
       .then((d) => {
         if (d) setData(d);
+        if (d) {
+          void fetch(`${import.meta.env.BASE_URL}api/board/watches`)
+            .then(async (response) => (response.ok ? response.json() : null))
+            .then((body: { events?: { kind: string; detail: string }[] } | null) => {
+              if (body?.events) setWatchEvents(body.events);
+            })
+            .catch(() => undefined);
+        }
       })
       .catch((err: Error) => setError(err.message));
   }, []);
@@ -303,6 +312,13 @@ export default function ShelfPage() {
                 <a href={`${import.meta.env.BASE_URL}api/board/crm.csv`}>HubSpot / Salesforce import template</a>
               </p>
               {boardMessage && <p className="mt-2 text-sm">{boardMessage}</p>}
+              {watchEvents.length > 0 && (
+                <ul className="mt-4 text-sm space-y-2">
+                  {watchEvents.map((event, index) => (
+                    <li key={`${event.kind}-${index}`}>{event.kind}: {event.detail}</li>
+                  ))}
+                </ul>
+              )}
             </section>
           </>
         )}
