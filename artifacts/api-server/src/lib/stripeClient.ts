@@ -1,6 +1,14 @@
 import Stripe from "stripe";
 import { StripeSync } from "stripe-replit-sync";
 
+export type StripeCredentialMode = "live" | "test" | "unknown";
+
+function modeForKey(secretKey: string): StripeCredentialMode {
+  if (/^(sk|rk)_live_/.test(secretKey)) return "live";
+  if (/^(sk|rk)_test_/.test(secretKey)) return "test";
+  return "unknown";
+}
+
 /**
  * Fetches Stripe credentials from the Replit connection API.
  * Not cached — tokens can rotate, so fetch fresh each time.
@@ -56,8 +64,17 @@ async function getStripeCredentials(): Promise<{ secretKey: string; webhookSecre
 
 /** Returns a fresh authenticated Stripe client (not cached; keys can rotate). */
 export async function getUncachableStripeClient(): Promise<Stripe> {
+  const { stripe } = await getStripeClientContext();
+  return stripe;
+}
+
+/** Returns a fresh client and its key mode for guarded, read-only checks. */
+export async function getStripeClientContext(): Promise<{
+  stripe: Stripe;
+  mode: StripeCredentialMode;
+}> {
   const { secretKey } = await getStripeCredentials();
-  return new Stripe(secretKey);
+  return { stripe: new Stripe(secretKey), mode: modeForKey(secretKey) };
 }
 
 /** Returns a fresh StripeSync instance for webhook processing and data sync. */
